@@ -14,10 +14,15 @@ import EnhancedBreadcrumb from "@/components/navigation/EnhancedBreadcrumb";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { EnhancedErrorBoundary } from "@/components/error/EnhancedErrorBoundary";
 import PerformanceDashboard from "@/components/development/PerformanceDashboard";
+import { SkipLinks, AccessibilityTester } from "@/components/accessibility";
 import { accessibilityService } from "@/services/AccessibilityService";
 import { assetOptimizationService } from "@/services/AssetOptimizationService";
 import { globalErrorHandler } from "@/services/GlobalErrorHandler";
-import { useEffect } from "react";
+import PerformanceMonitoringService from "@/services/PerformanceMonitoringService";
+import FocusManagerService from "@/services/FocusManagerService";
+import IntegratedLearningPlatform from "@/components/IntegratedLearningPlatform";
+import BackendStatus from "@/components/BackendStatus";
+import { useEffect, useState } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MalayalamLearning from "./pages/MalayalamLearning";
@@ -34,12 +39,74 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Initialize accessibility, asset optimization, and error handling services
+  const [showIntegratedPlatform, setShowIntegratedPlatform] = useState(false);
+  const [userProfile, setUserProfile] = useState({
+    name: 'Alex',
+    age: 36, // months
+    id: 'child-001'
+  });
+
+  // Initialize all services including performance monitoring and focus management
   useEffect(() => {
+    // Initialize core services
     accessibilityService.initialize();
     assetOptimizationService.initialize();
     globalErrorHandler.initialize();
+    
+    // Initialize performance monitoring
+    const performanceMonitor = PerformanceMonitoringService.getInstance();
+    performanceMonitor.initializeMonitoring();
+    
+    // Initialize focus management with keyboard shortcuts
+    const focusManager = FocusManagerService.getInstance();
+    
+    // Add global keyboard shortcuts
+    focusManager.addKeyboardShortcut('alt+1', () => {
+      const mainContent = document.getElementById('main-content');
+      if (mainContent) {
+        focusManager.focusElement(mainContent, { announceToScreenReader: true });
+      }
+    });
+    
+    focusManager.addKeyboardShortcut('alt+2', () => {
+      const navigation = document.querySelector('nav, [role="navigation"]') as HTMLElement;
+      if (navigation) {
+        focusManager.focusElement(navigation, { announceToScreenReader: true });
+      }
+    });
+    
+    // Cleanup on unmount
+    return () => {
+      performanceMonitor.cleanup && performanceMonitor.cleanup();
+      focusManager.cleanup();
+    };
   }, []);
+
+  // Toggle between integrated platform and original app
+  const togglePlatform = () => {
+    setShowIntegratedPlatform(!showIntegratedPlatform);
+  };
+
+  // Show integrated platform if enabled
+  if (showIntegratedPlatform) {
+    return (
+      <div className="relative">
+        <div className="fixed top-4 right-4 z-50">
+          <button
+            onClick={togglePlatform}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg shadow-lg hover:bg-purple-700 transition-colors"
+          >
+            Switch to Original App
+          </button>
+        </div>
+        <IntegratedLearningPlatform
+          childId={userProfile.id}
+          userName={userProfile.name}
+          userAge={userProfile.age}
+        />
+      </div>
+    );
+  }
 
   return (
     <EnhancedErrorBoundary boundary="app-root">
@@ -54,26 +121,47 @@ const App = () => {
                   <BrowserRouter>
                     <NavigationProvider>
                       <EnhancedErrorBoundary boundary="navigation">
-                      {/* Skip to main content link */}
-                      <a 
-                        href="#main-content" 
-                        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50"
-                        onFocus={() => accessibilityService.announce('Skip to main content link focused')}
-                      >
-                        Skip to main content
-                      </a>
+                      {/* Enhanced Skip Links Component */}
+                      <SkipLinks 
+                        links={[
+                          { href: '#main-content', label: 'Skip to main content' },
+                          { href: '#navigation', label: 'Skip to navigation' },
+                          { href: '#activities', label: 'Skip to activities' },
+                          { href: '#footer', label: 'Skip to footer' }
+                        ]}
+                      />
                       
                       {/* Enhanced Navigation System */}
                       <div className="min-h-screen bg-gradient-to-br from-background via-primary-soft/20 to-secondary-soft/20">
+                        {/* Backend Status Indicator */}
+                        <BackendStatus showInCorner={true} />
+                        
+                        {/* Platform Toggle Button */}
+                        <div className="fixed top-4 right-4 z-50">
+                          <button
+                            onClick={togglePlatform}
+                            className="px-4 py-2 bg-purple-600 text-white rounded-lg shadow-lg hover:bg-purple-700 transition-colors"
+                          >
+                            Try Integrated Platform
+                          </button>
+                        </div>
+                        
                         {/* Enhanced Navigation Header */}
-                        <EnhancedNavigation />
+                        <nav id="navigation" role="navigation" aria-label="Main navigation">
+                          <EnhancedNavigation />
+                        </nav>
                         
                         {/* Enhanced Breadcrumb Navigation */}
                         <EnhancedBreadcrumb className="px-4 py-2 bg-white/50 backdrop-blur-sm" />
                         
+                        {/* Backend Status Alert */}
+                        <div className="px-4">
+                          <BackendStatus />
+                        </div>
+                        
                         {/* Page Content with Transitions */}
                         <RouteTransition type="fade">
-                          <main id="main-content" role="main" aria-label="Main content">
+                          <main id="main-content" role="main" aria-label="Main content" tabIndex={-1}>
                             <Routes>
                               <Route path="/" element={<Index />} />
                               <Route path="/malayalam" element={<MalayalamLearning />} />
@@ -86,6 +174,20 @@ const App = () => {
                         
                         {/* Performance Dashboard (Development Only) */}
                         <PerformanceDashboard />
+                        
+                        {/* Accessibility Tester (Development Only) */}
+                        {process.env.NODE_ENV === 'development' && (
+                          <div className="fixed bottom-4 right-4 z-50 max-w-sm">
+                            <AccessibilityTester />
+                          </div>
+                        )}
+                        
+                        {/* Footer */}
+                        <footer id="footer" role="contentinfo" className="mt-auto py-4 px-4 bg-white/80 backdrop-blur-sm border-t">
+                          <div className="max-w-7xl mx-auto text-center text-sm text-gray-600">
+                            <p>&copy; {new Date().getFullYear()} Play & Learn Spark. All rights reserved.</p>
+                          </div>
+                        </footer>
                       </div>
                     </EnhancedErrorBoundary>
                   </NavigationProvider>

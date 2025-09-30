@@ -1,20 +1,55 @@
 import { Router } from 'express';
 import { logger } from '../utils/logger';
+import OpenAIService from '../services/OpenAIService';
+import HuggingFaceService from '../services/HuggingFaceService';
+import AnthropicService from '../services/AnthropicService';
 
 const router = Router();
 
 // Generate activity from processed content
 router.post('/generate-activity', async (req, res) => {
   try {
-    // TODO: Implement AI activity generation
-    logger.info('AI activity generation requested');
-    
+    const { 
+      topic, 
+      ageGroup, 
+      language = 'English', 
+      activityType = 'general', 
+      difficulty = 'medium',
+      provider = 'openai',
+      customPrompt 
+    } = req.body;
+
+    if (!topic || !ageGroup) {
+      return res.status(400).json({
+        success: false,
+        error: 'Topic and age group are required'
+      });
+    }
+
+    logger.info(`AI activity generation requested for topic: ${topic}, age: ${ageGroup}, provider: ${provider}`);
+
+    let content;
+    const request = { topic, ageGroup, language, activityType, difficulty, customPrompt };
+
+    switch (provider) {
+      case 'anthropic':
+        content = await AnthropicService.getInstance().generateContent(request);
+        break;
+      case 'huggingface':
+        content = await HuggingFaceService.getInstance().generateContent(request);
+        break;
+      case 'openai':
+      default:
+        content = await OpenAIService.getInstance().generateContent(request);
+        break;
+    }
+
     res.json({
       success: true,
-      message: 'AI activity generation endpoint - coming soon',
       data: {
-        activityId: 'placeholder',
-        status: 'pending'
+        content,
+        provider: provider,
+        generatedAt: new Date().toISOString()
       }
     });
   } catch (error) {
@@ -26,15 +61,181 @@ router.post('/generate-activity', async (req, res) => {
   }
 });
 
+// Generate story
+router.post('/generate-story', async (req, res) => {
+  try {
+    const { 
+      topic, 
+      ageGroup, 
+      language = 'English', 
+      length = 'medium',
+      includeImages = false,
+      provider = 'openai' 
+    } = req.body;
+
+    if (!topic || !ageGroup) {
+      return res.status(400).json({
+        success: false,
+        error: 'Topic and age group are required'
+      });
+    }
+
+    logger.info(`AI story generation requested for topic: ${topic}, provider: ${provider}`);
+
+    let story;
+    const request = { topic, ageGroup, language, length, includeImages };
+
+    switch (provider) {
+      case 'anthropic':
+        story = await AnthropicService.getInstance().generateStory(request);
+        break;
+      case 'openai':
+      default:
+        story = await OpenAIService.getInstance().generateStory(request);
+        break;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        story,
+        provider: provider,
+        generatedAt: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    logger.error('Error in AI story generation:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate story'
+    });
+  }
+});
+
+// Generate image
+router.post('/generate-image', async (req, res) => {
+  try {
+    const { 
+      prompt, 
+      ageGroup, 
+      style = 'cartoon',
+      size = 'medium' 
+    } = req.body;
+
+    if (!prompt || !ageGroup) {
+      return res.status(400).json({
+        success: false,
+        error: 'Prompt and age group are required'
+      });
+    }
+
+    logger.info(`AI image generation requested: ${prompt}`);
+
+    const image = await HuggingFaceService.getInstance().generateImage({
+      prompt,
+      ageGroup,
+      style,
+      size
+    });
+
+    if (!image) {
+      return res.status(503).json({
+        success: false,
+        error: 'Image generation service temporarily unavailable'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        image,
+        generatedAt: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    logger.error('Error in AI image generation:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate image'
+    });
+  }
+});
+
+// Check content safety
+router.post('/check-safety', async (req, res) => {
+  try {
+    const { content, ageGroup, context = 'general' } = req.body;
+
+    if (!content || !ageGroup) {
+      return res.status(400).json({
+        success: false,
+        error: 'Content and age group are required'
+      });
+    }
+
+    logger.info(`Content safety check requested for age group: ${ageGroup}`);
+
+    const safetyResult = await AnthropicService.getInstance().checkContentSafety({
+      content,
+      ageGroup,
+      context
+    });
+
+    res.json({
+      success: true,
+      data: safetyResult
+    });
+  } catch (error) {
+    logger.error('Error in content safety check:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to check content safety'
+    });
+  }
+});
+
+// Assess educational value
+router.post('/assess-educational-value', async (req, res) => {
+  try {
+    const { topic, content, ageGroup } = req.body;
+
+    if (!topic || !content || !ageGroup) {
+      return res.status(400).json({
+        success: false,
+        error: 'Topic, content, and age group are required'
+      });
+    }
+
+    logger.info(`Educational assessment requested for topic: ${topic}`);
+
+    const assessment = await AnthropicService.getInstance().assessEducationalValue(
+      topic,
+      content,
+      ageGroup
+    );
+
+    res.json({
+      success: true,
+      data: assessment
+    });
+  } catch (error) {
+    logger.error('Error in educational assessment:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to assess educational value'
+    });
+  }
+});
+
 // Setup AI provider configuration
 router.post('/providers/setup', async (req, res) => {
   try {
-    // TODO: Implement AI provider setup
+    // TODO: Implement AI provider setup and configuration storage
     logger.info('AI provider setup requested');
     
     res.json({
       success: true,
-      message: 'AI provider setup endpoint - coming soon'
+      message: 'AI provider setup endpoint - configuration storage coming soon'
     });
   } catch (error) {
     logger.error('Error in AI provider setup:', error);
@@ -45,9 +246,118 @@ router.post('/providers/setup', async (req, res) => {
   }
 });
 
-// Get available AI providers
+// Get available AI providers and their status
 router.get('/providers', async (req, res) => {
   try {
+    logger.info('AI providers status requested');
+
+    const [openaiAvailable, huggingfaceAvailable, anthropicAvailable] = await Promise.all([
+      OpenAIService.getInstance().isAvailable(),
+      HuggingFaceService.getInstance().isAvailable(),
+      AnthropicService.getInstance().isAvailable()
+    ]);
+
+    const providers = {
+      openai: {
+        name: 'OpenAI',
+        available: openaiAvailable,
+        capabilities: ['content-generation', 'story-generation', 'image-prompts'],
+        models: ['gpt-4o-mini']
+      },
+      huggingface: {
+        name: 'HuggingFace',
+        available: huggingfaceAvailable,
+        capabilities: ['content-generation', 'image-generation', 'emotion-classification', 'translation'],
+        models: HuggingFaceService.getInstance().getAvailableModels()
+      },
+      anthropic: {
+        name: 'Anthropic',
+        available: anthropicAvailable,
+        capabilities: ['content-generation', 'story-generation', 'safety-checking', 'educational-assessment'],
+        models: ['claude-3-haiku-20240307']
+      }
+    };
+
+    res.json({
+      success: true,
+      data: {
+        providers,
+        recommendedProvider: openaiAvailable ? 'openai' : anthropicAvailable ? 'anthropic' : 'huggingface',
+        totalAvailable: Object.values(providers).filter(p => p.available).length
+      }
+    });
+  } catch (error) {
+    logger.error('Error fetching AI providers:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch AI providers'
+    });
+  }
+});
+
+// Classify emotion in text
+router.post('/classify-emotion', async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    if (!text) {
+      return res.status(400).json({
+        success: false,
+        error: 'Text is required'
+      });
+    }
+
+    logger.info('Emotion classification requested');
+
+    const emotion = await HuggingFaceService.getInstance().classifyEmotion(text);
+
+    res.json({
+      success: true,
+      data: emotion
+    });
+  } catch (error) {
+    logger.error('Error in emotion classification:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to classify emotion'
+    });
+  }
+});
+
+// Translate text
+router.post('/translate', async (req, res) => {
+  try {
+    const { text, targetLanguage } = req.body;
+
+    if (!text || !targetLanguage) {
+      return res.status(400).json({
+        success: false,
+        error: 'Text and target language are required'
+      });
+    }
+
+    logger.info(`Translation requested to ${targetLanguage}`);
+
+    const translatedText = await HuggingFaceService.getInstance().translateText(text, targetLanguage);
+
+    res.json({
+      success: true,
+      data: {
+        originalText: text,
+        translatedText,
+        targetLanguage
+      }
+    });
+  } catch (error) {
+    logger.error('Error in translation:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to translate text'
+    });
+  }
+});
+
+export default router;
     res.json({
       success: true,
       data: {

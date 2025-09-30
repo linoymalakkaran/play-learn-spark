@@ -1,4 +1,4 @@
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
+import { onCLS, onINP, onFCP, onLCP, onTTFB } from 'web-vitals';
 
 interface PerformanceMetric {
   name: string;
@@ -11,7 +11,7 @@ interface PerformanceMetric {
 
 interface PerformanceThresholds {
   LCP: { good: number; poor: number };
-  FID: { good: number; poor: number };
+  INP: { good: number; poor: number };
   CLS: { good: number; poor: number };
   FCP: { good: number; poor: number };
   TTFB: { good: number; poor: number };
@@ -23,7 +23,7 @@ class PerformanceMonitoringService {
   private observers: PerformanceObserver[] = [];
   private thresholds: PerformanceThresholds = {
     LCP: { good: 2500, poor: 4000 },
-    FID: { good: 100, poor: 300 },
+    INP: { good: 200, poor: 500 },
     CLS: { good: 0.1, poor: 0.25 },
     FCP: { good: 1800, poor: 3000 },
     TTFB: { good: 800, poor: 1800 }
@@ -39,19 +39,19 @@ class PerformanceMonitoringService {
   // Initialize Core Web Vitals monitoring
   initializeMonitoring(): void {
     // Largest Contentful Paint
-    getLCP((metric) => this.handleMetric(metric));
+    onLCP((metric) => this.handleMetric(metric));
     
-    // First Input Delay
-    getFID((metric) => this.handleMetric(metric));
+    // Interaction to Next Paint (replaces FID)
+    onINP((metric) => this.handleMetric(metric));
     
     // Cumulative Layout Shift
-    getCLS((metric) => this.handleMetric(metric));
+    onCLS((metric) => this.handleMetric(metric));
     
     // First Contentful Paint
-    getFCP((metric) => this.handleMetric(metric));
+    onFCP((metric) => this.handleMetric(metric));
     
     // Time to First Byte
-    getTTFB((metric) => this.handleMetric(metric));
+    onTTFB((metric) => this.handleMetric(metric));
 
     // Custom performance observers
     this.initializeCustomObservers();
@@ -254,7 +254,7 @@ class PerformanceMonitoringService {
   private getRecommendation(metricName: string): string {
     const recommendations: Record<string, string> = {
       'LCP': 'Optimize images and remove unnecessary third-party scripts to improve Largest Contentful Paint',
-      'FID': 'Reduce JavaScript execution time and use web workers for heavy computations',
+      'INP': 'Reduce JavaScript execution time and use web workers for heavy computations to improve responsiveness',
       'CLS': 'Set size attributes on images and avoid inserting content above existing content',
       'FCP': 'Eliminate render-blocking resources and optimize critical resource loading',
       'TTFB': 'Optimize server response times and use CDN for static assets'

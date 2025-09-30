@@ -18,26 +18,32 @@ import { useNavigation } from '@/hooks/useNavigation';
 import { useProgress } from '@/hooks/useProgress';
 import { useContent } from '@/hooks/useContent';
 import { usePersonalization } from '@/hooks/usePersonalization';
+import { useAccessibility, useAriaLive, useFocusManagement } from '@/hooks/useAccessibility';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { Child, Activity } from '@/types/learning';
 import { soundEffects } from '@/utils/sounds';
+import { accessibilityService } from '@/services/AccessibilityService';
 import { useNavigate } from 'react-router-dom';
-import { AnimalSafari } from './activities/AnimalSafari';
-import { NumberGarden } from './activities/NumberGarden';
-import { ShapeDetective } from './activities/ShapeDetective';
-import { ColorRainbow } from './activities/ColorRainbow';
-import { FamilyTree } from './activities/FamilyTree';
-import { BodyParts } from './activities/BodyParts';
-import { WeatherStation } from './activities/WeatherStation';
-import { CountingTrain } from './activities/CountingTrain';
-import { SizeSorter } from './activities/SizeSorter';
-import { Transportation } from './activities/Transportation';
-import { EmotionFaces } from './activities/EmotionFaces';
-import { PizzaFractions } from './activities/PizzaFractions';
-import { PetParade } from './activities/PetParade';
+import { 
+  LazyAnimalSafari,
+  LazyNumberGarden,
+  LazyShapeDetective,
+  LazyColorRainbow,
+  LazyFamilyTree,
+  LazyBodyParts,
+  LazyWeatherStation,
+  LazyCountingTrain,
+  LazySizeSorter,
+  LazyTransportation,
+  LazyEmotionFaces,
+  LazyPizzaFractions,
+  LazyPetParade,
+  LazyArabicLearning,
+  LazyMalayalamLearning,
+  useActivityPreloader
+} from '@/components/common/LazyLoadWrapper';
 import { PlaceholderActivity } from './activities/PlaceholderActivity';
-import EnhancedArabicLearning from './activities/EnhancedArabicLearning';
-import EnhancedMalayalamLearning from './activities/EnhancedMalayalamLearning';
+import PerformanceMonitoringService from '@/services/PerformanceMonitoringService';
 
 interface DashboardProps {
   child: Child;
@@ -54,6 +60,10 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
   const [showAdaptiveEngine, setShowAdaptiveEngine] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  
+  // Performance monitoring and activity preloading
+  const [performanceService] = useState(() => PerformanceMonitoringService.getInstance());
+  const { preloadActivityOnHover } = useActivityPreloader();
   
   const { isFirstTime } = useTutorial();
   const { navigate: navNavigate } = useNavigation();
@@ -88,6 +98,40 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
     }
   }, [child, currentChild, saveProgress]);
 
+  // Accessibility hooks
+  const { elementRef: dashboardRef, announce } = useAccessibility({
+    announceOnMount: `Welcome to ${child?.name}'s dashboard`,
+    navigationGroup: 'dashboard',
+    ariaLabel: 'Learning Activities Dashboard'
+  });
+  
+  const { announceSuccess, announceError, announceLoading } = useAriaLive();
+  const { focusFirst } = useFocusManagement();
+
+  // Initialize accessibility service
+  useEffect(() => {
+    accessibilityService.initialize();
+  }, []);
+
+  // Announce tab changes
+  useEffect(() => {
+    const tabNames = {
+      'all': 'All Activities',
+      'english': 'English & Language Arts',
+      'math': 'Mathematics',
+      'science': 'Science & Nature',
+      'habits': 'Daily Habits',
+      'art': 'Art & Creativity',
+      'social': 'Social & Emotional',
+      'problem': 'Problem Solving',
+      'physical': 'Physical Development',
+      'world': 'World Awareness',
+      'languages': 'World Languages'
+    };
+    
+    announce(`Switched to ${tabNames[activeTab]} section`);
+  }, [activeTab, announce]);
+
   // Update navigation store with available activities
   useEffect(() => {
     const updateNavigationStore = () => {
@@ -97,6 +141,29 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
     
     updateNavigationStore();
   }, [child, setAvailableActivities]);
+
+  // Initialize performance monitoring
+  useEffect(() => {
+    performanceService.initializeMonitoring();
+    
+    // Cleanup on unmount
+    return () => {
+      performanceService.cleanup();
+    };
+  }, [performanceService]);
+
+  // Preload activities on component mount
+  useEffect(() => {
+    // Preload popular activities after a short delay
+    const preloadTimer = setTimeout(() => {
+      const popularActivities = ['animal-safari', 'number-garden', 'color-rainbow', 'shape-detective'];
+      popularActivities.forEach(activityId => {
+        preloadActivityOnHover(activityId);
+      });
+    }, 2000); // Preload after 2 seconds
+
+    return () => clearTimeout(preloadTimer);
+  }, [preloadActivityOnHover]);
 
   // Auto-save activity states
   const trackActivityStart = (activityId: string) => {
@@ -675,6 +742,13 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
     setIsLoadingActivity(true);
     await soundEffects.playClick();
     
+    // Find activity name for announcement
+    const activity = activities.find(a => a.id === activityId);
+    const activityName = activity?.title || activityId;
+    
+    // Announce loading
+    announceLoading(`Loading ${activityName} activity`);
+    
     // Track activity start
     trackActivityStart(activityId);
     
@@ -684,6 +758,9 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
     setCurrentActivity(activityId);
     setIsLoadingActivity(false);
     await soundEffects.playMagic();
+    
+    // Announce successful launch
+    announceSuccess(`${activityName} activity started`);
   };
 
   // Handle search result selection
@@ -717,7 +794,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   if (currentActivity === 'animal-safari') {
     return (
-      <AnimalSafari
+      <LazyAnimalSafari
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('animal-safari', score)}
         onBack={() => setCurrentActivity(null)}
@@ -727,7 +804,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   if (currentActivity === 'number-garden') {
     return (
-      <NumberGarden
+      <LazyNumberGarden
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('number-garden', score)}
         onBack={() => setCurrentActivity(null)}
@@ -737,7 +814,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   if (currentActivity === 'shape-detective') {
     return (
-      <ShapeDetective
+      <LazyShapeDetective
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('shape-detective', score)}
         onBack={() => setCurrentActivity(null)}
@@ -747,7 +824,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   if (currentActivity === 'color-rainbow') {
     return (
-      <ColorRainbow
+      <LazyColorRainbow
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('color-rainbow', score)}
         onBack={() => setCurrentActivity(null)}
@@ -757,7 +834,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   if (currentActivity === 'family-tree') {
     return (
-      <FamilyTree
+      <LazyFamilyTree
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('family-tree', score)}
         onBack={() => setCurrentActivity(null)}
@@ -767,7 +844,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   if (currentActivity === 'body-parts') {
     return (
-      <BodyParts
+      <LazyBodyParts
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('body-parts', score)}
         onBack={() => setCurrentActivity(null)}
@@ -777,7 +854,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   if (currentActivity === 'weather-station') {
     return (
-      <WeatherStation
+      <LazyWeatherStation
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('weather-station', score)}
         onBack={() => setCurrentActivity(null)}
@@ -787,7 +864,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   if (currentActivity === 'counting-train') {
     return (
-      <CountingTrain
+      <LazyCountingTrain
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('counting-train', score)}
         onBack={() => setCurrentActivity(null)}
@@ -797,7 +874,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   if (currentActivity === 'size-sorter') {
     return (
-      <SizeSorter
+      <LazySizeSorter
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('size-sorter', score)}
         onBack={() => setCurrentActivity(null)}
@@ -807,7 +884,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   if (currentActivity === 'transportation') {
     return (
-      <Transportation
+      <LazyTransportation
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('transportation', score)}
         onBack={() => setCurrentActivity(null)}
@@ -817,7 +894,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   if (currentActivity === 'emotion-faces') {
     return (
-      <EmotionFaces
+      <LazyEmotionFaces
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('emotion-faces', score)}
         onBack={() => setCurrentActivity(null)}
@@ -827,7 +904,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   if (currentActivity === 'pizza-fractions') {
     return (
-      <PizzaFractions
+      <LazyPizzaFractions
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('pizza-fractions', score)}
         onBack={() => setCurrentActivity(null)}
@@ -837,7 +914,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   if (currentActivity === 'pet-parade') {
     return (
-      <PetParade
+      <LazyPetParade
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('pet-parade', score)}
         onBack={() => setCurrentActivity(null)}
@@ -847,7 +924,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   if (currentActivity === 'enhanced-arabic-learning') {
     return (
-      <EnhancedArabicLearning
+      <LazyArabicLearning
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('enhanced-arabic-learning', score)}
         onBack={() => setCurrentActivity(null)}
@@ -857,7 +934,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   if (currentActivity === 'enhanced-malayalam-learning') {
     return (
-      <EnhancedMalayalamLearning
+      <LazyMalayalamLearning
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('enhanced-malayalam-learning', score)}
         onBack={() => setCurrentActivity(null)}
@@ -884,7 +961,13 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-soft via-background to-secondary-soft p-3 sm:p-4">
+    <div 
+      ref={dashboardRef}
+      className="min-h-screen bg-gradient-to-br from-primary-soft via-background to-secondary-soft p-3 sm:p-4"
+      role="main"
+      aria-label="Learning Activities Dashboard"
+      data-nav-group="dashboard"
+    >
       <div className="max-w-6xl mx-auto">
         {/* Enhanced Header with Play Learn Spark Branding */}
         <div className="relative mb-6 sm:mb-8">

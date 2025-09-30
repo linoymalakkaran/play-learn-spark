@@ -2,22 +2,16 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { HelpButton } from '@/components/common/HelpButton';
 import { TutorialManager } from '@/components/tutorial/TutorialManager';
 import { ActivityTransition } from '@/components/transitions/PageTransition';
-import ContentManagementSystem from '@/components/ContentManagementSystem';
-import PersonalizationCenter from '@/components/PersonalizationCenter';
-import AdaptiveContentEngine from '@/components/AdaptiveContentEngine';
-import NavigationFavorites from '@/components/navigation/NavigationFavorites';
-import AdvancedSearch from '@/components/navigation/AdvancedSearch';
-import PersonalizedNavigation from '@/components/PersonalizedNavigation';
 import { useTutorial } from '@/hooks/useTutorial';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useProgress } from '@/hooks/useProgress';
 import { useContent } from '@/hooks/useContent';
 import { usePersonalization } from '@/hooks/usePersonalization';
+import { useStudent, getGradeDisplayName, getRecommendedActivities, getDifficultyForGrade } from '@/hooks/useStudent';
 import { useAccessibility, useAriaLive, useFocusManagement } from '@/hooks/useAccessibility';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { Child, Activity } from '@/types/learning';
@@ -55,11 +49,9 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
   const [currentActivity, setCurrentActivity] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'english' | 'math' | 'science' | 'habits' | 'art' | 'social' | 'problem' | 'physical' | 'world' | 'languages'>('all');
   const [isLoadingActivity, setIsLoadingActivity] = useState(false);
-  const [showContentManager, setShowContentManager] = useState(false);
-  const [showPersonalization, setShowPersonalization] = useState(false);
-  const [showAdaptiveEngine, setShowAdaptiveEngine] = useState(false);
-  const [showFavorites, setShowFavorites] = useState(false);
-  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  
+  // Student context
+  const { student, clearStudent } = useStudent();
   
   // Performance monitoring and activity preloading
   const [performanceService] = useState(() => PerformanceMonitoringService.getInstance());
@@ -763,25 +755,6 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
     announceSuccess(`${activityName} activity started`);
   };
 
-  // Handle search result selection
-  const handleSearchResult = (result: any) => {
-    if (result.id && result.id.startsWith('activity-')) {
-      const activityId = result.id.replace('activity-', '');
-      handleActivityLaunch(activityId);
-    } else if (result.path) {
-      navigate(result.path);
-    }
-  };
-
-  // Handle favorites and quick access
-  const handleShowFavorites = () => {
-    setShowFavorites(true);
-  };
-
-  const handleShowAdvancedSearch = () => {
-    setShowAdvancedSearch(true);
-  };
-
   // Show activity loading overlay
   if (isLoadingActivity) {
     return (
@@ -992,16 +965,24 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
                 
                 {/* Welcome Message */}
                 <h2 className="text-xl sm:text-3xl font-['Comic_Neue'] font-bold text-primary mb-2 bounce-in">
-                  Welcome back, {child.name}! 🌟
+                  Welcome back, {student?.name || child.name}! 🌟
                 </h2>
                 <p className="text-sm sm:text-lg font-['Comic_Neue'] text-muted-foreground">
-                  Ready for some amazing learning adventures?
+                  {student?.grade ? 
+                    `Ready for some amazing ${getGradeDisplayName(student.grade)} learning adventures?` : 
+                    'Ready for some amazing learning adventures?'
+                  }
                 </p>
                 
                 {/* Quick Stats */}
                 <div className="flex flex-wrap gap-2 mt-4 justify-center sm:justify-start">
+                  {student?.grade && (
+                    <div className="px-3 py-1 bg-purple/20 rounded-full text-xs font-bold text-purple">
+                      {getGradeDisplayName(student.grade)} Student
+                    </div>
+                  )}
                   <div className="px-3 py-1 bg-success/20 rounded-full text-xs font-bold text-success">
-                    Age {child.age} Explorer
+                    Age {student?.age || child.age} Explorer
                   </div>
                   <div className="px-3 py-1 bg-magic/20 rounded-full text-xs font-bold text-magic">
                     {child.progress.totalActivitiesCompleted} Activities Done
@@ -1029,94 +1010,18 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
                 </div>
                 
                 <Button 
-                  onClick={onReset} 
+                  onClick={() => {
+                    // Clear student information
+                    if (student) {
+                      clearStudent();
+                    }
+                    onReset();
+                  }} 
                   variant="outline" 
                   className="px-6 py-3 font-['Comic_Neue'] font-bold border-2 border-primary/30 hover:border-primary hover:bg-primary hover:text-white transition-all duration-300 min-h-[44px] switch-learner-btn"
                 >
-                  Switch Learner 👥
+                  {student ? `Change Student (${student.name})` : 'Switch Learner'} 👥
                 </Button>
-                
-                {/* Content Management Buttons */}
-                <div className="flex flex-wrap gap-2 justify-center">
-                  <Dialog open={showPersonalization} onOpenChange={setShowPersonalization}>
-                    <DialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="font-['Comic_Neue'] font-bold border-2 border-blue-300 hover:border-blue-500 hover:bg-blue-500 hover:text-white transition-all duration-300"
-                      >
-                        🎨 Personalize
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
-                      <PersonalizationCenter child={child} onClose={() => setShowPersonalization(false)} />
-                    </DialogContent>
-                  </Dialog>
-
-                  <Dialog open={showAdaptiveEngine} onOpenChange={setShowAdaptiveEngine}>
-                    <DialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="font-['Comic_Neue'] font-bold border-2 border-purple-300 hover:border-purple-500 hover:bg-purple-500 hover:text-white transition-all duration-300"
-                      >
-                        🤖 AI Content
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
-                      <AdaptiveContentEngine 
-                        child={child} 
-                        onClose={() => setShowAdaptiveEngine(false)}
-                        onContentSelect={(content) => {
-                          setShowAdaptiveEngine(false);
-                          // Handle content selection
-                        }}
-                      />
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* Navigation Features */}
-                  <Dialog open={showFavorites} onOpenChange={setShowFavorites}>
-                    <DialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="font-['Comic_Neue'] font-bold border-2 border-red-300 hover:border-red-500 hover:bg-red-500 hover:text-white transition-all duration-300"
-                      >
-                        ❤️ Favorites
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
-                      <NavigationFavorites />
-                    </DialogContent>
-                  </Dialog>
-
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleShowAdvancedSearch}
-                    className="font-['Comic_Neue'] font-bold border-2 border-yellow-300 hover:border-yellow-500 hover:bg-yellow-500 hover:text-white transition-all duration-300"
-                  >
-                    🔍 Search
-                  </Button>
-
-                  {isCreatorMode && (
-                    <Dialog open={showContentManager} onOpenChange={setShowContentManager}>
-                      <DialogTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="font-['Comic_Neue'] font-bold border-2 border-green-300 hover:border-green-500 hover:bg-green-500 hover:text-white transition-all duration-300"
-                        >
-                          ⚙️ Content
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
-                        <ContentManagementSystem onClose={() => setShowContentManager(false)} />
-                      </DialogContent>
-                    </Dialog>
-                  )}
-                </div>
                 
                 {/* Tutorial Help Button */}
                 <HelpButton variant="inline" className="ml-2" />
@@ -1125,111 +1030,17 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
           </div>
         </div>
 
-        {/* Progress Overview - Mobile Optimized */}
-        <Card className="p-4 sm:p-6 mb-6 sm:mb-8 activity-card progress-section">
-          <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-3">
-            <h2 className="text-xl sm:text-2xl font-['Comic_Neue'] font-bold text-foreground text-center sm:text-left">
-              Your Progress 📈
-            </h2>
-            <div className="success-badge text-center">
-              {child.progress.totalActivitiesCompleted} of {activities.length} Activities Completed!
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">🔥</div>
-              <div className="text-lg sm:text-2xl font-bold text-success">{child.progress.currentStreak}</div>
-              <div className="text-xs sm:text-sm text-muted-foreground font-['Comic_Neue']">Day Streak</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">📚</div>
-              <div className="text-lg sm:text-2xl font-bold text-primary">{activities.filter(a => a.category === 'english').length}</div>
-              <div className="text-xs sm:text-sm text-muted-foreground font-['Comic_Neue']">English</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">🔢</div>
-              <div className="text-lg sm:text-2xl font-bold text-secondary">{activities.filter(a => a.category === 'math').length}</div>
-              <div className="text-xs sm:text-sm text-muted-foreground font-['Comic_Neue']">Math</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">🔬</div>
-              <div className="text-lg sm:text-2xl font-bold text-success">{activities.filter(a => a.category === 'science').length}</div>
-              <div className="text-xs sm:text-sm text-muted-foreground font-['Comic_Neue']">Science</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">🎨</div>
-              <div className="text-lg sm:text-2xl font-bold text-magic">{activities.filter(a => a.category === 'art').length}</div>
-              <div className="text-xs sm:text-sm text-muted-foreground font-['Comic_Neue']">Creative</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">⭐</div>
-              <div className="text-lg sm:text-2xl font-bold text-primary">{child.progress.averageScore || 0}%</div>
-              <div className="text-xs sm:text-sm text-muted-foreground font-['Comic_Neue']">Best Score</div>
-            </div>
-          </div>
-        </Card>
 
-        {/* Personalized Navigation - AI-Powered Recommendations */}
-        <PersonalizedNavigation child={child} className="mb-6" />
 
-        {/* Language Learning Section */}
-        <Card className="mb-6 language-learning bg-gradient-to-r from-orange-50 via-green-50 to-blue-50 border-2 border-dashed border-orange-300">
-          <div className="p-6">
-            <h3 className="text-xl font-['Comic_Neue'] font-bold text-center mb-4 text-foreground">
-              🌍 Language Learning Adventures
-            </h3>
-            <p className="text-center text-muted-foreground mb-4 font-['Comic_Neue']">
-              Explore new languages and cultures! Learn Malayalam and Arabic basics.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                onClick={async () => {
-                  await soundEffects.playClick();
-                  navigate('/malayalam');
-                }}
-                className="flex-1 sm:flex-none px-6 py-4 font-['Comic_Neue'] font-bold text-sm transition-all duration-300 transform hover:scale-105 bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg hover:shadow-xl"
-              >
-                <span className="text-lg mr-2">മ</span>
-                Learn Malayalam
-              </Button>
-              <Button
-                onClick={async () => {
-                  await soundEffects.playClick();
-                  navigate('/arabic');
-                }}
-                className="flex-1 sm:flex-none px-6 py-4 font-['Comic_Neue'] font-bold text-sm transition-all duration-300 transform hover:scale-105 bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-lg hover:shadow-xl"
-              >
-                <span className="text-lg mr-2" dir="rtl">ع</span>
-                Learn Arabic
-              </Button>
-            </div>
-          </div>
-        </Card>
+
 
         {/* Enhanced Activity Category Navigation */}
         <div className="mb-6 category-tabs">
           <h3 className="text-xl font-['Comic_Neue'] font-bold text-center mb-4 text-foreground">
-            � Learning Activities by Subject
+            � All Learning Adventures
           </h3>
           
-          {/* Quick Access - All Activities */}
-          <div className="mb-4 text-center">
-            <Button
-              onClick={async () => {
-                await soundEffects.playClick();
-                setActiveTab('all');
-              }}
-              variant={activeTab === 'all' ? 'default' : 'outline'}
-              className={`px-6 py-3 font-['Comic_Neue'] font-bold text-base min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
-                activeTab === 'all' 
-                  ? 'bg-gradient-to-r from-primary to-magic text-white shadow-lg' 
-                  : 'hover:bg-primary/10 hover:border-primary'
-              }`}
-            >
-              🌟 All Learning Adventures ({activities.length})
-            </Button>
-          </div>
+
           
           {/* Subject Categories */}
           <div className="space-y-4">
@@ -1527,13 +1338,6 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
       <TutorialManager 
         currentPage="dashboard" 
         isFirstTimeUser={isFirstTime}
-      />
-
-      {/* Advanced Search Component */}
-      <AdvancedSearch
-        isOpen={showAdvancedSearch}
-        onClose={() => setShowAdvancedSearch(false)}
-        onSearchResult={handleSearchResult}
       />
     </div>
   );

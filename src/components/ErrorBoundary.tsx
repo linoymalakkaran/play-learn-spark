@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  onNavigateHome?: () => void;
 }
 
 interface State {
@@ -15,7 +16,7 @@ interface State {
   errorInfo?: ErrorInfo;
 }
 
-class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundaryInner extends Component<Props, State> {
   public state: State = {
     hasError: false
   };
@@ -37,11 +38,17 @@ class ErrorBoundary extends Component<Props, State> {
   };
 
   private handleGoHome = () => {
-    window.location.href = '/';
+    if (this.props.onNavigateHome) {
+      this.props.onNavigateHome();
+    } else {
+      // Fallback to window.location for backward compatibility
+      window.location.href = '/';
+    }
   };
 
   private handleReload = () => {
-    window.location.reload();
+    // Force a state reset instead of page reload
+    this.handleReset();
   };
 
   public render() {
@@ -99,7 +106,7 @@ class ErrorBoundary extends Component<Props, State> {
                   className="flex items-center gap-2"
                 >
                   <RefreshCw className="w-4 h-4" />
-                  Reload Page
+                  Try Again
                 </Button>
               </div>
 
@@ -127,5 +134,27 @@ class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+// Wrapper component that provides navigation
+import { useNavigate } from 'react-router-dom';
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback?: ReactNode;
+}
+
+const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({ children, fallback }) => {
+  const navigate = useNavigate();
+  
+  const handleNavigateHome = () => {
+    navigate('/');
+  };
+
+  return (
+    <ErrorBoundaryInner onNavigateHome={handleNavigateHome} fallback={fallback}>
+      {children}
+    </ErrorBoundaryInner>
+  );
+};
 
 export default ErrorBoundary;

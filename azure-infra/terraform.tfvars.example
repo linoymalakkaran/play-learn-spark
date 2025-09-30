@@ -1,0 +1,31 @@
+# Example terraform.tfvars file
+# Copy this file to terraform.tfvars and customize the values
+
+# Project configuration
+project_name = "play-learn-spark"
+environment  = "dev"
+location     = "East US"
+
+# App Service Plan SKU
+# Options: F1 (Free), D1 (Shared), B1, B2, B3 (Basic), S1, S2, S3 (Standard), P1v2, P2v2, P3v2 (Premium v2)
+app_service_plan_sku = "B1"
+
+# Enable/disable features
+enable_application_insights = true
+enable_custom_domain       = false
+
+# Custom domain (only if enable_custom_domain = true)
+# custom_domain_name = "playlearnspark.com"
+
+# Resource naming (optional - will use defaults if not specified)
+# resource_group_name     = "play-learn-spark-dev-rg"
+# container_registry_name = "playlearnspark"
+
+# Tags for all resources
+tags = {
+  Project     = "Play Learn Spark"
+  Environment = "dev"
+  Owner       = "Development Team"
+  ManagedBy   = "Terraform"
+  CostCenter  = "Education"
+}

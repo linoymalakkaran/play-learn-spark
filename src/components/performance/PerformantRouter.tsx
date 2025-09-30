@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -194,7 +194,10 @@ class RouteErrorBoundary extends React.Component<
                   Try Again
                 </button>
                 <button
-                  onClick={() => window.location.href = '/'}
+                  onClick={() => {
+                    // This will be replaced with proper navigation when wrapped
+                    window.location.href = '/';
+                  }}
                   className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
                 >
                   Go Home
@@ -210,18 +213,62 @@ class RouteErrorBoundary extends React.Component<
   }
 }
 
-// Route wrapper with error boundary and loading
+// Enhanced Route wrapper with error boundary, loading, and navigation
 const RouteWrapper: React.FC<{
   children: React.ReactNode;
   routeName: string;
   loadingType: 'dashboard' | 'activity' | 'language' | 'simple';
-}> = ({ children, routeName, loadingType }) => (
-  <RouteErrorBoundary routeName={routeName}>
-    <Suspense fallback={<PageLoadingSkeleton type={loadingType} />}>
-      {children}
-    </Suspense>
-  </RouteErrorBoundary>
-);
+}> = ({ children, routeName, loadingType }) => {
+  const navigate = useNavigate();
+  
+  // Create an enhanced RouteErrorBoundary that can handle navigation
+  const EnhancedRouteErrorBoundary = React.useMemo(() => {
+    const originalRender = RouteErrorBoundary.prototype.render;
+    
+    return class extends RouteErrorBoundary {
+      render() {
+        if (this.state.hasError) {
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
+              <Card className="w-full max-w-md">
+                <CardContent className="p-6 text-center">
+                  <div className="text-6xl mb-4">😵</div>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2">Oops! Page Not Loading</h2>
+                  <p className="text-gray-600 mb-6">
+                    We're having trouble loading this page. Please try again or go back to the home page.
+                  </p>
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => this.setState({ hasError: false })}
+                      className="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                    >
+                      Try Again
+                    </button>
+                    <button
+                      onClick={() => navigate('/')}
+                      className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                    >
+                      Go Home
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          );
+        }
+        return this.props.children;
+      }
+    };
+  }, [navigate]);
+
+  return (
+    <EnhancedRouteErrorBoundary routeName={routeName}>
+      <Suspense fallback={<PageLoadingSkeleton type={loadingType} />}>
+        {children}
+      </Suspense>
+    </EnhancedRouteErrorBoundary>
+  );
+};
 
 // Main Router Component with Performance Optimization
 const PerformantRouter: React.FC = () => {

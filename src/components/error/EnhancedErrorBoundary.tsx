@@ -24,6 +24,7 @@ interface Props {
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
   showDetails?: boolean;
   boundary?: string;
+  onNavigateHome?: () => void;
 }
 
 interface State {
@@ -35,7 +36,7 @@ interface State {
   copied: boolean;
 }
 
-export class EnhancedErrorBoundary extends Component<Props, State> {
+export class EnhancedErrorBoundaryInner extends Component<Props, State> {
   private retryTimeout: NodeJS.Timeout | null = null;
 
   constructor(props: Props) {
@@ -152,11 +153,17 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
   };
 
   private handleGoHome = () => {
-    window.location.href = '/';
+    if (this.props.onNavigateHome) {
+      this.props.onNavigateHome();
+    } else {
+      // Fallback for backward compatibility
+      window.location.href = '/';
+    }
   };
 
   private handleReload = () => {
-    window.location.reload();
+    // Force a component reset instead of page reload
+    this.handleRetry();
   };
 
   private copyErrorDetails = async () => {
@@ -384,5 +391,45 @@ Timestamp: ${new Date().toISOString()}
     return children;
   }
 }
+
+// Wrapper component that provides navigation
+import { useNavigate } from 'react-router-dom';
+
+interface EnhancedErrorBoundaryProps {
+  children: ReactNode;
+  fallback?: ReactNode;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
+  showDetails?: boolean;
+  boundary?: string;
+  onNavigateHome?: () => void;
+}
+
+export const EnhancedErrorBoundary: React.FC<EnhancedErrorBoundaryProps> = (props) => {
+  // Safely try to use navigate, fallback to window.location if outside router context
+  let navigate: ((path: string) => void) | null = null;
+  
+  try {
+    const reactRouterNavigate = useNavigate();
+    navigate = reactRouterNavigate;
+  } catch (error) {
+    // useNavigate is not available outside router context
+    navigate = null;
+  }
+  
+  const handleNavigateHome = () => {
+    if (navigate) {
+      navigate('/');
+    } else {
+      // Fallback to window.location if router is not available
+      window.location.href = '/';
+    }
+  };
+
+  return (
+    <EnhancedErrorBoundaryInner {...props} onNavigateHome={handleNavigateHome}>
+      {props.children}
+    </EnhancedErrorBoundaryInner>
+  );
+};
 
 export default EnhancedErrorBoundary;

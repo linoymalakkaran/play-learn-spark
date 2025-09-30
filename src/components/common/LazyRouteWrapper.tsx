@@ -127,10 +127,10 @@ class RouteErrorBoundary extends React.Component<
                 </div>
                 <div className="space-y-3">
                   <button
-                    onClick={() => window.location.reload()}
+                    onClick={() => this.setState({ hasError: false, error: null })}
                     className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                   >
-                    Refresh Page
+                    Try Again
                   </button>
                   <div>
                     <button

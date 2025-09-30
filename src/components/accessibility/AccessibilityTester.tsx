@@ -38,7 +38,11 @@ interface AccessibilityStats {
   colorContrastIssues: number;
 }
 
-export const AccessibilityTester: React.FC = () => {
+interface AccessibilityTesterProps {
+  onClose?: () => void;
+}
+
+export const AccessibilityTester: React.FC<AccessibilityTesterProps> = ({ onClose }) => {
   const [isActive, setIsActive] = useState(false);
   const [issues, setIssues] = useState<AccessibilityIssue[]>([]);
   const [stats, setStats] = useState<AccessibilityStats>({
@@ -267,14 +271,27 @@ export const AccessibilityTester: React.FC = () => {
               Real-time accessibility testing and feedback
             </CardDescription>
           </div>
-          <Button
-            onClick={() => setIsActive(!isActive)}
-            variant={isActive ? "destructive" : "default"}
-            className="flex items-center gap-2"
-          >
-            {isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            {isActive ? 'Stop Testing' : 'Start Testing'}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setIsActive(!isActive)}
+              variant={isActive ? "destructive" : "default"}
+              className="flex items-center gap-2"
+            >
+              {isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {isActive ? 'Stop Testing' : 'Start Testing'}
+            </Button>
+            {onClose && (
+              <Button
+                onClick={onClose}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1"
+                title="Close Accessibility Tester"
+              >
+                <XCircle className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
 

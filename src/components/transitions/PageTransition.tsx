@@ -37,30 +37,35 @@ export const PageTransition: React.FC<PageTransitionProps> = ({
     }
   }, [location, displayLocation, setTransitioning]);
 
+  const getPageTransitionStyles = () => {
+    const baseStyle = {
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      transformStyle: 'preserve-3d' as const,
+      width: '100%',
+      height: '100%'
+    };
+
+    if (transitionClass === 'transition-in') {
+      return {
+        ...baseStyle,
+        opacity: 1,
+        transform: 'translateY(0) scale(1)'
+      };
+    } else {
+      return {
+        ...baseStyle,
+        opacity: 0,
+        transform: 'translateY(-20px) scale(1.02)'
+      };
+    }
+  };
+
   return (
     <div
       ref={containerRef}
       className={`page-transition w-full h-full ${transitionClass}`}
-      style={{
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        transformStyle: 'preserve-3d'
-      }}
+      style={getPageTransitionStyles()}
     >
-      <style jsx>{`
-        .page-transition.transition-in {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
-        
-        .page-transition.transition-out {
-          opacity: 0;
-          transform: translateY(-20px) scale(1.02);
-        }
-        
-        .page-transition {
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-      `}</style>
       {children}
     </div>
   );
@@ -99,42 +104,34 @@ export const RouteTransition: React.FC<RouteTransitionProps> = ({
     return `${base} ${typeClass} ${stateClass}`;
   };
 
+  const getRouteTransitionStyles = () => {
+    const baseStyle = {
+      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+      width: '100%'
+    };
+
+    if (type === 'fade') {
+      return {
+        ...baseStyle,
+        opacity: isTransitioning ? 0 : 1
+      };
+    } else if (type === 'slide') {
+      return {
+        ...baseStyle,
+        transform: isTransitioning ? 'translateX(-100%)' : 'translateX(0)',
+        opacity: isTransitioning ? 0 : 1
+      };
+    } else { // scale
+      return {
+        ...baseStyle,
+        transform: isTransitioning ? 'scale(0.98) translateY(20px)' : 'scale(1) translateY(0)',
+        opacity: isTransitioning ? 0 : 1
+      };
+    }
+  };
+
   return (
-    <div className={getTransitionClass()}>
-      <style jsx>{`
-        .route-transition {
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          width: 100%;
-        }
-        
-        .route-transition-fade.active {
-          opacity: 1;
-        }
-        
-        .route-transition-fade.transitioning {
-          opacity: 0;
-        }
-        
-        .route-transition-slide.active {
-          transform: translateX(0);
-          opacity: 1;
-        }
-        
-        .route-transition-slide.transitioning {
-          transform: translateX(-100%);
-          opacity: 0;
-        }
-        
-        .route-transition-scale.active {
-          transform: scale(1) translateY(0);
-          opacity: 1;
-        }
-        
-        .route-transition-scale.transitioning {
-          transform: scale(0.98) translateY(20px);
-          opacity: 0;
-        }
-      `}</style>
+    <div className={getTransitionClass()} style={getRouteTransitionStyles()}>
       {children}
     </div>
   );
@@ -169,34 +166,40 @@ export const ActivityTransition: React.FC<ActivityTransitionProps> = ({
     }
   }, [isVisible]);
 
+  const getActivityTransitionStyles = () => {
+    const baseStyle = {
+      transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+      transformStyle: 'preserve-3d' as const,
+      perspective: '1000px',
+      width: '100%',
+      height: '100%'
+    };
+
+    if (animationClass === 'activity-enter-active') {
+      return {
+        ...baseStyle,
+        opacity: 1,
+        transform: 'scale(1) rotateY(0deg)'
+      };
+    } else if (animationClass === 'activity-exit-active') {
+      return {
+        ...baseStyle,
+        opacity: 0,
+        transform: 'scale(1.1) rotateY(10deg)'
+      };
+    } else {
+      return {
+        ...baseStyle,
+        opacity: 0,
+        transform: 'scale(0.9) rotateY(-10deg)'
+      };
+    }
+  };
+
   if (!shouldRender) return null;
 
   return (
-    <div className={`activity-transition ${animationClass}`}>
-      <style jsx>{`
-        .activity-transition {
-          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-          transform-style: preserve-3d;
-          perspective: 1000px;
-          width: 100%;
-          height: 100%;
-        }
-        
-        .activity-enter-active {
-          opacity: 1;
-          transform: scale(1) rotateY(0deg);
-        }
-        
-        .activity-exit-active {
-          opacity: 0;
-          transform: scale(1.1) rotateY(10deg);
-        }
-        
-        .activity-transition:not(.activity-enter-active) {
-          opacity: 0;
-          transform: scale(0.9) rotateY(-10deg);
-        }
-      `}</style>
+    <div className={`activity-transition ${animationClass}`} style={getActivityTransitionStyles()}>
       {children}
     </div>
   );
@@ -224,58 +227,53 @@ export const LoadingTransition: React.FC<LoadingTransitionProps> = ({
     }
   }, [isLoading]);
 
+  const loadingContentStyle = {
+    transition: 'opacity 0.3s ease-in-out',
+    position: 'absolute' as const,
+    width: '100%',
+    top: 0,
+    left: 0,
+    opacity: isLoading ? 1 : 0,
+    pointerEvents: isLoading ? 'auto' as const : 'none' as const
+  };
+
+  const mainContentStyle = {
+    transition: 'opacity 0.3s ease-in-out',
+    position: 'absolute' as const,
+    width: '100%',
+    top: 0,
+    left: 0,
+    opacity: showContent ? 1 : 0,
+    pointerEvents: showContent ? 'auto' as const : 'none' as const
+  };
+
+  const spinnerStyle = {
+    width: '32px',
+    height: '32px',
+    border: '4px solid var(--primary)',
+    borderTop: '4px solid transparent',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite'
+  };
+
   return (
-    <div className="loading-transition">
-      <style jsx>{`
-        .loading-transition {
-          position: relative;
-          width: 100%;
-          min-height: 200px;
-        }
-        
-        .loading-content,
-        .main-content {
-          transition: opacity 0.3s ease-in-out;
-          position: absolute;
-          width: 100%;
-          top: 0;
-          left: 0;
-        }
-        
-        .loading-content {
-          opacity: ${isLoading ? 1 : 0};
-          pointer-events: ${isLoading ? 'auto' : 'none'};
-        }
-        
-        .main-content {
-          opacity: ${showContent ? 1 : 0};
-          pointer-events: ${showContent ? 'auto' : 'none'};
-        }
-        
-        .spinner {
-          width: 32px;
-          height: 32px;
-          border: 4px solid var(--primary);
-          border-top: 4px solid transparent;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-        
+    <div className="loading-transition" style={{ position: 'relative', width: '100%', minHeight: '200px' }}>
+      <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
       `}</style>
       
-      <div className="loading-content">
+      <div style={loadingContentStyle}>
         {loadingComponent || (
           <div className="flex items-center justify-center h-64">
-            <div className="spinner" />
+            <div style={spinnerStyle} />
           </div>
         )}
       </div>
       
-      <div className="main-content">
+      <div style={mainContentStyle}>
         {children}
       </div>
     </div>

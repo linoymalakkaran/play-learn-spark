@@ -416,7 +416,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
       { id: 'word-problems', title: 'Word Problems', description: 'Solve problems with words!', subcategory: 'comprehension', icon: '📝', backgroundColor: 'from-magic to-magic-soft' },
       { id: 'spatial-reasoning', title: 'Spatial Reasoning', description: 'Think in 3D space!', subcategory: 'spatial', icon: '📐', backgroundColor: 'from-success to-success-soft' },
       { id: 'if-then-scenarios', title: 'If-Then Scenarios', description: 'Predict what happens next!', subcategory: 'prediction', icon: '🔮', backgroundColor: 'from-secondary to-secondary-soft' },
-      { id: 'puzzle-pieces', title: 'Puzzle Assembly', description: 'Put pieces together logically!', subcategory: 'assembly', icon: '🧩', backgroundColor: 'from-primary to-primary-soft' },
+      { id: 'puzzle-assembly-problem', title: 'Puzzle Assembly', description: 'Put pieces together logically!', subcategory: 'assembly', icon: '🧩', backgroundColor: 'from-primary to-primary-soft' },
       { id: 'decision-trees', title: 'Decision Trees', description: 'Make smart choices!', subcategory: 'decisions', icon: '🌳', backgroundColor: 'from-magic to-magic-soft' },
       { id: 'resource-management', title: 'Resource Management', description: 'Use resources wisely!', subcategory: 'planning', icon: '⚖️', backgroundColor: 'from-success to-success-soft' },
       { id: 'optimization-games', title: 'Optimization Games', description: 'Find the best solution!', subcategory: 'optimization', icon: '🎯', backgroundColor: 'from-secondary to-secondary-soft' },
@@ -472,7 +472,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
     // WORLD EXPLORER ACTIVITIES - Cultures, Geography, Traditions
     const worldActivities = [
       { id: 'country-flags', title: 'Country Flags', description: 'Learn flags from around the world!', subcategory: 'geography', icon: '🏳️', backgroundColor: 'from-primary to-primary-soft' },
-      { id: 'cultural-foods', title: 'Cultural Foods', description: 'Taste foods from different cultures!', subcategory: 'culture', icon: '🍜', backgroundColor: 'from-secondary to-secondary-soft' },
+      { id: 'cultural-foods-world', title: 'Cultural Foods', description: 'Taste foods from different cultures!', subcategory: 'culture', icon: '🍜', backgroundColor: 'from-secondary to-secondary-soft' },
       { id: 'world-landmarks', title: 'World Landmarks', description: 'Discover famous places!', subcategory: 'landmarks', icon: '🗼', backgroundColor: 'from-magic to-magic-soft' },
       { id: 'traditional-clothes', title: 'Traditional Clothes', description: 'See clothing from different cultures!', subcategory: 'clothing', icon: '👘', backgroundColor: 'from-success to-success-soft' },
       { id: 'world-animals', title: 'World Animals', description: 'Meet animals from different continents!', subcategory: 'animals', icon: '🦘', backgroundColor: 'from-primary to-primary-soft' },
@@ -490,7 +490,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
       { id: 'pirate-treasure', title: 'Pirate Treasure', description: 'Explore pirate adventures worldwide!', subcategory: 'adventure', icon: '🏴‍☠️', backgroundColor: 'from-primary to-primary-soft' },
       { id: 'transportation-world', title: 'Transportation World', description: 'How people travel worldwide!', subcategory: 'transport', icon: '🚅', backgroundColor: 'from-magic to-magic-soft' },
       { id: 'world-homes', title: 'World Homes', description: 'See houses from different cultures!', subcategory: 'homes', icon: '🏠', backgroundColor: 'from-success to-success-soft' },
-      { id: 'cultural-games', title: 'Cultural Games', description: 'Play games from around the world!', subcategory: 'games', icon: '🎲', backgroundColor: 'from-primary to-primary-soft' },
+      { id: 'cultural-games-world', title: 'Cultural Games', description: 'Play games from around the world!', subcategory: 'games', icon: '🎲', backgroundColor: 'from-primary to-primary-soft' },
       { id: 'world-instruments', title: 'World Instruments', description: 'Hear instruments from different cultures!', subcategory: 'instruments', icon: '🪘', backgroundColor: 'from-secondary to-secondary-soft' },
       { id: 'natural-wonders', title: 'Natural Wonders', description: 'Explore amazing natural places!', subcategory: 'nature', icon: '🏔️', backgroundColor: 'from-magic to-magic-soft' },
       { id: 'world-dances', title: 'World Dances', description: 'Learn dances from different cultures!', subcategory: 'dance', icon: '💃', backgroundColor: 'from-success to-success-soft' },
@@ -517,14 +517,14 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
       { id: 'traditional-songs', title: 'Traditional Songs', description: 'Songs from different cultures!', subcategory: 'music', icon: '🎵', backgroundColor: 'from-primary to-primary-soft' },
       { id: 'festival-celebrations', title: 'Festival Celebrations', description: 'Learn about cultural festivals!', subcategory: 'festivals', icon: '🎉', backgroundColor: 'from-secondary to-secondary-soft' },
       { id: 'number-systems', title: 'Number Systems', description: 'Count in different languages!', subcategory: 'numbers', icon: '🔢', backgroundColor: 'from-success to-success-soft' },
-      { id: 'cultural-foods', title: 'Cultural Foods', description: 'Traditional foods and their names!', subcategory: 'food', icon: '🍽️', backgroundColor: 'from-magic to-magic-soft' },
+      { id: 'cultural-foods-language', title: 'Cultural Foods', description: 'Traditional foods and their names!', subcategory: 'food', icon: '🍽️', backgroundColor: 'from-magic to-magic-soft' },
       { id: 'traditional-clothing', title: 'Traditional Clothing', description: 'Clothes from different cultures!', subcategory: 'clothing', icon: '👘', backgroundColor: 'from-primary to-primary-soft' },
       { id: 'cultural-dances', title: 'Cultural Dances', description: 'Dances from around the world!', subcategory: 'dance', icon: '💃', backgroundColor: 'from-secondary to-secondary-soft' },
       { id: 'language-patterns', title: 'Language Patterns', description: 'How languages work!', subcategory: 'patterns', icon: '🔤', backgroundColor: 'from-success to-success-soft' },
       { id: 'cultural-instruments', title: 'Cultural Instruments', description: 'Music from different cultures!', subcategory: 'instruments', icon: '🎸', backgroundColor: 'from-magic to-magic-soft' },
       { id: 'poetry-traditions', title: 'Poetry Traditions', description: 'Beautiful poems from cultures!', subcategory: 'poetry', icon: '📝', backgroundColor: 'from-primary to-primary-soft' },
       { id: 'storytelling-styles', title: 'Storytelling Styles', description: 'Different ways to tell stories!', subcategory: 'storytelling', icon: '🎭', backgroundColor: 'from-secondary to-secondary-soft' },
-      { id: 'cultural-games', title: 'Cultural Games', description: 'Traditional games from cultures!', subcategory: 'games', icon: '🎲', backgroundColor: 'from-success to-success-soft' },
+      { id: 'cultural-games-language', title: 'Cultural Games', description: 'Traditional games from cultures!', subcategory: 'games', icon: '🎲', backgroundColor: 'from-success to-success-soft' },
       { id: 'language-sounds', title: 'Language Sounds', description: 'Unique sounds in languages!', subcategory: 'pronunciation', icon: '🔊', backgroundColor: 'from-magic to-magic-soft' },
       { id: 'cultural-symbols', title: 'Cultural Symbols', description: 'Important symbols in cultures!', subcategory: 'symbols', icon: '🕆', backgroundColor: 'from-primary to-primary-soft' },
       { id: 'translation-fun', title: 'Translation Fun', description: 'Translate between languages!', subcategory: 'translation', icon: '🔄', backgroundColor: 'from-secondary to-secondary-soft' },
@@ -1207,167 +1207,206 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
           </div>
         </Card>
 
-        {/* Enhanced Activity Category Tabs */}
+        {/* Enhanced Activity Category Navigation */}
         <div className="mb-6 category-tabs">
           <h3 className="text-xl font-['Comic_Neue'] font-bold text-center mb-4 text-foreground">
-            🎯 Choose Your Learning Adventure
+            � Learning Activities by Subject
           </h3>
-          <div className="overflow-x-auto scrollbar-hide">
-            <div className="flex gap-3 pb-2 min-w-max px-1">
-              <Button
-                onClick={async () => {
-                  await soundEffects.playClick();
-                  setActiveTab('all');
-                }}
-                variant={activeTab === 'all' ? 'default' : 'outline'}
-                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
-                  activeTab === 'all' 
-                    ? 'bg-gradient-to-r from-primary to-magic text-white shadow-lg' 
-                    : 'hover:bg-primary/10 hover:border-primary'
-                }`}
-              >
-                🌟 All Adventures ({activities.length})
-              </Button>
-              <Button
-                onClick={async () => {
-                  await soundEffects.playClick();
-                  setActiveTab('english');
-                }}
-                variant={activeTab === 'english' ? 'default' : 'outline'}
-                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
-                  activeTab === 'english' 
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' 
-                    : 'hover:bg-blue-100 hover:border-blue-500 text-blue-700'
-                }`}
-              >
-                📚 English ({activities.filter(a => a.category === 'english').length})
-              </Button>
-              <Button
-                onClick={async () => {
-                  await soundEffects.playClick();
-                  setActiveTab('math');
-                }}
-                variant={activeTab === 'math' ? 'default' : 'outline'}
-                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
-                  activeTab === 'math' 
-                    ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg' 
-                    : 'hover:bg-green-100 hover:border-green-500 text-green-700'
-                }`}
-              >
-                🔢 Math ({activities.filter(a => a.category === 'math').length})
-              </Button>
-              <Button
-                onClick={async () => {
-                  await soundEffects.playClick();
-                  setActiveTab('science');
-                }}
-                variant={activeTab === 'science' ? 'default' : 'outline'}
-                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
-                  activeTab === 'science' 
-                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg' 
-                    : 'hover:bg-purple-100 hover:border-purple-500 text-purple-700'
-                }`}
-              >
-                🔬 Science ({activities.filter(a => a.category === 'science').length})
-              </Button>
-              <Button
-                onClick={async () => {
-                  await soundEffects.playClick();
-                  setActiveTab('habits');
-                }}
-                variant={activeTab === 'habits' ? 'default' : 'outline'}
-                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
-                  activeTab === 'habits' 
-                    ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg' 
-                    : 'hover:bg-yellow-100 hover:border-yellow-500 text-yellow-700'
-                }`}
-              >
-                ⭐ Habits ({activities.filter(a => a.category === 'habits').length})
-              </Button>
-              <Button
-                onClick={async () => {
-                  await soundEffects.playClick();
-                  setActiveTab('art');
-                }}
-                variant={activeTab === 'art' ? 'default' : 'outline'}
-                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
-                  activeTab === 'art' 
-                    ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg' 
-                    : 'hover:bg-pink-100 hover:border-pink-500 text-pink-700'
-                }`}
-              >
-                🎨 Art ({activities.filter(a => a.category === 'art').length})
-              </Button>
-              <Button
-                onClick={async () => {
-                  await soundEffects.playClick();
-                  setActiveTab('social');
-                }}
-                variant={activeTab === 'social' ? 'default' : 'outline'}
-                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
-                  activeTab === 'social' 
-                    ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg' 
-                    : 'hover:bg-indigo-100 hover:border-indigo-500 text-indigo-700'
-                }`}
-              >
-                🤝 Social ({activities.filter(a => a.category === 'social').length})
-              </Button>
-              <Button
-                onClick={async () => {
-                  await soundEffects.playClick();
-                  setActiveTab('problem');
-                }}
-                variant={activeTab === 'problem' ? 'default' : 'outline'}
-                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
-                  activeTab === 'problem' 
-                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg' 
-                    : 'hover:bg-orange-100 hover:border-orange-500 text-orange-700'
-                }`}
-              >
-                🧩 Logic ({activities.filter(a => a.category === 'problem').length})
-              </Button>
-              <Button
-                onClick={async () => {
-                  await soundEffects.playClick();
-                  setActiveTab('physical');
-                }}
-                variant={activeTab === 'physical' ? 'default' : 'outline'}
-                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
-                  activeTab === 'physical' 
-                    ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg' 
-                    : 'hover:bg-red-100 hover:border-red-500 text-red-700'
-                }`}
-              >
-                🏃‍♂️ Active ({activities.filter(a => a.category === 'physical').length})
-              </Button>
-              <Button
-                onClick={async () => {
-                  await soundEffects.playClick();
-                  setActiveTab('world');
-                }}
-                variant={activeTab === 'world' ? 'default' : 'outline'}
-                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
-                  activeTab === 'world' 
-                    ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-lg' 
-                    : 'hover:bg-teal-100 hover:border-teal-500 text-teal-700'
-                }`}
-              >
-                🌍 World
-              </Button>
-              <Button
-                onClick={async () => {
-                  await soundEffects.playClick();
-                  setActiveTab('languages');
-                }}
-                variant={activeTab === 'languages' ? 'default' : 'outline'}
-                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
-                  activeTab === 'languages' 
-                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg' 
-                    : 'hover:bg-purple-100 hover:border-purple-500 text-purple-700'
-                }`}
-              >
-                🗣️ Languages ({activities.filter(a => a.category === 'languages').length})
-              </Button>
+          
+          {/* Quick Access - All Activities */}
+          <div className="mb-4 text-center">
+            <Button
+              onClick={async () => {
+                await soundEffects.playClick();
+                setActiveTab('all');
+              }}
+              variant={activeTab === 'all' ? 'default' : 'outline'}
+              className={`px-6 py-3 font-['Comic_Neue'] font-bold text-base min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
+                activeTab === 'all' 
+                  ? 'bg-gradient-to-r from-primary to-magic text-white shadow-lg' 
+                  : 'hover:bg-primary/10 hover:border-primary'
+              }`}
+            >
+              🌟 All Learning Adventures ({activities.length})
+            </Button>
+          </div>
+          
+          {/* Subject Categories */}
+          <div className="space-y-4">
+            {/* Core Subjects */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-600 mb-2 px-2">📚 Core Subjects</h4>
+              <div className="overflow-x-auto scrollbar-hide">
+                <div className="flex gap-2 pb-2 min-w-max px-1">
+                  <Button
+                    onClick={async () => {
+                      await soundEffects.playClick();
+                      setActiveTab('english');
+                    }}
+                    variant={activeTab === 'english' ? 'default' : 'outline'}
+                    className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[45px] transition-all duration-300 transform hover:scale-105 ${
+                      activeTab === 'english' 
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' 
+                        : 'hover:bg-blue-100 hover:border-blue-500 text-blue-700'
+                    }`}
+                  >
+                    📚 English ({activities.filter(a => a.category === 'english').length})
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      await soundEffects.playClick();
+                      setActiveTab('math');
+                    }}
+                    variant={activeTab === 'math' ? 'default' : 'outline'}
+                    className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[45px] transition-all duration-300 transform hover:scale-105 ${
+                      activeTab === 'math' 
+                        ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg' 
+                        : 'hover:bg-green-100 hover:border-green-500 text-green-700'
+                    }`}
+                  >
+                    🔢 Math ({activities.filter(a => a.category === 'math').length})
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      await soundEffects.playClick();
+                      setActiveTab('science');
+                    }}
+                    variant={activeTab === 'science' ? 'default' : 'outline'}
+                    className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[45px] transition-all duration-300 transform hover:scale-105 ${
+                      activeTab === 'science' 
+                        ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg' 
+                        : 'hover:bg-purple-100 hover:border-purple-500 text-purple-700'
+                    }`}
+                  >
+                    🔬 Science ({activities.filter(a => a.category === 'science').length})
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Skills & Development */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-600 mb-2 px-2">🌟 Skills & Development</h4>
+              <div className="overflow-x-auto scrollbar-hide">
+                <div className="flex gap-2 pb-2 min-w-max px-1">
+                  <Button
+                    onClick={async () => {
+                      await soundEffects.playClick();
+                      setActiveTab('problem');
+                    }}
+                    variant={activeTab === 'problem' ? 'default' : 'outline'}
+                    className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[45px] transition-all duration-300 transform hover:scale-105 ${
+                      activeTab === 'problem' 
+                        ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg' 
+                        : 'hover:bg-orange-100 hover:border-orange-500 text-orange-700'
+                    }`}
+                  >
+                    🧩 Logic & Problem Solving ({activities.filter(a => a.category === 'problem').length})
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      await soundEffects.playClick();
+                      setActiveTab('habits');
+                    }}
+                    variant={activeTab === 'habits' ? 'default' : 'outline'}
+                    className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[45px] transition-all duration-300 transform hover:scale-105 ${
+                      activeTab === 'habits' 
+                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg' 
+                        : 'hover:bg-yellow-100 hover:border-yellow-500 text-yellow-700'
+                    }`}
+                  >
+                    ⭐ Good Habits ({activities.filter(a => a.category === 'habits').length})
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Creative & Active */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-600 mb-2 px-2">🎨 Creative & Active</h4>
+              <div className="overflow-x-auto scrollbar-hide">
+                <div className="flex gap-2 pb-2 min-w-max px-1">
+                  <Button
+                    onClick={async () => {
+                      await soundEffects.playClick();
+                      setActiveTab('art');
+                    }}
+                    variant={activeTab === 'art' ? 'default' : 'outline'}
+                    className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[45px] transition-all duration-300 transform hover:scale-105 ${
+                      activeTab === 'art' 
+                        ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg' 
+                        : 'hover:bg-pink-100 hover:border-pink-500 text-pink-700'
+                    }`}
+                  >
+                    🎨 Art & Creativity ({activities.filter(a => a.category === 'art').length})
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      await soundEffects.playClick();
+                      setActiveTab('physical');
+                    }}
+                    variant={activeTab === 'physical' ? 'default' : 'outline'}
+                    className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[45px] transition-all duration-300 transform hover:scale-105 ${
+                      activeTab === 'physical' 
+                        ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg' 
+                        : 'hover:bg-red-100 hover:border-red-500 text-red-700'
+                    }`}
+                  >
+                    🏃‍♂️ Active & Movement ({activities.filter(a => a.category === 'physical').length})
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      await soundEffects.playClick();
+                      setActiveTab('social');
+                    }}
+                    variant={activeTab === 'social' ? 'default' : 'outline'}
+                    className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[45px] transition-all duration-300 transform hover:scale-105 ${
+                      activeTab === 'social' 
+                        ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg' 
+                        : 'hover:bg-indigo-100 hover:border-indigo-500 text-indigo-700'
+                    }`}
+                  >
+                    🤝 Social Skills ({activities.filter(a => a.category === 'social').length})
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            {/* World & Languages */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-600 mb-2 px-2">🌍 Culture & Languages</h4>
+              <div className="overflow-x-auto scrollbar-hide">
+                <div className="flex gap-2 pb-2 min-w-max px-1">
+                  <Button
+                    onClick={async () => {
+                      await soundEffects.playClick();
+                      setActiveTab('world');
+                    }}
+                    variant={activeTab === 'world' ? 'default' : 'outline'}
+                    className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[45px] transition-all duration-300 transform hover:scale-105 ${
+                      activeTab === 'world' 
+                        ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-lg' 
+                        : 'hover:bg-teal-100 hover:border-teal-500 text-teal-700'
+                    }`}
+                  >
+                    🌍 World Exploration ({activities.filter(a => a.category === 'world').length})
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      await soundEffects.playClick();
+                      setActiveTab('languages');
+                    }}
+                    variant={activeTab === 'languages' ? 'default' : 'outline'}
+                    className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[45px] transition-all duration-300 transform hover:scale-105 ${
+                      activeTab === 'languages' 
+                        ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg' 
+                        : 'hover:bg-purple-100 hover:border-purple-500 text-purple-700'
+                    }`}
+                  >
+                    🗣️ Languages ({activities.filter(a => a.category === 'languages').length})
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

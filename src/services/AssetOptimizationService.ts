@@ -237,11 +237,21 @@ class AssetOptimizationService {
   /**
    * Preload critical fonts
    */
+  /**
+   * Preload critical fonts - Updated with safer approach
+   */
   preloadCriticalFonts(): void {
+    // Skip font preloading in development or if fonts are not available
+    // This prevents 404 errors while maintaining the service structure
+    if (import.meta.env.DEV) {
+      console.log('🔤 Font preloading skipped in development mode');
+      return;
+    }
+
     const criticalFonts: FontPreloadOptions[] = [
-      { family: 'Comic Neue', weight: '400', style: 'normal', display: 'swap' },
-      { family: 'Comic Neue', weight: '700', style: 'normal', display: 'swap' },
-      { family: 'Fredoka One', weight: '400', style: 'normal', display: 'swap' }
+      { family: 'Inter', weight: '400', style: 'normal', display: 'swap' },
+      { family: 'Inter', weight: '500', style: 'normal', display: 'swap' },
+      { family: 'Inter', weight: '600', style: 'normal', display: 'swap' }
     ];
 
     criticalFonts.forEach((font) => {
@@ -250,7 +260,7 @@ class AssetOptimizationService {
   }
 
   /**
-   * Preload a specific font
+   * Preload a specific font with error handling
    */
   preloadFont(options: FontPreloadOptions): void {
     const { family, weight = '400', style = 'normal', display = 'swap' } = options;
@@ -258,16 +268,21 @@ class AssetOptimizationService {
 
     if (this.fontCache.has(fontKey)) return;
 
+    // Only proceed if we have a valid font URL
+    const fontUrl = this.generateFontUrl(family, weight, style);
+    if (!fontUrl) return;
+
     const link = document.createElement('link');
     link.rel = 'preload';
     link.as = 'font';
     link.type = 'font/woff2';
     link.crossOrigin = 'anonymous';
-    
-    // This would need to be updated with actual font URLs
-    // For Google Fonts or custom font hosting
-    const fontUrl = this.generateFontUrl(family, weight, style);
     link.href = fontUrl;
+
+    // Add error handling
+    link.onerror = () => {
+      console.warn(`⚠️ Failed to preload font: ${family} ${weight} ${style}`);
+    };
 
     document.head.appendChild(link);
     this.fontCache.add(fontKey);
@@ -277,12 +292,25 @@ class AssetOptimizationService {
   }
 
   /**
-   * Generate font URL
+   * Generate font URL - safer implementation
    */
-  private generateFontUrl(family: string, weight: string | number, style: string): string {
-    // This is a placeholder - would be customized for your font source
-    const familyParam = family.replace(/\s+/g, '+');
-    return `https://fonts.gstatic.com/s/${familyParam.toLowerCase()}/${weight}/${style}.woff2`;
+  private generateFontUrl(family: string, weight: string | number, style: string): string | null {
+    // Only generate URLs for fonts we know are available
+    // In a production app, you'd have a mapping of available fonts
+    const availableFonts = ['Inter', 'Roboto', 'Open Sans'];
+    
+    if (!availableFonts.includes(family)) {
+      console.warn(`⚠️ Font ${family} not in available fonts list`);
+      return null;
+    }
+
+    // For Inter font from Google Fonts (commonly available)
+    if (family === 'Inter') {
+      const familyParam = family.replace(/\s+/g, '+');
+      return `https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2`;
+    }
+
+    return null;
   }
 
   /**

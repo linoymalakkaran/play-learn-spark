@@ -9,8 +9,7 @@ import { PersonalizationProvider } from "@/hooks/usePersonalization";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { RouteTransition } from "@/components/transitions/PageTransition";
-import EnhancedNavigation from "@/components/navigation/EnhancedNavigation";
-import EnhancedBreadcrumb from "@/components/navigation/EnhancedBreadcrumb";
+import FooterNavigation from "@/components/navigation/FooterNavigation";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { EnhancedErrorBoundary } from "@/components/error/EnhancedErrorBoundary";
 import PerformanceDashboard from "@/components/development/PerformanceDashboard";
@@ -26,7 +25,8 @@ import { useEffect, useState } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MalayalamLearning from "./pages/MalayalamLearning";
-// import ArabicLearning from "./pages/ArabicLearning";
+import ArabicLearning from "./pages/ArabicLearning";
+import AIHomeworkAnalyzer from "./pages/AIHomeworkAnalyzer";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,6 +40,7 @@ const queryClient = new QueryClient({
 
 const App = () => {
   const [showIntegratedPlatform, setShowIntegratedPlatform] = useState(false);
+  const [showAccessibilityTester, setShowAccessibilityTester] = useState(true);
   const [userProfile, setUserProfile] = useState({
     name: 'Alex',
     age: 36, // months
@@ -121,20 +122,8 @@ const App = () => {
                   <BrowserRouter>
                     <NavigationProvider>
                       <EnhancedErrorBoundary boundary="navigation">
-                      {/* Enhanced Skip Links Component */}
-                      <SkipLinks 
-                        links={[
-                          { href: '#main-content', label: 'Skip to main content' },
-                          { href: '#navigation', label: 'Skip to navigation' },
-                          { href: '#activities', label: 'Skip to activities' },
-                          { href: '#footer', label: 'Skip to footer' }
-                        ]}
-                      />
-                      
-                      {/* Enhanced Navigation System */}
-                      <div className="min-h-screen bg-gradient-to-br from-background via-primary-soft/20 to-secondary-soft/20">
-                        {/* Backend Status Indicator */}
-                        <BackendStatus showInCorner={true} />
+                      {/* Simple App Layout */}
+                      <div className="min-h-screen bg-gradient-to-br from-background via-primary-soft/20 to-secondary-soft/20 flex flex-col">
                         
                         {/* Platform Toggle Button */}
                         <div className="fixed top-4 right-4 z-50">
@@ -146,48 +135,22 @@ const App = () => {
                           </button>
                         </div>
                         
-                        {/* Enhanced Navigation Header */}
-                        <nav id="navigation" role="navigation" aria-label="Main navigation">
-                          <EnhancedNavigation />
-                        </nav>
-                        
-                        {/* Enhanced Breadcrumb Navigation */}
-                        <EnhancedBreadcrumb className="px-4 py-2 bg-white/50 backdrop-blur-sm" />
-                        
-                        {/* Backend Status Alert */}
-                        <div className="px-4">
-                          <BackendStatus />
-                        </div>
-                        
                         {/* Page Content with Transitions */}
                         <RouteTransition type="fade">
-                          <main id="main-content" role="main" aria-label="Main content" tabIndex={-1}>
+                          <main id="main-content" role="main" aria-label="Main content" tabIndex={-1} className="flex-1">
                             <Routes>
                               <Route path="/" element={<Index />} />
                               <Route path="/malayalam" element={<MalayalamLearning />} />
-                              {/* <Route path="/arabic" element={<ArabicLearning />} /> */}
+                              <Route path="/arabic" element={<ArabicLearning />} />
+                              <Route path="/ai-homework" element={<AIHomeworkAnalyzer />} />
                               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                               <Route path="*" element={<NotFound />} />
                             </Routes>
                           </main>
                         </RouteTransition>
                         
-                        {/* Performance Dashboard (Development Only) */}
-                        <PerformanceDashboard />
-                        
-                        {/* Accessibility Tester (Development Only) */}
-                        {process.env.NODE_ENV === 'development' && (
-                          <div className="fixed bottom-4 right-4 z-50 max-w-sm">
-                            <AccessibilityTester />
-                          </div>
-                        )}
-                        
-                        {/* Footer */}
-                        <footer id="footer" role="contentinfo" className="mt-auto py-4 px-4 bg-white/80 backdrop-blur-sm border-t">
-                          <div className="max-w-7xl mx-auto text-center text-sm text-gray-600">
-                            <p>&copy; {new Date().getFullYear()} Play & Learn Spark. All rights reserved.</p>
-                          </div>
-                        </footer>
+                        {/* Simple Footer Navigation */}
+                        <FooterNavigation />
                       </div>
                     </EnhancedErrorBoundary>
                   </NavigationProvider>

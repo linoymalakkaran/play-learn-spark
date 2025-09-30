@@ -107,7 +107,10 @@ async function startServer() {
     // Try to connect to database (optional for development)
     try {
       await connectDatabase();
-      logger.info('Database connected successfully');
+      // Initialize default data for development
+      const { initializeDefaultData } = await import('./config/database');
+      initializeDefaultData();
+      logger.info('Database connected and initialized successfully');
     } catch (dbError) {
       logger.warn('Database connection failed - running without database:', dbError);
       logger.info('Server will start without database functionality');
@@ -116,8 +119,8 @@ async function startServer() {
     // Start HTTP server
     app.listen(PORT, () => {
       logger.info(`🚀 Play Learn Spark Backend Server running on port ${PORT}`);
-      logger.info(`📝 Environment: ${process.env.NODE_ENV}`);
-      logger.info(`🌐 CORS origin: ${process.env.CORS_ORIGIN}`);
+      logger.info(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+      logger.info(`🌐 CORS origin: ${process.env.CORS_ORIGIN || 'http://localhost:8080'}`);
       logger.info(`📚 API Documentation: http://localhost:${PORT}/`);
       logger.info(`🔑 Auth endpoints: http://localhost:${PORT}/api/auth`);
     });

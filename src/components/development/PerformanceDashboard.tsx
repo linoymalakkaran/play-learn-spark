@@ -12,7 +12,9 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
-  RefreshCw
+  RefreshCw,
+  Minimize2,
+  X
 } from 'lucide-react';
 import PerformanceMonitoringService from '@/services/PerformanceMonitoringService';
 
@@ -23,6 +25,7 @@ interface PerformanceDashboardProps {
 const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ className = "" }) => {
   const [performanceData, setPerformanceData] = useState<any>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
   const [performanceService] = useState(() => PerformanceMonitoringService.getInstance());
 
   useEffect(() => {
@@ -86,6 +89,14 @@ const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ className =
     return descriptions[name] || 'Performance metric';
   };
 
+  const handleClose = () => {
+    setIsVisible(false);
+  };
+
+  const handleMinimize = () => {
+    setIsMinimized(!isMinimized);
+  };
+
   if (!isVisible || !performanceData) {
     return null;
   }
@@ -94,7 +105,7 @@ const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ className =
   const latestMetrics = metrics.slice(-5); // Show last 5 metrics
 
   return (
-    <div className={`fixed bottom-4 right-4 w-96 max-h-96 overflow-y-auto z-50 ${className}`}>
+    <div className={`fixed bottom-4 right-4 ${isMinimized ? 'w-64' : 'w-96'} ${isMinimized ? 'h-auto' : 'max-h-96 overflow-y-auto'} z-50 ${className}`}>
       <Card className="border-2 border-primary/20 shadow-lg">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -102,7 +113,7 @@ const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ className =
               <BarChart3 className="h-5 w-5 text-primary" />
               <CardTitle className="text-lg">Performance Monitor</CardTitle>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <Badge 
                 variant="outline" 
                 className={`${
@@ -118,103 +129,124 @@ const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ className =
                 variant="ghost"
                 onClick={updatePerformanceData}
                 className="h-8 w-8 p-0"
+                title="Refresh data"
               >
                 <RefreshCw className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleMinimize}
+                className="h-8 w-8 p-0"
+                title={isMinimized ? "Expand" : "Minimize"}
+              >
+                <Minimize2 className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleClose}
+                className="h-8 w-8 p-0"
+                title="Close"
+              >
+                <X className="h-4 w-4" />
               </Button>
             </div>
           </div>
           <Progress value={overallScore} className="h-2" />
         </CardHeader>
 
-        <CardContent className="space-y-4">
-          {/* Core Web Vitals */}
-          <div>
-            <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
-              <Zap className="h-4 w-4" />
-              Core Web Vitals
-            </h4>
-            <div className="space-y-2">
-              {latestMetrics.map((metric, index) => (
-                <div key={`${metric.name}-${index}`} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {getRatingIcon(metric.rating)}
-                    <span className="text-sm font-medium">{metric.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm">
-                      {formatMetricValue(metric.name, metric.value)}
-                    </span>
-                    <Badge 
-                      variant="outline" 
-                      className={`text-xs ${getRatingColor(metric.rating)}`}
-                    >
-                      {metric.rating}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Recommendations */}
-          {recommendations.length > 0 && (
+        {!isMinimized && (
+          <CardContent className="space-y-4">
+            {/* Core Web Vitals */}
             <div>
               <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
-                <TrendingUp className="h-4 w-4" />
-                Recommendations
+                <Zap className="h-4 w-4" />
+                Core Web Vitals
               </h4>
-              <div className="space-y-1">
-                {recommendations.slice(0, 3).map((rec, index) => (
-                  <div key={index} className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
-                    {rec}
+              <div className="space-y-2">
+                {latestMetrics.map((metric, index) => (
+                  <div key={`${metric.name}-${index}`} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {getRatingIcon(metric.rating)}
+                      <span className="text-sm font-medium">{metric.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">
+                        {formatMetricValue(metric.name, metric.value)}
+                      </span>
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs ${getRatingColor(metric.rating)}`}
+                      >
+                        {metric.rating}
+                      </Badge>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
-          )}
 
-          {/* Performance Tips */}
-          <div>
-            <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              Development Tips
-            </h4>
-            <div className="space-y-1 text-xs text-muted-foreground">
-              <div>• Use React DevTools Profiler to identify slow components</div>
-              <div>• Implement code splitting for large bundles</div>
-              <div>• Optimize images and use modern formats (WebP)</div>
-              <div>• Enable service worker for caching</div>
-            </div>
-          </div>
+            {/* Recommendations */}
+            {recommendations.length > 0 && (
+              <div>
+                <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
+                  <TrendingUp className="h-4 w-4" />
+                  Recommendations
+                </h4>
+                <div className="space-y-1">
+                  {recommendations.slice(0, 3).map((rec, index) => (
+                    <div key={index} className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                      {rec}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-          {/* Quick Actions */}
-          <div className="pt-2 border-t">
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  // Open Lighthouse in new tab
-                  window.open(`chrome://lighthouse/?url=${window.location.href}`, '_blank');
-                }}
-                className="flex-1 text-xs"
-              >
-                Run Lighthouse
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  // Log performance data to console
-                  console.table(metrics);
-                }}
-                className="flex-1 text-xs"
-              >
-                Log Data
-              </Button>
+            {/* Performance Tips */}
+            <div>
+              <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                Development Tips
+              </h4>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <div>• Use React DevTools Profiler to identify slow components</div>
+                <div>• Implement code splitting for large bundles</div>
+                <div>• Optimize images and use modern formats (WebP)</div>
+                <div>• Enable service worker for caching</div>
+              </div>
             </div>
-          </div>
-        </CardContent>
+
+            {/* Quick Actions */}
+            <div className="pt-2 border-t">
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    // Open Lighthouse in new tab
+                    window.open(`chrome://lighthouse/?url=${window.location.href}`, '_blank');
+                  }}
+                  className="flex-1 text-xs"
+                >
+                  Run Lighthouse
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    // Log performance data to console
+                    console.table(metrics);
+                  }}
+                  className="flex-1 text-xs"
+                >
+                  Log Data
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        )}
       </Card>
     </div>
   );

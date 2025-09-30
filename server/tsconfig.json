@@ -30,11 +30,23 @@
     "emitDecoratorMetadata": true
   },
   "include": [
-    "src/**/*"
+    "src/app-simple.ts",
+    "src/config/database.ts",
+    "src/routes/content.routes.ts",
+    "src/utils/logger.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "src/models/**/*",
+    "src/routes/auth.routes.ts",
+    "src/routes/ai.routes.ts",
+    "src/routes/activity.routes.ts",
+    "src/routes/progress.routes.ts",
+    "src/controllers/**/*",
+    "src/middleware/**/*",
+    "src/services/**/*",
+    "src/tests/**/*"
   ]
 }

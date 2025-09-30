@@ -177,20 +177,35 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
     setError(null);
     
     try {
-      // Simulate API call - replace with actual API
-      const response = await fetch('/api/content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filter })
-      });
+      // Check if backend is available before making API call
+      let contentItems: ContentItem[] = [];
       
-      if (!response.ok) {
-        throw new Error('Failed to load content');
+      // First try to check backend availability
+      try {
+        const healthCheck = await fetch('/api/health', { method: 'GET' });
+        if (healthCheck.ok) {
+          // Backend is available, try to load content
+          const response = await fetch('/api/content', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filter })
+          });
+          
+          if (response.ok) {
+            contentItems = await response.json();
+          } else {
+            throw new Error('Failed to load content from API');
+          }
+        } else {
+          throw new Error('Backend not available');
+        }
+      } catch (apiError) {
+        // Backend not available or API failed, use fallback
+        console.log('📱 Using local content - backend not available');
+        throw apiError;
       }
       
-      const contentItems: ContentItem[] = await response.json();
-      
-      // Update local state
+      // Update local state if we got content from API
       const contentMap = contentItems.reduce((acc, item) => {
         acc[item.id] = item;
         return acc;

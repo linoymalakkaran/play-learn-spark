@@ -357,7 +357,9 @@ router.post('/translate', async (req, res) => {
   }
 });
 
-export default router;
+// Get available AI providers
+router.get('/providers', (req, res) => {
+  try {
     res.json({
       success: true,
       data: {

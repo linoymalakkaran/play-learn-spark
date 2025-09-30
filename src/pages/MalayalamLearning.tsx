@@ -22,32 +22,74 @@ interface LearningLevel {
   };
 }
 
-// Malayalam alphabet data (Level 1)
+// Complete Malayalam alphabet (54 letters)
 const malayalamAlphabet = [
-  { letter: 'അ', transliteration: 'a', pronunciation: 'ah', example: 'അമ്മ (amma) - mother' },
-  { letter: 'ആ', transliteration: 'aa', pronunciation: 'aah', example: 'ആകാശം (aakaasham) - sky' },
-  { letter: 'ഇ', transliteration: 'i', pronunciation: 'ih', example: 'ഇല (ila) - leaf' },
-  { letter: 'ഈ', transliteration: 'ee', pronunciation: 'eeh', example: 'ഈച്ച (eecha) - fly' },
-  { letter: 'ഉ', transliteration: 'u', pronunciation: 'uh', example: 'ഉമ്മ (umma) - kiss' },
-  { letter: 'ഊ', transliteration: 'oo', pronunciation: 'ooh', example: 'ഊഞ്ഞാൽ (onjaal) - swing' },
-  { letter: 'എ', transliteration: 'e', pronunciation: 'eh', example: 'എലി (eli) - mouse' },
-  { letter: 'ഏ', transliteration: 'ae', pronunciation: 'aeh', example: 'ഏട് (aet) - page' },
-  { letter: 'ഒ', transliteration: 'o', pronunciation: 'oh', example: 'ഒരു (oru) - one' },
-  { letter: 'ഓ', transliteration: 'au', pronunciation: 'auh', example: 'ഓട് (aut) - tile' },
-  { letter: 'ക', transliteration: 'ka', pronunciation: 'kah', example: 'കണ്ണ് (kann) - eye' },
-  { letter: 'ഖ', transliteration: 'kha', pronunciation: 'khah', example: 'ഖനി (khani) - mine' }
-];
+  // Vowels (സ്വരങ്ങൾ) - 14 letters
+  { letter: 'അ', transliteration: 'a', pronunciation: 'ah', example: 'അമ്മ (amma) - mother', type: 'vowel' },
+  { letter: 'ആ', transliteration: 'aa', pronunciation: 'aah', example: 'ആകാശം (aakaasham) - sky', type: 'vowel' },
+  { letter: 'ഇ', transliteration: 'i', pronunciation: 'ih', example: 'ഇല (ila) - leaf', type: 'vowel' },
+  { letter: 'ഈ', transliteration: 'ee', pronunciation: 'eeh', example: 'ഈച്ച (eecha) - fly', type: 'vowel' },
+  { letter: 'ഉ', transliteration: 'u', pronunciation: 'uh', example: 'ഉമ്മ (umma) - kiss', type: 'vowel' },
+  { letter: 'ഊ', transliteration: 'oo', pronunciation: 'ooh', example: 'ഊഞ്ഞാൽ (onjaal) - swing', type: 'vowel' },
+  { letter: 'എ', transliteration: 'e', pronunciation: 'eh', example: 'എലി (eli) - mouse', type: 'vowel' },
+  { letter: 'ഏ', transliteration: 'ae', pronunciation: 'aeh', example: 'ഏട് (aet) - page', type: 'vowel' },
+  { letter: 'ഐ', transliteration: 'ai', pronunciation: 'eye', example: 'ഐസ് (ice) - ice', type: 'vowel' },
+  { letter: 'ഒ', transliteration: 'o', pronunciation: 'oh', example: 'ഒരു (oru) - one', type: 'vowel' },
+  { letter: 'ഓ', transliteration: 'au', pronunciation: 'auh', example: 'ഓട് (aut) - tile', type: 'vowel' },
+  { letter: 'ഔ', transliteration: 'au', pronunciation: 'ouw', example: 'ഔഷധം (aushadham) - medicine', type: 'vowel' },
+  { letter: 'അം', transliteration: 'am', pronunciation: 'um', example: 'കം (kam) - less', type: 'vowel' },
+  { letter: 'അഃ', transliteration: 'ah', pronunciation: 'ah', example: 'ദുഃഖം (duhkham) - sorrow', type: 'vowel' },
 
-// Level 2 - More consonants
-const level2Alphabet = [
-  { letter: 'ഗ', transliteration: 'ga', pronunciation: 'gah', example: 'ഗയ (gaya) - cow' },
-  { letter: 'ഘ', transliteration: 'gha', pronunciation: 'ghah', example: 'ഘടം (ghadam) - pot' },
-  { letter: 'ച', transliteration: 'cha', pronunciation: 'chah', example: 'ചന്ദ്രൻ (chandran) - moon' },
-  { letter: 'ജ', transliteration: 'ja', pronunciation: 'jah', example: 'ജലം (jalam) - water' },
-  { letter: 'ഞ', transliteration: 'nja', pronunciation: 'njah', example: 'ഞാൻ (njaan) - I' },
-  { letter: 'ട', transliteration: 'ta', pronunciation: 'tah', example: 'ടെലിഫോൺ (telephone)' },
-  { letter: 'ഡ', transliteration: 'da', pronunciation: 'dah', example: 'ഡോക്ടർ (doctor)' },
-  { letter: 'ണ', transliteration: 'na', pronunciation: 'nah', example: 'മണം (manam) - smell' }
+  // Consonants (വ്യഞ്ജനങ്ങൾ) - 40 letters
+  { letter: 'ക', transliteration: 'ka', pronunciation: 'kah', example: 'കണ്ണ് (kann) - eye', type: 'consonant' },
+  { letter: 'ഖ', transliteration: 'kha', pronunciation: 'khah', example: 'ഖനി (khani) - mine', type: 'consonant' },
+  { letter: 'ഗ', transliteration: 'ga', pronunciation: 'gah', example: 'ഗയ (gaya) - cow', type: 'consonant' },
+  { letter: 'ഘ', transliteration: 'gha', pronunciation: 'ghah', example: 'ഘടം (ghadam) - pot', type: 'consonant' },
+  { letter: 'ങ', transliteration: 'nga', pronunciation: 'ngah', example: 'മങ്ങൽ (mangal) - dimness', type: 'consonant' },
+  
+  { letter: 'ച', transliteration: 'cha', pronunciation: 'chah', example: 'ചന്ദ്രൻ (chandran) - moon', type: 'consonant' },
+  { letter: 'ഛ', transliteration: 'chha', pronunciation: 'chhah', example: 'ഛത്രം (chhatram) - umbrella', type: 'consonant' },
+  { letter: 'ജ', transliteration: 'ja', pronunciation: 'jah', example: 'ജലം (jalam) - water', type: 'consonant' },
+  { letter: 'ഝ', transliteration: 'jha', pronunciation: 'jhah', example: 'ഝരി (jhari) - stream', type: 'consonant' },
+  { letter: 'ഞ', transliteration: 'nja', pronunciation: 'njah', example: 'ഞാൻ (njaan) - I', type: 'consonant' },
+  
+  { letter: 'ട', transliteration: 'ta', pronunciation: 'tah', example: 'ടെലിഫോൺ (telephone)', type: 'consonant' },
+  { letter: 'ഠ', transliteration: 'tha', pronunciation: 'thah', example: 'ഠക്കുറി (thakkuri) - smith', type: 'consonant' },
+  { letter: 'ഡ', transliteration: 'da', pronunciation: 'dah', example: 'ഡോക്ടർ (doctor)', type: 'consonant' },
+  { letter: 'ഢ', transliteration: 'dha', pronunciation: 'dhah', example: 'ഢാക്കാ (dhaakka) - Dhaka', type: 'consonant' },
+  { letter: 'ണ', transliteration: 'na', pronunciation: 'nah', example: 'മണം (manam) - smell', type: 'consonant' },
+  
+  { letter: 'ത', transliteration: 'tha', pronunciation: 'thah', example: 'തല (thala) - head', type: 'consonant' },
+  { letter: 'ഥ', transliteration: 'tha', pronunciation: 'thah', example: 'ഥാൽ (thaal) - plate', type: 'consonant' },
+  { letter: 'ദ', transliteration: 'da', pronunciation: 'dah', example: 'ദിനം (dinam) - day', type: 'consonant' },
+  { letter: 'ധ', transliteration: 'dha', pronunciation: 'dhah', example: 'ധനം (dhanam) - wealth', type: 'consonant' },
+  { letter: 'ന', transliteration: 'na', pronunciation: 'nah', example: 'നീർ (neer) - water', type: 'consonant' },
+  
+  { letter: 'പ', transliteration: 'pa', pronunciation: 'pah', example: 'പണം (panam) - money', type: 'consonant' },
+  { letter: 'ഫ', transliteration: 'pha', pronunciation: 'phah', example: 'ഫലം (phalam) - fruit', type: 'consonant' },
+  { letter: 'ബ', transliteration: 'ba', pronunciation: 'bah', example: 'ബാല (baala) - child', type: 'consonant' },
+  { letter: 'ഭ', transliteration: 'bha', pronunciation: 'bhah', example: 'ഭൂമി (bhoomi) - earth', type: 'consonant' },
+  { letter: 'മ', transliteration: 'ma', pronunciation: 'mah', example: 'മരം (maram) - tree', type: 'consonant' },
+  
+  { letter: 'യ', transliteration: 'ya', pronunciation: 'yah', example: 'യത്രാ (yathra) - journey', type: 'consonant' },
+  { letter: 'ര', transliteration: 'ra', pronunciation: 'rah', example: 'രാജാ (raaja) - king', type: 'consonant' },
+  { letter: 'ല', transliteration: 'la', pronunciation: 'lah', example: 'ലോകം (lokam) - world', type: 'consonant' },
+  { letter: 'വ', transliteration: 'va', pronunciation: 'vah', example: 'വാനം (vaanam) - sky', type: 'consonant' },
+  { letter: 'ശ', transliteration: 'sha', pronunciation: 'shah', example: 'ശാല (shaala) - school', type: 'consonant' },
+  { letter: 'ഷ', transliteration: 'sha', pronunciation: 'shah', example: 'ഷട്ട് (shut) - six', type: 'consonant' },
+  { letter: 'സ', transliteration: 'sa', pronunciation: 'sah', example: 'സുഖം (sukham) - comfort', type: 'consonant' },
+  { letter: 'ഹ', transliteration: 'ha', pronunciation: 'hah', example: 'ഹൃദയം (hridayam) - heart', type: 'consonant' },
+  
+  { letter: 'ള', transliteration: 'la', pronunciation: 'lah', example: 'ഇള (ila) - young', type: 'consonant' },
+  { letter: 'ഴ', transliteration: 'zha', pronunciation: 'zhah', example: 'ഴാ (zhaa) - who', type: 'consonant' },
+  { letter: 'റ', transliteration: 'ra', pronunciation: 'rah', example: 'റോഡ് (road)', type: 'consonant' },
+  
+  // Chillu Letters (ചില്ലുകൾ) - Additional forms
+  { letter: 'ൺ', transliteration: 'n', pronunciation: 'n', example: 'കൺ (kan) - eye', type: 'chillu' },
+  { letter: 'ൻ', transliteration: 'n', pronunciation: 'n', example: 'പെൻ (pen) - pen', type: 'chillu' },
+  { letter: 'ർ', transliteration: 'r', pronunciation: 'r', example: 'കർ (kar) - hand', type: 'chillu' },
+  { letter: 'ൽ', transliteration: 'l', pronunciation: 'l', example: 'കൽ (kal) - stone', type: 'chillu' },
+  { letter: 'ൾ', transliteration: 'l', pronunciation: 'l', example: 'കൾ (kal) - stones', type: 'chillu' }
 ];
 
 // Basic vocabulary (Level 1)
@@ -102,23 +144,23 @@ const level2Phrases = [
 const learningLevels: LearningLevel[] = [
   {
     id: 1,
-    title: "Level 1: Foundation",
-    description: "Learn basic vowels, consonants, numbers and simple words",
+    title: "Level 1: Foundation - തുടക്കം",
+    description: "Learn vowels and basic consonants, numbers and simple words (സ്വരങ്ങൾ ആൻഡ് സാധാരണ വ്യഞ്ജനങ്ങൾ)",
     unlockRequirement: 0,
     content: {
-      alphabet: malayalamAlphabet,
+      alphabet: malayalamAlphabet.filter(letter => letter.type === 'vowel' || (letter.type === 'consonant' && malayalamAlphabet.indexOf(letter) < 35)),
       vocabulary: basicVocabulary,
       numbers: malayalamNumbers
     }
   },
   {
     id: 2,
-    title: "Level 2: Building Skills",
-    description: "More letters, advanced vocabulary and common phrases",
+    title: "Level 2: Complete Alphabet - പൂർണ്ണമായ വർണ്ണമാല",
+    description: "All 54 Malayalam letters including chillu letters, advanced vocabulary and phrases (എല്ലാ വർണ്ണങ്ങൾ)",
     unlockRequirement: 75,
     content: {
-      alphabet: level2Alphabet,
-      vocabulary: level2Vocabulary,
+      alphabet: malayalamAlphabet,
+      vocabulary: [...basicVocabulary, ...level2Vocabulary],
       phrases: level2Phrases
     }
   }
@@ -403,16 +445,53 @@ const MalayalamLearning = () => {
                 <CardDescription>
                   {currentLevel === 1 
                     ? "Learn the Malayalam vowels and basic consonants. Click on each letter to hear pronunciation and see examples."
-                    : "Learn more Malayalam consonants and letter combinations. Build on your foundation from Level 1!"
+                    : "Complete Malayalam alphabet with all 54 letters organized by type. Master all vowels, consonants, and chillu letters!"
                   }
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {(getCurrentLevelData().content.alphabet || []).map((letter, index) => (
-                    <AlphabetCard key={index} letter={letter} index={index} />
-                  ))}
-                </div>
+              <CardContent className="space-y-8">
+                {currentLevel === 2 ? (
+                  // Level 2: Organized by letter type
+                  <>
+                    {/* Vowels Section */}
+                    <div>
+                      <h3 className="text-lg font-bold mb-4 text-blue-600">സ്വരങ്ങൾ (Vowels) - {malayalamAlphabet.filter(l => l.type === 'vowel').length} letters</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                        {malayalamAlphabet.filter(letter => letter.type === 'vowel').map((letter, index) => (
+                          <AlphabetCard key={`vowel-${index}`} letter={letter} index={index} />
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Consonants Section */}
+                    <div>
+                      <h3 className="text-lg font-bold mb-4 text-green-600">വ്യഞ്ജനങ്ങൾ (Consonants) - {malayalamAlphabet.filter(l => l.type === 'consonant').length} letters</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                        {malayalamAlphabet.filter(letter => letter.type === 'consonant').map((letter, index) => (
+                          <AlphabetCard key={`consonant-${index}`} letter={letter} index={index} />
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Chillu Letters Section */}
+                    <div>
+                      <h3 className="text-lg font-bold mb-4 text-purple-600">ചില്ലക്ഷരങ്ങൾ (Chillu Letters) - {malayalamAlphabet.filter(l => l.type === 'chillu').length} letters</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        {malayalamAlphabet.filter(letter => letter.type === 'chillu').map((letter, index) => (
+                          <AlphabetCard key={`chillu-${index}`} letter={letter} index={index} />
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  // Level 1: Basic layout
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {(getCurrentLevelData().content.alphabet || []).map((letter, index) => (
+                      <AlphabetCard key={index} letter={letter} index={index} />
+                    ))}
+                  </div>
+                )}
+                
                 {selectedLetter !== null && getCurrentLevelData().content.alphabet && (
                   <div className="mt-6 p-4 bg-orange-100 rounded-lg">
                     <h3 className="font-bold text-lg mb-2">Practice Tip:</h3>

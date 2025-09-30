@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongo:27017/play-learn-spark
+      - CORS_ORIGIN=http://localhost:8080
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - ./docker/mongo-init:/docker-entrypoint-initdb.d
+    environment:
+      - MONGO_INITDB_DATABASE=play-learn-spark
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
+  redis-data:

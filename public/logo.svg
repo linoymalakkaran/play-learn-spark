@@ -1,0 +1,45 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle with Gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#4ECDC4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#45B7D1;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="sparkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD93D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF6B6B;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Main Background Circle -->
+  <circle cx="60" cy="60" r="55" fill="url(#bgGradient)" stroke="#FFFFFF" stroke-width="3"/>
+  
+  <!-- Spark/Star in the center -->
+  <g transform="translate(60, 60)">
+    <!-- Central spark -->
+    <polygon points="0,-20 6,-6 20,0 6,6 0,20 -6,6 -20,0 -6,-6" fill="url(#sparkGradient)" stroke="#FFFFFF" stroke-width="2"/>
+    
+    <!-- Smaller sparkles around -->
+    <circle cx="25" cy="-15" r="3" fill="#FFD93D"/>
+    <circle cx="-20" cy="18" r="2.5" fill="#FF6B6B"/>
+    <circle cx="18" cy="22" r="2" fill="#4ECDC4"/>
+    <circle cx="-25" cy="-10" r="2.5" fill="#FFD93D"/>
+    
+    <!-- Tiny sparkles -->
+    <circle cx="15" cy="-25" r="1.5" fill="#FFFFFF"/>
+    <circle cx="-15" cy="25" r="1.5" fill="#FFFFFF"/>
+    <circle cx="30" cy="5" r="1" fill="#FFFFFF"/>
+    <circle cx="-30" cy="-5" r="1" fill="#FFFFFF"/>
+  </g>
+  
+  <!-- Playful elements around the circle -->
+  <!-- ABC text element -->
+  <text x="20" y="25" font-family="Comic Neue, sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF">ABC</text>
+  <!-- 123 text element -->
+  <text x="85" y="100" font-family="Comic Neue, sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF">123</text>
+  
+  <!-- Small decorative elements -->
+  <circle cx="25" cy="95" r="4" fill="#FFD93D" opacity="0.8"/>
+  <circle cx="95" y="25" r="3" fill="#FF6B6B" opacity="0.8"/>
+</svg>

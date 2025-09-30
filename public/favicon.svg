@@ -1,0 +1,41 @@
+<!-- This is a placeholder for favicon.ico generation -->
+<!-- In a real scenario, you would use a tool like https://favicon.io or similar to generate proper ICO files -->
+<!-- For now, we'll update the SVG and create a simple PNG-based favicon -->
+
+<!-- Favicon sizes needed:
+- 16x16 (favicon.ico)
+- 32x32 (favicon.ico) 
+- 180x180 (apple-touch-icon.png)
+- 192x192 (android-chrome-192x192.png)
+- 512x512 (android-chrome-512x512.png)
+-->
+
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bgGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#4ECDC4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#45B7D1;stop-opacity:1" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="15" fill="url(#bgGradient)"/>
+  
+  <!-- Graduation cap -->
+  <rect x="10" y="14" width="12" height="3" rx="1.5" fill="#2c3e50"/>
+  <polygon points="16,8 22,13 16,18 10,13" fill="#34495e"/>
+  
+  <!-- Tassel -->
+  <circle cx="22" cy="13" r="1" fill="#FFD93D"/>
+  <line x1="22" y1="14" x2="22" y2="18" stroke="#FFD93D" stroke-width="1"/>
+  
+  <!-- Sparkles -->
+  <circle cx="8" cy="8" r="1" fill="#fff"/>
+  <circle cx="24" cy="7" r="0.8" fill="#fff"/>
+  <circle cx="25" cy="20" r="0.6" fill="#fff"/>
+  <circle cx="7" cy="23" r="0.8" fill="#fff"/>
+  
+  <!-- Small educational symbols -->
+  <text x="16" y="26" font-family="Arial, sans-serif" font-size="6" font-weight="bold" text-anchor="middle" fill="#fff">🎓</text>
+</svg>

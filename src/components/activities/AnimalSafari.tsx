@@ -47,10 +47,16 @@ export const AnimalSafari = ({ childAge, onComplete, onBack }: AnimalSafariProps
 
   const handleAnimalClick = async (animal: Animal) => {
     await soundEffects.playSuccess();
+    
+    // Play the animal sound
+    setTimeout(async () => {
+      await soundEffects.playAnimalSound(animal.name);
+    }, 300);
+    
     setShowSound(true);
     setScore(prev => prev + 1);
     
-    // Show sound for 2 seconds with celebration
+    // Show sound for 3 seconds to let animal sound play
     setTimeout(async () => {
       setShowSound(false);
       
@@ -61,7 +67,11 @@ export const AnimalSafari = ({ childAge, onComplete, onBack }: AnimalSafariProps
         await soundEffects.playCheer();
         setGameComplete(true);
       }
-    }, 2000);
+    }, 3000);
+  };
+
+  const playAnimalSoundOnly = async (animal: Animal) => {
+    await soundEffects.playAnimalSound(animal.name);
   };
 
   const handleComplete = () => {
@@ -128,7 +138,7 @@ export const AnimalSafari = ({ childAge, onComplete, onBack }: AnimalSafariProps
           {selectedAnimals[currentAnimal] && (
             <div className="space-y-6">
               <p className="text-2xl font-['Comic_Neue'] text-muted-foreground mb-8">
-                Click on the {selectedAnimals[currentAnimal].name} to hear its sound!
+                Meet the {selectedAnimals[currentAnimal].name}! Click "Listen" to hear its sound!
               </p>
 
               <div 
@@ -140,8 +150,26 @@ export const AnimalSafari = ({ childAge, onComplete, onBack }: AnimalSafariProps
                 </div>
                 
                 {!showSound && (
-                  <div className="text-3xl font-['Comic_Neue'] font-bold text-success animate-pulse">
-                    {selectedAnimals[currentAnimal].name}
+                  <div>
+                    <div className="text-3xl font-['Comic_Neue'] font-bold text-success animate-pulse mb-4">
+                      {selectedAnimals[currentAnimal].name}
+                    </div>
+                    
+                    <div className="flex gap-4 justify-center">
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          playAnimalSoundOnly(selectedAnimals[currentAnimal]);
+                        }}
+                        className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 font-['Comic_Neue'] font-bold text-lg transform hover:scale-105 transition-all duration-200"
+                      >
+                        🔊 Listen to {selectedAnimals[currentAnimal].name}
+                      </Button>
+                    </div>
+                    
+                    <p className="text-lg font-['Comic_Neue'] text-muted-foreground mt-4">
+                      Click the animal when you're ready to move on!
+                    </p>
                   </div>
                 )}
               </div>

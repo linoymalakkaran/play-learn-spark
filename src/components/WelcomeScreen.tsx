@@ -34,11 +34,17 @@ export const WelcomeScreen = ({ onChildSelected }: WelcomeScreenProps) => {
     <div className="min-h-screen bg-gradient-to-br from-primary-soft via-secondary-soft to-magic-soft flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl p-8 text-center bounce-in">
         <div className="mb-8">
-          <h1 className="text-6xl font-['Fredoka_One'] text-primary mb-4 text-shadow float">
-            Little Learners! 🌟
-          </h1>
-          <p className="text-2xl text-muted-foreground font-['Comic_Neue'] font-light">
-            Fun English & Math Adventures for Ages 3-6
+          <div className="flex items-center justify-center mb-4">
+            <img src="/logo.svg" alt="Play Learn Spark" className="w-16 h-16 mr-4 animate-pulse" />
+            <h1 className="text-5xl md:text-6xl font-['Fredoka_One'] text-primary text-shadow float">
+              Play Learn Spark! 🌟
+            </h1>
+          </div>
+          <p className="text-xl md:text-2xl text-muted-foreground font-['Comic_Neue'] font-light">
+            Interactive Learning Adventures for Ages 3-6
+          </p>
+          <p className="text-lg text-muted-foreground font-['Comic_Neue'] mt-2">
+            English • Math • Science • Malayalam • Arabic • AI-Powered Activities
           </p>
         </div>
 

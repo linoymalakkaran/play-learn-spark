@@ -1,0 +1,27 @@
+{
+  "name": "Play Learn Spark",
+  "short_name": "Play Learn Spark",
+  "description": "Interactive educational platform for children aged 3-6",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#4ECDC4",
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "16x16 32x32",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["education", "kids", "learning"],
+  "lang": "en",
+  "scope": "/",
+  "id": "play-learn-spark"
+}

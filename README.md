@@ -1,73 +1,114 @@
-# Welcome to your Lovable project
+# Play Learn Spark 🌟
 
-## Project info
+**An Interactive Educational Platform for Children (Ages 3-6)**
 
-**URL**: https://lovable.dev/projects/2b0fec75-101b-4afd-997b-42ada5507650
+Play Learn Spark is a comprehensive learning application that makes education fun and engaging for young children. Our platform combines English, Mathematics, Science, and multilingual learning (Malayalam & Arabic) with AI-powered content generation.
 
-## How can I edit this code?
+## 🚀 Features
 
-There are several ways of editing your application.
+- **Multi-Subject Learning**: English vocabulary, Mathematics, Science experiments, and Good Habits
+- **Multilingual Support**: Native language learning for Malayalam and Arabic
+- **AI-Powered Content**: Generate custom activities from uploaded documents
+- **Age-Appropriate Design**: Specifically designed for children aged 3-6
+- **Progress Tracking**: Monitor learning progress and achievements
+- **Interactive Activities**: Engaging games and exercises with sound effects
+- **Parent Dashboard**: Tools for parents to track and guide learning
 
-**Use Lovable**
+## 🛠️ Getting Started
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/2b0fec75-101b-4afd-997b-42ada5507650) and start prompting.
+### Prerequisites
+- Node.js 18+ and npm installed ([install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
+- Modern web browser with Web Audio API support
 
-Changes made via Lovable will be committed automatically to this repo.
+### Installation
 
-**Use your preferred IDE**
+```bash
+# Clone the repository
+git clone https://github.com/linoymalakkaran/play-learn-spark.git
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+# Navigate to the project directory
+cd play-learn-spark
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+# Install dependencies
+npm install
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will be available at `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Building for Production
 
-**Use GitHub Codespaces**
+```bash
+# Build the application
+npm run build
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Preview the production build
+npm run preview
+```
 
-## What technologies are used for this project?
+## 🛠️ Technology Stack
 
-This project is built with:
+### Frontend
+- **React 18** with TypeScript for robust component development
+- **Vite** for fast development and building
+- **TailwindCSS** for responsive, utility-first styling
+- **Shadcn-UI** for accessible, customizable components
+- **Framer Motion** for smooth animations
+- **Web Audio API** for interactive sound effects
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Backend (Coming Soon)
+- **Node.js** with Express.js
+- **MongoDB** for data storage
+- **Multiple AI Providers** (OpenAI, Hugging Face, Anthropic)
+- **Docker** for containerization
+- **Azure App Service** for hosting
 
-## How can I deploy this project?
+## 📁 Project Structure
 
-Simply open [Lovable](https://lovable.dev/projects/2b0fec75-101b-4afd-997b-42ada5507650) and click on Share -> Publish.
+```
+src/
+├── components/           # React components
+│   ├── activities/      # Learning activities
+│   ├── ui/             # Reusable UI components
+│   └── common/         # Shared components
+├── pages/              # Application pages
+├── hooks/              # Custom React hooks
+├── types/              # TypeScript type definitions
+├── utils/              # Utility functions
+└── stores/             # State management
+```
 
-## Can I connect a custom domain to my Lovable project?
+## 🚀 Deployment
 
-Yes, you can!
+### Frontend Deployment
+The frontend can be deployed to various platforms:
+- **Vercel**: Connect your GitHub repository for automatic deployments
+- **Netlify**: Deploy with continuous integration
+- **Azure Static Web Apps**: For integration with Azure backend services
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Backend Deployment (Planned)
+- **Azure App Service**: Containerized backend deployment
+- **MongoDB Atlas**: Cloud database hosting
+- **Docker**: Containerization for consistent environments
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 📝 Development Roadmap
+
+See [README-plan.md](./README-plan.md) for detailed implementation plans and technical specifications.
+
+## 🤝 Contributing
+
+We welcome contributions! Please read our contributing guidelines and submit pull requests for any improvements.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📞 Support
+
+For support and questions, please open an issue on GitHub or contact the development team.
+
+---
+
+**Made with ❤️ for young learners everywhere**

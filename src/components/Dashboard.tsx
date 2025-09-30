@@ -2,7 +2,13 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { HelpButton } from '@/components/common/HelpButton';
+import { TutorialManager } from '@/components/tutorial/TutorialManager';
+import { useTutorial } from '@/hooks/useTutorial';
 import { Child, Activity } from '@/types/learning';
+import { soundEffects } from '@/utils/sounds';
+import { useNavigate } from 'react-router-dom';
 import { AnimalSafari } from './activities/AnimalSafari';
 import { NumberGarden } from './activities/NumberGarden';
 import { ShapeDetective } from './activities/ShapeDetective';
@@ -26,7 +32,10 @@ interface DashboardProps {
 
 export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) => {
   const [currentActivity, setCurrentActivity] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'all' | 'english' | 'math' | 'science' | 'habits' | 'art' | 'social' | 'problem' | 'physical' | 'world'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'english' | 'math' | 'science' | 'habits' | 'art' | 'social' | 'problem' | 'physical' | 'world' | 'languages'>('all');
+  const [isLoadingActivity, setIsLoadingActivity] = useState(false);
+  const { isFirstTime } = useTutorial();
+  const navigate = useNavigate();
 
   // Activities organized by age group - 30 English + 30 Math each
   const getActivitiesForAge = (age: 3 | 4 | 5 | 6): Activity[] => {
@@ -483,6 +492,31 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
     setCurrentActivity(null);
   };
 
+  // Enhanced activity launch with loading state
+  const handleActivityLaunch = async (activityId: string) => {
+    if (isLoadingActivity) return; // Prevent multiple clicks
+    
+    setIsLoadingActivity(true);
+    await soundEffects.playClick();
+    
+    // Simulate activity loading time
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    setCurrentActivity(activityId);
+    setIsLoadingActivity(false);
+    await soundEffects.playMagic();
+  };
+
+  // Show activity loading overlay
+  if (isLoadingActivity) {
+    return (
+      <LoadingSpinner 
+        size="lg"
+        message="Preparing your learning adventure..."
+      />
+    );
+  }
+
   if (currentActivity === 'animal-safari') {
     return (
       <AnimalSafari
@@ -634,33 +668,82 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-soft via-background to-secondary-soft p-3 sm:p-4">
       <div className="max-w-6xl mx-auto">
-        {/* Header with Score - Mobile Optimized */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4">
-          <div className="text-center flex-1 bounce-in">
-            <h1 className="text-3xl sm:text-5xl font-['Fredoka_One'] text-primary mb-2 text-shadow">
-              Welcome back, {child.name}! 🌟
-            </h1>
-            <p className="text-base sm:text-xl font-['Comic_Neue'] text-muted-foreground">
-              Ready for some fun learning adventures?
-            </p>
+        {/* Enhanced Header with Play Learn Spark Branding */}
+        <div className="relative mb-6 sm:mb-8">
+          {/* Decorative background elements */}
+          <div className="absolute inset-0 overflow-hidden rounded-3xl">
+            <div className="absolute top-4 left-4 text-6xl opacity-10 animate-bounce">⭐</div>
+            <div className="absolute top-8 right-8 text-4xl opacity-10 animate-pulse">🚀</div>
+            <div className="absolute bottom-4 left-1/4 text-5xl opacity-10 animate-pulse">🎯</div>
+            <div className="absolute bottom-8 right-1/3 text-3xl opacity-10 animate-bounce">✨</div>
           </div>
-          <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-            <div className="bg-gradient-to-r from-success to-success-soft p-3 sm:p-4 rounded-lg text-center w-full sm:w-auto">
-              <div className="text-2xl sm:text-3xl font-bold text-white">{child.progress.averageScore || 0}%</div>
-              <div className="text-xs text-white/80 font-['Comic_Neue']">Average Score</div>
+          
+          <div className="relative bg-gradient-to-r from-magic/20 via-primary/20 to-success/20 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-primary/20 profile-section">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
+              <div className="text-center sm:text-left flex-1">
+                {/* Play Learn Spark Logo/Title */}
+                <div className="flex items-center justify-center sm:justify-start gap-3 mb-3">
+                  <div className="text-4xl sm:text-5xl animate-pulse">🎓</div>
+                  <h1 className="text-2xl sm:text-4xl font-['Fredoka_One'] bg-gradient-to-r from-primary via-magic to-success bg-clip-text text-transparent">
+                    Play Learn Spark
+                  </h1>
+                </div>
+                
+                {/* Welcome Message */}
+                <h2 className="text-xl sm:text-3xl font-['Comic_Neue'] font-bold text-primary mb-2 bounce-in">
+                  Welcome back, {child.name}! 🌟
+                </h2>
+                <p className="text-sm sm:text-lg font-['Comic_Neue'] text-muted-foreground">
+                  Ready for some amazing learning adventures?
+                </p>
+                
+                {/* Quick Stats */}
+                <div className="flex flex-wrap gap-2 mt-4 justify-center sm:justify-start">
+                  <div className="px-3 py-1 bg-success/20 rounded-full text-xs font-bold text-success">
+                    Age {child.age} Explorer
+                  </div>
+                  <div className="px-3 py-1 bg-magic/20 rounded-full text-xs font-bold text-magic">
+                    {child.progress.totalActivitiesCompleted} Activities Done
+                  </div>
+                  <div className="px-3 py-1 bg-primary/20 rounded-full text-xs font-bold text-primary">
+                    Level {Math.floor((child.progress.averageScore || 0) / 20) + 1}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Score & Actions */}
+              <div className="flex flex-col items-center gap-4">
+                <div className="bg-gradient-to-br from-success via-magic to-primary p-6 rounded-2xl text-center shadow-xl transform hover:scale-105 transition-transform">
+                  <div className="text-3xl sm:text-4xl font-bold text-white mb-1">
+                    {child.progress.averageScore || 0}%
+                  </div>
+                  <div className="text-xs text-white/90 font-['Comic_Neue'] font-bold">
+                    SUCCESS RATE
+                  </div>
+                  <div className="text-2xl mt-2">
+                    {child.progress.averageScore >= 80 ? '🏆' : 
+                     child.progress.averageScore >= 60 ? '⭐' : 
+                     child.progress.averageScore >= 40 ? '👍' : '🎯'}
+                  </div>
+                </div>
+                
+                <Button 
+                  onClick={onReset} 
+                  variant="outline" 
+                  className="px-6 py-3 font-['Comic_Neue'] font-bold border-2 border-primary/30 hover:border-primary hover:bg-primary hover:text-white transition-all duration-300 min-h-[44px] switch-learner-btn"
+                >
+                  Switch Learner 👥
+                </Button>
+                
+                {/* Tutorial Help Button */}
+                <HelpButton variant="inline" className="ml-2" />
+              </div>
             </div>
-            <Button 
-              onClick={onReset} 
-              variant="outline" 
-              className="px-4 py-2 font-['Comic_Neue'] font-bold w-full sm:w-auto min-h-[44px]"
-            >
-              Switch Learner 👥
-            </Button>
           </div>
         </div>
 
         {/* Progress Overview - Mobile Optimized */}
-        <Card className="p-4 sm:p-6 mb-6 sm:mb-8 activity-card">
+        <Card className="p-4 sm:p-6 mb-6 sm:mb-8 activity-card progress-section">
           <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-3">
             <h2 className="text-xl sm:text-2xl font-['Comic_Neue'] font-bold text-foreground text-center sm:text-left">
               Your Progress 📈
@@ -704,77 +787,184 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
           </div>
         </Card>
 
-        {/* Activity Tabs - Mobile Optimized */}
-        <div className="mb-6">
+        {/* Language Learning Section */}
+        <Card className="mb-6 language-learning bg-gradient-to-r from-orange-50 via-green-50 to-blue-50 border-2 border-dashed border-orange-300">
+          <div className="p-6">
+            <h3 className="text-xl font-['Comic_Neue'] font-bold text-center mb-4 text-foreground">
+              🌍 Language Learning Adventures
+            </h3>
+            <p className="text-center text-muted-foreground mb-4 font-['Comic_Neue']">
+              Explore new languages and cultures! Learn Malayalam and Arabic basics.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={async () => {
+                  await soundEffects.playClick();
+                  navigate('/malayalam');
+                }}
+                className="flex-1 sm:flex-none px-6 py-4 font-['Comic_Neue'] font-bold text-sm transition-all duration-300 transform hover:scale-105 bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg hover:shadow-xl"
+              >
+                <span className="text-lg mr-2">മ</span>
+                Learn Malayalam
+              </Button>
+              <Button
+                onClick={async () => {
+                  await soundEffects.playClick();
+                  navigate('/arabic');
+                }}
+                className="flex-1 sm:flex-none px-6 py-4 font-['Comic_Neue'] font-bold text-sm transition-all duration-300 transform hover:scale-105 bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-lg hover:shadow-xl"
+              >
+                <span className="text-lg mr-2" dir="rtl">ع</span>
+                Learn Arabic
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        {/* Enhanced Activity Category Tabs */}
+        <div className="mb-6 category-tabs">
+          <h3 className="text-xl font-['Comic_Neue'] font-bold text-center mb-4 text-foreground">
+            🎯 Choose Your Learning Adventure
+          </h3>
           <div className="overflow-x-auto scrollbar-hide">
-            <div className="flex gap-2 pb-2 min-w-max px-1">
+            <div className="flex gap-3 pb-2 min-w-max px-1">
               <Button
-                onClick={() => setActiveTab('all')}
+                onClick={async () => {
+                  await soundEffects.playClick();
+                  setActiveTab('all');
+                }}
                 variant={activeTab === 'all' ? 'default' : 'outline'}
-                className="px-3 sm:px-4 py-2 font-['Comic_Neue'] font-bold text-xs sm:text-sm whitespace-nowrap min-h-[44px]"
+                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
+                  activeTab === 'all' 
+                    ? 'bg-gradient-to-r from-primary to-magic text-white shadow-lg' 
+                    : 'hover:bg-primary/10 hover:border-primary'
+                }`}
               >
-                All ({activities.length})
+                🌟 All Adventures ({activities.length})
               </Button>
               <Button
-                onClick={() => setActiveTab('english')}
+                onClick={async () => {
+                  await soundEffects.playClick();
+                  setActiveTab('english');
+                }}
                 variant={activeTab === 'english' ? 'default' : 'outline'}
-                className="px-3 sm:px-4 py-2 font-['Comic_Neue'] font-bold text-xs sm:text-sm whitespace-nowrap min-h-[44px]"
+                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
+                  activeTab === 'english' 
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' 
+                    : 'hover:bg-blue-100 hover:border-blue-500 text-blue-700'
+                }`}
               >
-                📚 English
+                📚 English ({activities.filter(a => a.category === 'english').length})
               </Button>
               <Button
-                onClick={() => setActiveTab('math')}
+                onClick={async () => {
+                  await soundEffects.playClick();
+                  setActiveTab('math');
+                }}
                 variant={activeTab === 'math' ? 'default' : 'outline'}
-                className="px-3 sm:px-4 py-2 font-['Comic_Neue'] font-bold text-xs sm:text-sm whitespace-nowrap min-h-[44px]"
+                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
+                  activeTab === 'math' 
+                    ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg' 
+                    : 'hover:bg-green-100 hover:border-green-500 text-green-700'
+                }`}
               >
-                🔢 Math
+                🔢 Math ({activities.filter(a => a.category === 'math').length})
               </Button>
               <Button
-                onClick={() => setActiveTab('science')}
+                onClick={async () => {
+                  await soundEffects.playClick();
+                  setActiveTab('science');
+                }}
                 variant={activeTab === 'science' ? 'default' : 'outline'}
-                className="px-3 sm:px-4 py-2 font-['Comic_Neue'] font-bold text-xs sm:text-sm whitespace-nowrap min-h-[44px]"
+                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
+                  activeTab === 'science' 
+                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg' 
+                    : 'hover:bg-purple-100 hover:border-purple-500 text-purple-700'
+                }`}
               >
-                🔬 Science
+                🔬 Science ({activities.filter(a => a.category === 'science').length})
               </Button>
               <Button
-                onClick={() => setActiveTab('habits')}
+                onClick={async () => {
+                  await soundEffects.playClick();
+                  setActiveTab('habits');
+                }}
                 variant={activeTab === 'habits' ? 'default' : 'outline'}
-                className="px-3 sm:px-4 py-2 font-['Comic_Neue'] font-bold text-xs sm:text-sm whitespace-nowrap min-h-[44px]"
+                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
+                  activeTab === 'habits' 
+                    ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-lg' 
+                    : 'hover:bg-yellow-100 hover:border-yellow-500 text-yellow-700'
+                }`}
               >
-                ⭐ Habits
+                ⭐ Habits ({activities.filter(a => a.category === 'habits').length})
               </Button>
               <Button
-                onClick={() => setActiveTab('art')}
+                onClick={async () => {
+                  await soundEffects.playClick();
+                  setActiveTab('art');
+                }}
                 variant={activeTab === 'art' ? 'default' : 'outline'}
-                className="px-3 sm:px-4 py-2 font-['Comic_Neue'] font-bold text-xs sm:text-sm whitespace-nowrap min-h-[44px]"
+                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
+                  activeTab === 'art' 
+                    ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg' 
+                    : 'hover:bg-pink-100 hover:border-pink-500 text-pink-700'
+                }`}
               >
-                🎨 Art
+                🎨 Art ({activities.filter(a => a.category === 'art').length})
               </Button>
               <Button
-                onClick={() => setActiveTab('social')}
+                onClick={async () => {
+                  await soundEffects.playClick();
+                  setActiveTab('social');
+                }}
                 variant={activeTab === 'social' ? 'default' : 'outline'}
-                className="px-3 sm:px-4 py-2 font-['Comic_Neue'] font-bold text-xs sm:text-sm whitespace-nowrap min-h-[44px]"
+                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
+                  activeTab === 'social' 
+                    ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg' 
+                    : 'hover:bg-indigo-100 hover:border-indigo-500 text-indigo-700'
+                }`}
               >
-                🤝 Social
+                🤝 Social ({activities.filter(a => a.category === 'social').length})
               </Button>
               <Button
-                onClick={() => setActiveTab('problem')}
+                onClick={async () => {
+                  await soundEffects.playClick();
+                  setActiveTab('problem');
+                }}
                 variant={activeTab === 'problem' ? 'default' : 'outline'}
-                className="px-3 sm:px-4 py-2 font-['Comic_Neue'] font-bold text-xs sm:text-sm whitespace-nowrap min-h-[44px]"
+                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
+                  activeTab === 'problem' 
+                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg' 
+                    : 'hover:bg-orange-100 hover:border-orange-500 text-orange-700'
+                }`}
               >
-                🧩 Logic
+                🧩 Logic ({activities.filter(a => a.category === 'problem').length})
               </Button>
               <Button
-                onClick={() => setActiveTab('physical')}
+                onClick={async () => {
+                  await soundEffects.playClick();
+                  setActiveTab('physical');
+                }}
                 variant={activeTab === 'physical' ? 'default' : 'outline'}
-                className="px-3 sm:px-4 py-2 font-['Comic_Neue'] font-bold text-xs sm:text-sm whitespace-nowrap min-h-[44px]"
+                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
+                  activeTab === 'physical' 
+                    ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg' 
+                    : 'hover:bg-red-100 hover:border-red-500 text-red-700'
+                }`}
               >
-                🏃‍♂️ Active
+                🏃‍♂️ Active ({activities.filter(a => a.category === 'physical').length})
               </Button>
               <Button
-                onClick={() => setActiveTab('world')}
+                onClick={async () => {
+                  await soundEffects.playClick();
+                  setActiveTab('world');
+                }}
                 variant={activeTab === 'world' ? 'default' : 'outline'}
-                className="px-3 sm:px-4 py-2 font-['Comic_Neue'] font-bold text-xs sm:text-sm whitespace-nowrap min-h-[44px]"
+                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
+                  activeTab === 'world' 
+                    ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-lg' 
+                    : 'hover:bg-teal-100 hover:border-teal-500 text-teal-700'
+                }`}
               >
                 🌍 World
               </Button>
@@ -783,7 +973,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
         </div>
 
         {/* Filtered Activity Grid - Mobile Optimized */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 activities-grid">
           {filteredActivities.map((activity) => (
             <Card
               key={activity.id}
@@ -794,7 +984,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
                   : 'activity-card hover:scale-105 active:scale-95'
                 }
               `}
-              onClick={() => !activity.isLocked && setCurrentActivity(activity.id)}
+              onClick={() => !activity.isLocked && handleActivityLaunch(activity.id)}
             >
               <div className={`absolute inset-0 bg-gradient-to-br ${activity.backgroundColor} opacity-10`} />
               
@@ -859,6 +1049,12 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
           </p>
         </div>
       </div>
+      
+      {/* Tutorial Manager */}
+      <TutorialManager 
+        currentPage="dashboard" 
+        isFirstTimeUser={isFirstTime}
+      />
     </div>
   );
 };

@@ -9,7 +9,8 @@ import { PersonalizationProvider } from "@/hooks/usePersonalization";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { RouteTransition } from "@/components/transitions/PageTransition";
-import BreadcrumbNav from "@/components/navigation/BreadcrumbNav";
+import EnhancedNavigation from "@/components/navigation/EnhancedNavigation";
+import EnhancedBreadcrumb from "@/components/navigation/EnhancedBreadcrumb";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -39,9 +40,13 @@ const App = () => (
                 <BrowserRouter>
                   <NavigationProvider>
                     <ErrorBoundary>
-                      {/* Global Navigation */}
+                      {/* Enhanced Navigation System */}
                       <div className="min-h-screen bg-gradient-to-br from-background via-primary-soft/20 to-secondary-soft/20">
-                        <BreadcrumbNav className="sticky top-0 z-50 m-4" />
+                        {/* Enhanced Navigation Header */}
+                        <EnhancedNavigation />
+                        
+                        {/* Enhanced Breadcrumb Navigation */}
+                        <EnhancedBreadcrumb className="px-4 py-2 bg-white/50 backdrop-blur-sm" />
                         
                         {/* Page Content with Transitions */}
                         <RouteTransition type="fade">

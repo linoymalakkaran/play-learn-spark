@@ -10,11 +10,15 @@ import { ActivityTransition } from '@/components/transitions/PageTransition';
 import ContentManagementSystem from '@/components/ContentManagementSystem';
 import PersonalizationCenter from '@/components/PersonalizationCenter';
 import AdaptiveContentEngine from '@/components/AdaptiveContentEngine';
+import NavigationFavorites from '@/components/navigation/NavigationFavorites';
+import AdvancedSearch from '@/components/navigation/AdvancedSearch';
+import PersonalizedNavigation from '@/components/PersonalizedNavigation';
 import { useTutorial } from '@/hooks/useTutorial';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useProgress } from '@/hooks/useProgress';
 import { useContent } from '@/hooks/useContent';
 import { usePersonalization } from '@/hooks/usePersonalization';
+import { useNavigationStore } from '@/stores/navigationStore';
 import { Child, Activity } from '@/types/learning';
 import { soundEffects } from '@/utils/sounds';
 import { useNavigate } from 'react-router-dom';
@@ -48,11 +52,20 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
   const [showContentManager, setShowContentManager] = useState(false);
   const [showPersonalization, setShowPersonalization] = useState(false);
   const [showAdaptiveEngine, setShowAdaptiveEngine] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  
   const { isFirstTime } = useTutorial();
   const { navigate: navNavigate } = useNavigation();
   const { updateActivityState, getActivityState, currentChild, saveProgress } = useProgress();
   const { isCreatorMode, getRecommendations } = useContent();
   const { getProfile, createProfile } = usePersonalization();
+  const { 
+    setAvailableActivities, 
+    addRecentlyAccessed, 
+    getRecommendedContent,
+    setCurrentSection 
+  } = useNavigationStore();
   const navigate = useNavigate();
 
   // Initialize personalization profile if needed
@@ -62,8 +75,11 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
       if (!profile) {
         profile = createProfile(child);
       }
+      
+      // Set current section for navigation
+      setCurrentSection('dashboard');
     }
-  }, [child, getProfile, createProfile]);
+  }, [child, getProfile, createProfile, setCurrentSection]);
 
   // Load/save progress when child changes
   useEffect(() => {
@@ -72,12 +88,35 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
     }
   }, [child, currentChild, saveProgress]);
 
+  // Update navigation store with available activities
+  useEffect(() => {
+    const updateNavigationStore = () => {
+      const allActivities = getFilteredActivities('all');
+      setAvailableActivities(allActivities);
+    };
+    
+    updateNavigationStore();
+  }, [child, setAvailableActivities]);
+
   // Auto-save activity states
   const trackActivityStart = (activityId: string) => {
     updateActivityState(activityId, {
       status: 'in-progress',
       lastAccessed: Date.now()
     });
+    
+    // Update navigation store
+    const activity = getFilteredActivities('all').find(a => a.id === activityId);
+    if (activity) {
+      addRecentlyAccessed({
+        id: activity.id,
+        title: activity.title,
+        path: `/activity/${activity.id}`,
+        category: activity.category,
+        icon: activity.icon,
+        lastAccessed: Date.now()
+      });
+    }
   };
 
   const trackActivityComplete = (activityId: string, score: number) => {
@@ -454,6 +493,27 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
       );
     }
 
+    // Helper function to assign difficulty levels based on age and activity index
+    const getDifficultyLevel = (age: number, index: number, category: string): number => {
+      const baseLevel = age - 2; // Age 3 = level 1, Age 4 = level 2, etc.
+      const categoryMultiplier = {
+        'english': 0,
+        'math': 0.5,
+        'science': 1,
+        'habits': -0.5,
+        'art': 0,
+        'social': 0,
+        'problem': 1,
+        'physical': -0.5,
+        'world': 0.5,
+        'languages': 1
+      }[category] || 0;
+      
+      const progressionBonus = Math.floor(index / 10) * 0.5; // Gradual increase
+      
+      return Math.max(1, Math.min(5, Math.round(baseLevel + categoryMultiplier + progressionBonus)));
+    };
+
     // Create Activity objects with proper categories
     const allActivities: Activity[] = [
       // English Activities
@@ -463,6 +523,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
         minAge: age,
         maxAge: age,
         estimatedDuration: 5 + Math.floor(index / 10) * 2,
+        difficultyLevel: getDifficultyLevel(age, index, 'english'),
         isLocked: false,
         isCompleted: false,
       })),
@@ -473,6 +534,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
         minAge: age,
         maxAge: age,
         estimatedDuration: 5 + Math.floor(index / 10) * 2,
+        difficultyLevel: getDifficultyLevel(age, index, 'math'),
         isLocked: false,
         isCompleted: false,
       })),
@@ -483,6 +545,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
         minAge: age,
         maxAge: age,
         estimatedDuration: 8 + Math.floor(index / 8) * 3,
+        difficultyLevel: getDifficultyLevel(age, index, 'science'),
         isLocked: false,
         isCompleted: false,
       })),
@@ -493,6 +556,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
         minAge: age,
         maxAge: age,
         estimatedDuration: 6 + Math.floor(index / 10) * 2,
+        difficultyLevel: getDifficultyLevel(age, index, 'habits'),
         isLocked: false,
         isCompleted: false,
       })),
@@ -503,6 +567,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
         minAge: age,
         maxAge: age,
         estimatedDuration: 10 + Math.floor(index / 8) * 3,
+        difficultyLevel: getDifficultyLevel(age, index, 'art'),
         isLocked: false,
         isCompleted: false,
       })),
@@ -513,6 +578,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
         minAge: age,
         maxAge: age,
         estimatedDuration: 7 + Math.floor(index / 10) * 2,
+        difficultyLevel: getDifficultyLevel(age, index, 'social'),
         isLocked: false,
         isCompleted: false,
       })),
@@ -523,6 +589,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
         minAge: age,
         maxAge: age,
         estimatedDuration: 8 + Math.floor(index / 8) * 3,
+        difficultyLevel: getDifficultyLevel(age, index, 'problem'),
         isLocked: false,
         isCompleted: false,
       })),
@@ -533,6 +600,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
         minAge: age,
         maxAge: age,
         estimatedDuration: 15 + Math.floor(index / 6) * 5,
+        difficultyLevel: getDifficultyLevel(age, index, 'physical'),
         isLocked: false,
         isCompleted: false,
       })),
@@ -543,6 +611,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
         minAge: age,
         maxAge: age,
         estimatedDuration: 12 + Math.floor(index / 8) * 3,
+        difficultyLevel: getDifficultyLevel(age, index, 'world'),
         isLocked: false,
         isCompleted: false,
       })),
@@ -553,6 +622,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
         minAge: age,
         maxAge: age,
         estimatedDuration: 10 + Math.floor(index / 6) * 4,
+        difficultyLevel: getDifficultyLevel(age, index, 'languages'),
         isLocked: false,
         isCompleted: false,
       }))
@@ -567,6 +637,12 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
     if (activeTab === 'all') return true;
     return activity.category === activeTab;
   });
+
+  // Helper function for navigation store
+  const getFilteredActivities = (category: string) => {
+    if (category === 'all') return activities;
+    return activities.filter(activity => activity.category === category);
+  };
 
   const handleActivityComplete = (activityId: string, score: number) => {
     // Track completion in new progress system
@@ -608,6 +684,25 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
     setCurrentActivity(activityId);
     setIsLoadingActivity(false);
     await soundEffects.playMagic();
+  };
+
+  // Handle search result selection
+  const handleSearchResult = (result: any) => {
+    if (result.id && result.id.startsWith('activity-')) {
+      const activityId = result.id.replace('activity-', '');
+      handleActivityLaunch(activityId);
+    } else if (result.path) {
+      navigate(result.path);
+    }
+  };
+
+  // Handle favorites and quick access
+  const handleShowFavorites = () => {
+    setShowFavorites(true);
+  };
+
+  const handleShowAdvancedSearch = () => {
+    setShowAdvancedSearch(true);
   };
 
   // Show activity loading overlay
@@ -897,6 +992,31 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
                     </DialogContent>
                   </Dialog>
 
+                  {/* Navigation Features */}
+                  <Dialog open={showFavorites} onOpenChange={setShowFavorites}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="font-['Comic_Neue'] font-bold border-2 border-red-300 hover:border-red-500 hover:bg-red-500 hover:text-white transition-all duration-300"
+                      >
+                        ❤️ Favorites
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
+                      <NavigationFavorites />
+                    </DialogContent>
+                  </Dialog>
+
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleShowAdvancedSearch}
+                    className="font-['Comic_Neue'] font-bold border-2 border-yellow-300 hover:border-yellow-500 hover:bg-yellow-500 hover:text-white transition-all duration-300"
+                  >
+                    🔍 Search
+                  </Button>
+
                   {isCreatorMode && (
                     <Dialog open={showContentManager} onOpenChange={setShowContentManager}>
                       <DialogTrigger asChild>
@@ -966,6 +1086,9 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
             </div>
           </div>
         </Card>
+
+        {/* Personalized Navigation - AI-Powered Recommendations */}
+        <PersonalizedNavigation child={child} className="mb-6" />
 
         {/* Language Learning Section */}
         <Card className="mb-6 language-learning bg-gradient-to-r from-orange-50 via-green-50 to-blue-50 border-2 border-dashed border-orange-300">
@@ -1282,6 +1405,13 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
       <TutorialManager 
         currentPage="dashboard" 
         isFirstTimeUser={isFirstTime}
+      />
+
+      {/* Advanced Search Component */}
+      <AdvancedSearch
+        isOpen={showAdvancedSearch}
+        onClose={() => setShowAdvancedSearch(false)}
+        onSearchResult={handleSearchResult}
       />
     </div>
   );

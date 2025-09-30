@@ -3,6 +3,11 @@ export interface Child {
   name: string;
   age: 3 | 4 | 5 | 6;
   progress: ChildProgress;
+  preferences?: {
+    difficultyLevel?: number;
+    learningStyle?: 'visual' | 'auditory' | 'kinesthetic' | 'mixed';
+    interests?: string[];
+  };
 }
 
 export interface ChildProgress {
@@ -34,6 +39,7 @@ export interface Activity {
   minAge: number;
   maxAge: number;
   estimatedDuration: number; // in minutes
+  difficultyLevel: number; // 1-5 scale
   icon: string;
   backgroundColor: string;
   isLocked: boolean;

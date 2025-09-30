@@ -31,6 +31,7 @@ const malayalamAlphabet = [
   { letter: 'ഈ', transliteration: 'ee', pronunciation: 'eeh', example: 'ഈച്ച (eecha) - fly', type: 'vowel' },
   { letter: 'ഉ', transliteration: 'u', pronunciation: 'uh', example: 'ഉമ്മ (umma) - kiss', type: 'vowel' },
   { letter: 'ഊ', transliteration: 'oo', pronunciation: 'ooh', example: 'ഊഞ്ഞാൽ (onjaal) - swing', type: 'vowel' },
+  { letter: 'ഋ', transliteration: 'r', pronunciation: 'r', example: 'ഋതു (ruthu) - season', type: 'vowel' },
   { letter: 'എ', transliteration: 'e', pronunciation: 'eh', example: 'എലി (eli) - mouse', type: 'vowel' },
   { letter: 'ഏ', transliteration: 'ae', pronunciation: 'aeh', example: 'ഏട് (aet) - page', type: 'vowel' },
   { letter: 'ഐ', transliteration: 'ai', pronunciation: 'eye', example: 'ഐസ് (ice) - ice', type: 'vowel' },
@@ -230,8 +231,23 @@ const MalayalamLearning = () => {
   const playPronunciation = async (text: string, letter?: string) => {
     // Use enhanced letter pronunciation if letter is provided
     if (letter) {
-      await soundEffects.playLetterPronunciation(letter, 'malayalam');
-      await new Promise(resolve => setTimeout(resolve, 300));
+      try {
+        if (soundEffects && typeof (soundEffects as any).playLetterPronunciation === 'function') {
+          await (soundEffects as any).playLetterPronunciation(letter, 'malayalam');
+          await new Promise(resolve => setTimeout(resolve, 300));
+        } else if ('speechSynthesis' in window) {
+          // fallback directly to speech synthesis for the letter
+          const u = new SpeechSynthesisUtterance(letter);
+          u.lang = 'ml-IN';
+          u.rate = 0.8;
+          window.speechSynthesis.speak(u);
+          await new Promise(resolve => setTimeout(resolve, 300));
+        } else if (soundEffects && typeof (soundEffects as any).playClick === 'function') {
+          await (soundEffects as any).playClick();
+        }
+      } catch (e) {
+        // ignore sound errors
+      }
     }
     
     // Also use speech synthesis for the transliteration
@@ -453,34 +469,58 @@ const MalayalamLearning = () => {
                 {currentLevel === 2 ? (
                   // Level 2: Organized by letter type
                   <>
-                    {/* Vowels Section */}
+                    {/* Vowels Section (level-aware) */}
                     <div>
-                      <h3 className="text-lg font-bold mb-4 text-blue-600">സ്വരങ്ങൾ (Vowels) - {malayalamAlphabet.filter(l => l.type === 'vowel').length} letters</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                        {malayalamAlphabet.filter(letter => letter.type === 'vowel').map((letter, index) => (
-                          <AlphabetCard key={`vowel-${index}`} letter={letter} index={index} />
-                        ))}
-                      </div>
+                      {(() => {
+                        const alpha = getCurrentLevelData().content.alphabet || malayalamAlphabet;
+                        const vowels = alpha.filter((l: any) => l.type === 'vowel');
+                        return (
+                          <>
+                            <h3 className="text-lg font-bold mb-4 text-blue-600">സ്വരങ്ങൾ (Vowels) - {vowels.length} letters</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                              {vowels.map((letter: any, index: number) => (
+                                <AlphabetCard key={`vowel-${index}`} letter={letter} index={index} />
+                              ))}
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                     
-                    {/* Consonants Section */}
+                    {/* Consonants Section (level-aware) */}
                     <div>
-                      <h3 className="text-lg font-bold mb-4 text-green-600">വ്യഞ്ജനങ്ങൾ (Consonants) - {malayalamAlphabet.filter(l => l.type === 'consonant').length} letters</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
-                        {malayalamAlphabet.filter(letter => letter.type === 'consonant').map((letter, index) => (
-                          <AlphabetCard key={`consonant-${index}`} letter={letter} index={index} />
-                        ))}
-                      </div>
+                      {(() => {
+                        const alpha = getCurrentLevelData().content.alphabet || malayalamAlphabet;
+                        const cons = alpha.filter((l: any) => l.type === 'consonant');
+                        return (
+                          <>
+                            <h3 className="text-lg font-bold mb-4 text-green-600">വ്യഞ്ജനങ്ങൾ (Consonants) - {cons.length} letters</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                              {cons.map((letter: any, index: number) => (
+                                <AlphabetCard key={`consonant-${index}`} letter={letter} index={index} />
+                              ))}
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                     
-                    {/* Chillu Letters Section */}
+                    {/* Chillu Letters Section (level-aware) */}
                     <div>
-                      <h3 className="text-lg font-bold mb-4 text-purple-600">ചില്ലക്ഷരങ്ങൾ (Chillu Letters) - {malayalamAlphabet.filter(l => l.type === 'chillu').length} letters</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                        {malayalamAlphabet.filter(letter => letter.type === 'chillu').map((letter, index) => (
-                          <AlphabetCard key={`chillu-${index}`} letter={letter} index={index} />
-                        ))}
-                      </div>
+                      {(() => {
+                        const alpha = getCurrentLevelData().content.alphabet || malayalamAlphabet;
+                        const chillu = alpha.filter((l: any) => l.type === 'chillu');
+                        return (
+                          <>
+                            <h3 className="text-lg font-bold mb-4 text-purple-600">ചില്ലക്ഷരങ്ങൾ (Chillu Letters) - {chillu.length} letters</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                              {chillu.map((letter: any, index: number) => (
+                                <AlphabetCard key={`chillu-${index}`} letter={letter} index={index} />
+                              ))}
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   </>
                 ) : (

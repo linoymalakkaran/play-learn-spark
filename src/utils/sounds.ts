@@ -77,6 +77,37 @@ export class SoundEffects {
     setTimeout(() => this.createTone(783.99, 0.3), 300);
   }
 
+  /**
+   * Play a short pronunciation cue for a letter or word.
+   * Tries to use SpeechSynthesis when available for real pronunciation,
+   * otherwise falls back to a short tone mapped from the character code.
+   */
+  async playLetterPronunciation(text: string, lang: string = 'ml-IN'): Promise<void> {
+    if (!this.enabled) return;
+
+    try {
+      // Prefer SpeechSynthesis for natural pronunciation when available
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        try {
+          utterance.lang = lang;
+        } catch (e) {
+          // ignore if setting lang fails
+        }
+        utterance.rate = 0.8;
+        window.speechSynthesis.speak(utterance);
+        return;
+      }
+
+      // Fallback: produce a short tone based on text char codes
+      const code = text ? text.charCodeAt(0) : 440;
+      const freq = 220 + (code % 440);
+      await this.createTone(freq, 0.12);
+    } catch (error) {
+      // ignore errors - keep silent fallback
+    }
+  }
+
   disable(): void {
     this.enabled = false;
   }

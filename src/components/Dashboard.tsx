@@ -1,11 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { HelpButton } from '@/components/common/HelpButton';
 import { TutorialManager } from '@/components/tutorial/TutorialManager';
+import { ActivityTransition } from '@/components/transitions/PageTransition';
+import ContentManagementSystem from '@/components/ContentManagementSystem';
+import PersonalizationCenter from '@/components/PersonalizationCenter';
+import AdaptiveContentEngine from '@/components/AdaptiveContentEngine';
 import { useTutorial } from '@/hooks/useTutorial';
+import { useNavigation } from '@/hooks/useNavigation';
+import { useProgress } from '@/hooks/useProgress';
+import { useContent } from '@/hooks/useContent';
+import { usePersonalization } from '@/hooks/usePersonalization';
 import { Child, Activity } from '@/types/learning';
 import { soundEffects } from '@/utils/sounds';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +32,8 @@ import { EmotionFaces } from './activities/EmotionFaces';
 import { PizzaFractions } from './activities/PizzaFractions';
 import { PetParade } from './activities/PetParade';
 import { PlaceholderActivity } from './activities/PlaceholderActivity';
+import EnhancedArabicLearning from './activities/EnhancedArabicLearning';
+import EnhancedMalayalamLearning from './activities/EnhancedMalayalamLearning';
 
 interface DashboardProps {
   child: Child;
@@ -34,8 +45,49 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
   const [currentActivity, setCurrentActivity] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'english' | 'math' | 'science' | 'habits' | 'art' | 'social' | 'problem' | 'physical' | 'world' | 'languages'>('all');
   const [isLoadingActivity, setIsLoadingActivity] = useState(false);
+  const [showContentManager, setShowContentManager] = useState(false);
+  const [showPersonalization, setShowPersonalization] = useState(false);
+  const [showAdaptiveEngine, setShowAdaptiveEngine] = useState(false);
   const { isFirstTime } = useTutorial();
+  const { navigate: navNavigate } = useNavigation();
+  const { updateActivityState, getActivityState, currentChild, saveProgress } = useProgress();
+  const { isCreatorMode, getRecommendations } = useContent();
+  const { getProfile, createProfile } = usePersonalization();
   const navigate = useNavigate();
+
+  // Initialize personalization profile if needed
+  useEffect(() => {
+    if (child) {
+      let profile = getProfile(child.id);
+      if (!profile) {
+        profile = createProfile(child);
+      }
+    }
+  }, [child, getProfile, createProfile]);
+
+  // Load/save progress when child changes
+  useEffect(() => {
+    if (child && currentChild?.name !== child.name) {
+      saveProgress(child.name, { currentChild: child });
+    }
+  }, [child, currentChild, saveProgress]);
+
+  // Auto-save activity states
+  const trackActivityStart = (activityId: string) => {
+    updateActivityState(activityId, {
+      status: 'in-progress',
+      lastAccessed: Date.now()
+    });
+  };
+
+  const trackActivityComplete = (activityId: string, score: number) => {
+    updateActivityState(activityId, {
+      status: 'completed',
+      score,
+      progress: 100,
+      lastAccessed: Date.now()
+    });
+  };
 
   // Activities organized by age group - 30 English + 30 Math each
   const getActivitiesForAge = (age: 3 | 4 | 5 | 6): Activity[] => {
@@ -348,6 +400,40 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
       { id: 'environmental-awareness', title: 'Environmental Awareness', description: 'Protect our planet together!', subcategory: 'environment', icon: '🌱', backgroundColor: 'from-secondary to-secondary-soft' },
     ];
 
+    // LANGUAGE LEARNING ACTIVITIES - Arabic, Malayalam, Cultural Learning
+    const languageActivities = [
+      { id: 'enhanced-arabic-learning', title: 'Arabic Learning', description: 'Learn Arabic alphabet, culture, and stories!', subcategory: 'arabic', icon: '🕌', backgroundColor: 'from-arabic to-arabic-soft' },
+      { id: 'enhanced-malayalam-learning', title: 'Malayalam Learning', description: 'Discover Malayalam language and Kerala culture!', subcategory: 'malayalam', icon: '🌴', backgroundColor: 'from-malayalam to-malayalam-soft' },
+      { id: 'world-greetings', title: 'World Greetings', description: 'Say hello in many languages!', subcategory: 'greetings', icon: '👋', backgroundColor: 'from-primary to-primary-soft' },
+      { id: 'cultural-stories', title: 'Cultural Stories', description: 'Stories from around the world!', subcategory: 'stories', icon: '📚', backgroundColor: 'from-secondary to-secondary-soft' },
+      { id: 'language-family-tree', title: 'Language Family Tree', description: 'How languages are related!', subcategory: 'families', icon: '🌳', backgroundColor: 'from-success to-success-soft' },
+      { id: 'writing-systems', title: 'Writing Systems', description: 'Different ways to write!', subcategory: 'writing', icon: '✍️', backgroundColor: 'from-magic to-magic-soft' },
+      { id: 'traditional-songs', title: 'Traditional Songs', description: 'Songs from different cultures!', subcategory: 'music', icon: '🎵', backgroundColor: 'from-primary to-primary-soft' },
+      { id: 'festival-celebrations', title: 'Festival Celebrations', description: 'Learn about cultural festivals!', subcategory: 'festivals', icon: '🎉', backgroundColor: 'from-secondary to-secondary-soft' },
+      { id: 'number-systems', title: 'Number Systems', description: 'Count in different languages!', subcategory: 'numbers', icon: '🔢', backgroundColor: 'from-success to-success-soft' },
+      { id: 'cultural-foods', title: 'Cultural Foods', description: 'Traditional foods and their names!', subcategory: 'food', icon: '🍽️', backgroundColor: 'from-magic to-magic-soft' },
+      { id: 'traditional-clothing', title: 'Traditional Clothing', description: 'Clothes from different cultures!', subcategory: 'clothing', icon: '👘', backgroundColor: 'from-primary to-primary-soft' },
+      { id: 'cultural-dances', title: 'Cultural Dances', description: 'Dances from around the world!', subcategory: 'dance', icon: '💃', backgroundColor: 'from-secondary to-secondary-soft' },
+      { id: 'language-patterns', title: 'Language Patterns', description: 'How languages work!', subcategory: 'patterns', icon: '🔤', backgroundColor: 'from-success to-success-soft' },
+      { id: 'cultural-instruments', title: 'Cultural Instruments', description: 'Music from different cultures!', subcategory: 'instruments', icon: '🎸', backgroundColor: 'from-magic to-magic-soft' },
+      { id: 'poetry-traditions', title: 'Poetry Traditions', description: 'Beautiful poems from cultures!', subcategory: 'poetry', icon: '📝', backgroundColor: 'from-primary to-primary-soft' },
+      { id: 'storytelling-styles', title: 'Storytelling Styles', description: 'Different ways to tell stories!', subcategory: 'storytelling', icon: '🎭', backgroundColor: 'from-secondary to-secondary-soft' },
+      { id: 'cultural-games', title: 'Cultural Games', description: 'Traditional games from cultures!', subcategory: 'games', icon: '🎲', backgroundColor: 'from-success to-success-soft' },
+      { id: 'language-sounds', title: 'Language Sounds', description: 'Unique sounds in languages!', subcategory: 'pronunciation', icon: '🔊', backgroundColor: 'from-magic to-magic-soft' },
+      { id: 'cultural-symbols', title: 'Cultural Symbols', description: 'Important symbols in cultures!', subcategory: 'symbols', icon: '🕆', backgroundColor: 'from-primary to-primary-soft' },
+      { id: 'translation-fun', title: 'Translation Fun', description: 'Translate between languages!', subcategory: 'translation', icon: '🔄', backgroundColor: 'from-secondary to-secondary-soft' },
+      { id: 'cultural-values', title: 'Cultural Values', description: 'What different cultures value!', subcategory: 'values', icon: '💖', backgroundColor: 'from-success to-success-soft' },
+      { id: 'language-evolution', title: 'Language Evolution', description: 'How languages change over time!', subcategory: 'history', icon: '⏳', backgroundColor: 'from-magic to-magic-soft' },
+      { id: 'cultural-art', title: 'Cultural Art', description: 'Art styles from different cultures!', subcategory: 'art', icon: '🎨', backgroundColor: 'from-primary to-primary-soft' },
+      { id: 'language-families', title: 'Language Families', description: 'Groups of related languages!', subcategory: 'linguistics', icon: '👨‍👩‍👧‍👦', backgroundColor: 'from-secondary to-secondary-soft' },
+      { id: 'cultural-calendar', title: 'Cultural Calendar', description: 'Different ways to mark time!', subcategory: 'calendar', icon: '📅', backgroundColor: 'from-success to-success-soft' },
+      { id: 'language-preservation', title: 'Language Preservation', description: 'Keeping languages alive!', subcategory: 'preservation', icon: '🔒', backgroundColor: 'from-magic to-magic-soft' },
+      { id: 'cultural-wisdom', title: 'Cultural Wisdom', description: 'Traditional sayings and wisdom!', subcategory: 'wisdom', icon: '🦉', backgroundColor: 'from-primary to-primary-soft' },
+      { id: 'global-communication', title: 'Global Communication', description: 'How we connect across cultures!', subcategory: 'communication', icon: '🌐', backgroundColor: 'from-secondary to-secondary-soft' },
+      { id: 'language-learning-tips', title: 'Language Learning Tips', description: 'How to learn languages better!', subcategory: 'learning', icon: '💡', backgroundColor: 'from-success to-success-soft' },
+      { id: 'cultural-bridges', title: 'Cultural Bridges', description: 'How cultures connect and share!', subcategory: 'connections', icon: '🌉', backgroundColor: 'from-magic to-magic-soft' }
+    ];
+
     // Add age-specific activities
     if (age >= 4) {
       englishActivities.push(
@@ -459,6 +545,16 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
         estimatedDuration: 12 + Math.floor(index / 8) * 3,
         isLocked: false,
         isCompleted: false,
+      })),
+      // Language Learning Activities
+      ...languageActivities.slice(0, 30).map((activity, index) => ({
+        ...activity,
+        category: 'languages' as const,
+        minAge: age,
+        maxAge: age,
+        estimatedDuration: 10 + Math.floor(index / 6) * 4,
+        isLocked: false,
+        isCompleted: false,
       }))
     ];
 
@@ -473,6 +569,10 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
   });
 
   const handleActivityComplete = (activityId: string, score: number) => {
+    // Track completion in new progress system
+    trackActivityComplete(activityId, score);
+    
+    // Update legacy child progress system
     const newTotalActivities = child.progress.totalActivitiesCompleted + 1;
     const newTotalScore = child.progress.totalScore + score;
     const newAverageScore = newTotalActivities > 0 ? Math.round(newTotalScore / newTotalActivities) : 0;
@@ -492,12 +592,15 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
     setCurrentActivity(null);
   };
 
-  // Enhanced activity launch with loading state
+  // Enhanced activity launch with loading state and progress tracking
   const handleActivityLaunch = async (activityId: string) => {
     if (isLoadingActivity) return; // Prevent multiple clicks
     
     setIsLoadingActivity(true);
     await soundEffects.playClick();
+    
+    // Track activity start
+    trackActivityStart(activityId);
     
     // Simulate activity loading time
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -647,6 +750,26 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
     );
   }
 
+  if (currentActivity === 'enhanced-arabic-learning') {
+    return (
+      <EnhancedArabicLearning
+        childAge={child.age}
+        onComplete={(score) => handleActivityComplete('enhanced-arabic-learning', score)}
+        onBack={() => setCurrentActivity(null)}
+      />
+    );
+  }
+
+  if (currentActivity === 'enhanced-malayalam-learning') {
+    return (
+      <EnhancedMalayalamLearning
+        childAge={child.age}
+        onComplete={(score) => handleActivityComplete('enhanced-malayalam-learning', score)}
+        onBack={() => setCurrentActivity(null)}
+      />
+    );
+  }
+
   // Handle all other activities with interactive placeholder
   if (currentActivity) {
     const activity = activities.find(a => a.id === currentActivity);
@@ -734,6 +857,63 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
                 >
                   Switch Learner 👥
                 </Button>
+                
+                {/* Content Management Buttons */}
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <Dialog open={showPersonalization} onOpenChange={setShowPersonalization}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="font-['Comic_Neue'] font-bold border-2 border-blue-300 hover:border-blue-500 hover:bg-blue-500 hover:text-white transition-all duration-300"
+                      >
+                        🎨 Personalize
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
+                      <PersonalizationCenter child={child} onClose={() => setShowPersonalization(false)} />
+                    </DialogContent>
+                  </Dialog>
+
+                  <Dialog open={showAdaptiveEngine} onOpenChange={setShowAdaptiveEngine}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="font-['Comic_Neue'] font-bold border-2 border-purple-300 hover:border-purple-500 hover:bg-purple-500 hover:text-white transition-all duration-300"
+                      >
+                        🤖 AI Content
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
+                      <AdaptiveContentEngine 
+                        child={child} 
+                        onClose={() => setShowAdaptiveEngine(false)}
+                        onContentSelect={(content) => {
+                          setShowAdaptiveEngine(false);
+                          // Handle content selection
+                        }}
+                      />
+                    </DialogContent>
+                  </Dialog>
+
+                  {isCreatorMode && (
+                    <Dialog open={showContentManager} onOpenChange={setShowContentManager}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="font-['Comic_Neue'] font-bold border-2 border-green-300 hover:border-green-500 hover:bg-green-500 hover:text-white transition-all duration-300"
+                        >
+                          ⚙️ Content
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
+                        <ContentManagementSystem onClose={() => setShowContentManager(false)} />
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
                 
                 {/* Tutorial Help Button */}
                 <HelpButton variant="inline" className="ml-2" />
@@ -968,40 +1148,82 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
               >
                 🌍 World
               </Button>
+              <Button
+                onClick={async () => {
+                  await soundEffects.playClick();
+                  setActiveTab('languages');
+                }}
+                variant={activeTab === 'languages' ? 'default' : 'outline'}
+                className={`px-4 py-3 font-['Comic_Neue'] font-bold text-sm whitespace-nowrap min-h-[50px] transition-all duration-300 transform hover:scale-105 ${
+                  activeTab === 'languages' 
+                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg' 
+                    : 'hover:bg-purple-100 hover:border-purple-500 text-purple-700'
+                }`}
+              >
+                🗣️ Languages ({activities.filter(a => a.category === 'languages').length})
+              </Button>
             </div>
           </div>
         </div>
 
         {/* Filtered Activity Grid - Mobile Optimized */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 activities-grid">
-          {filteredActivities.map((activity) => (
-            <Card
-              key={activity.id}
-              className={`
-                p-4 sm:p-6 cursor-pointer relative overflow-hidden min-h-[200px] sm:min-h-[220px]
-                ${activity.isLocked 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'activity-card hover:scale-105 active:scale-95'
-                }
-              `}
-              onClick={() => !activity.isLocked && handleActivityLaunch(activity.id)}
-            >
-              <div className={`absolute inset-0 bg-gradient-to-br ${activity.backgroundColor} opacity-10`} />
-              
-              <div className="relative z-10 h-full flex flex-col">
-                <div className="text-4xl sm:text-5xl mb-3 sm:mb-4 text-center flex-shrink-0">
-                  {activity.isLocked ? '🔒' : activity.icon}
-                </div>
-                
-                <h3 className="text-lg sm:text-xl font-['Comic_Neue'] font-bold text-center mb-2 flex-shrink-0 line-clamp-2">
-                  {activity.title}
-                </h3>
-                
-                <p className="text-muted-foreground text-center mb-4 font-['Comic_Neue'] text-sm sm:text-base flex-grow line-clamp-3">
-                  {activity.description}
-                </p>
-                
-                <div className="flex justify-between items-center text-xs sm:text-sm text-muted-foreground flex-shrink-0">
+          {filteredActivities.map((activity) => {
+            const activityState = getActivityState(activity.id);
+            const isCompleted = activityState?.status === 'completed';
+            const isInProgress = activityState?.status === 'in-progress';
+            const activityProgress = activityState?.progress || 0;
+            
+            return (
+              <ActivityTransition 
+                key={activity.id} 
+                activityId={activity.id} 
+                isVisible={true}
+              >
+                <Card
+                  className={`
+                    p-4 sm:p-6 cursor-pointer relative overflow-hidden min-h-[200px] sm:min-h-[220px]
+                    ${activity.isLocked 
+                      ? 'opacity-50 cursor-not-allowed' 
+                      : 'activity-card hover:scale-105 active:scale-95'
+                    }
+                    ${isCompleted ? 'ring-2 ring-green-500 ring-opacity-50' : ''}
+                    ${isInProgress ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}
+                  `}
+                  onClick={() => !activity.isLocked && handleActivityLaunch(activity.id)}
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-br ${activity.backgroundColor} opacity-10`} />
+                  
+                  {/* Progress indicator */}
+                  {activityProgress > 0 && (
+                    <div className="absolute top-2 right-2 z-20">
+                      <div className="w-8 h-8 rounded-full bg-background/90 flex items-center justify-center text-xs font-bold">
+                        {isCompleted ? '✓' : `${activityProgress}%`}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="relative z-10 h-full flex flex-col">
+                    <div className="text-4xl sm:text-5xl mb-3 sm:mb-4 text-center flex-shrink-0">
+                      {activity.isLocked ? '🔒' : activity.icon}
+                    </div>
+                    
+                    <h3 className="text-lg sm:text-xl font-['Comic_Neue'] font-bold text-center mb-2 flex-shrink-0 line-clamp-2">
+                      {activity.title}
+                    </h3>
+                    
+                    <p className="text-muted-foreground text-center mb-4 font-['Comic_Neue'] text-sm sm:text-base flex-grow line-clamp-3">
+                      {activity.description}
+                    </p>
+                    
+                    {/* Progress bar for in-progress activities */}
+                    {isInProgress && activityProgress > 0 && (
+                      <div className="mb-3">
+                        <Progress value={activityProgress} className="h-1" />
+                      </div>
+                    )}
+                    
+                    <div className="flex justify-between items-center text-xs sm:text-sm text-muted-foreground flex-shrink-0">
                   <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-bold ${
                     activity.category === 'english' 
                       ? 'bg-success-soft text-success-foreground' 
@@ -1019,6 +1241,10 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
                       ? 'bg-secondary-soft text-secondary-foreground'
                       : activity.category === 'physical'
                       ? 'bg-success-soft text-success-foreground'
+                      : activity.category === 'world'
+                      ? 'bg-teal-soft text-teal-foreground'
+                      : activity.category === 'languages'
+                      ? 'bg-purple-soft text-purple-foreground'
                       : 'bg-primary-soft text-primary-foreground'
                   }`}>
                     {activity.category.toUpperCase()}
@@ -1033,7 +1259,9 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
                 )}
               </div>
             </Card>
-          ))}
+          </ActivityTransition>
+        );
+      })}
         </div>
 
         {/* Encouraging Message */}

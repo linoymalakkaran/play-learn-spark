@@ -11,6 +11,7 @@ import { errorHandler } from './middleware/errorHandler';
 import { notFoundHandler } from './middleware/notFoundHandler';
 
 // Routes
+import authRoutes from './routes/auth.routes';
 import aiRoutes from './routes/ai.routes';
 import contentRoutes from './routes/content.routes';
 import activityRoutes from './routes/activity.routes';
@@ -73,6 +74,7 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/activities', activityRoutes);
@@ -86,6 +88,7 @@ app.get('/', (req, res) => {
     description: 'Backend server for Play Learn Spark educational platform',
     endpoints: {
       health: '/health',
+      auth: '/api/auth',
       ai: '/api/ai',
       content: '/api/content',
       activities: '/api/activities',
@@ -101,15 +104,22 @@ app.use(errorHandler);
 // Start server
 async function startServer() {
   try {
-    // Connect to database
-    await connectDatabase();
-    logger.info('Database connected successfully');
+    // Try to connect to database (optional for development)
+    try {
+      await connectDatabase();
+      logger.info('Database connected successfully');
+    } catch (dbError) {
+      logger.warn('Database connection failed - running without database:', dbError);
+      logger.info('Server will start without database functionality');
+    }
 
     // Start HTTP server
     app.listen(PORT, () => {
-      logger.info(`Server running on port ${PORT}`);
-      logger.info(`Environment: ${process.env.NODE_ENV}`);
-      logger.info(`CORS origin: ${process.env.CORS_ORIGIN}`);
+      logger.info(`🚀 Play Learn Spark Backend Server running on port ${PORT}`);
+      logger.info(`📝 Environment: ${process.env.NODE_ENV}`);
+      logger.info(`🌐 CORS origin: ${process.env.CORS_ORIGIN}`);
+      logger.info(`📚 API Documentation: http://localhost:${PORT}/`);
+      logger.info(`🔑 Auth endpoints: http://localhost:${PORT}/api/auth`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);

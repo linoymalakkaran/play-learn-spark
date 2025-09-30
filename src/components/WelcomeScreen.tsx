@@ -14,6 +14,7 @@ export const WelcomeScreen = ({ onChildSelected }: WelcomeScreenProps) => {
   const handleStartLearning = () => {
     if (selectedAge && childName.trim()) {
       const newChild: Child = {
+        id: `child_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name: childName.trim(),
         age: selectedAge,
           progress: {

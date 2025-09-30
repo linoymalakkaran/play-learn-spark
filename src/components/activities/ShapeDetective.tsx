@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { soundEffects } from '@/utils/sounds';
+import { useDragAndDrop, Draggable, DropZone } from '@/hooks/useDragAndDrop';
+import { useGestureElement } from '@/hooks/useGesture';
 
 interface ShapeDetectiveProps {
   childAge: 3 | 4 | 5 | 6;
@@ -24,6 +26,14 @@ interface Detective {
   correctAnswer: string;
   options: string[];
   isComplete: boolean;
+  mode: 'select' | 'drag'; // New property for interaction mode
+}
+
+interface ShapeItem {
+  id: string;
+  shape: Shape;
+  example: string;
+  isCorrect: boolean;
 }
 
 const shapes: Shape[] = [
@@ -72,6 +82,15 @@ export const ShapeDetective = ({ childAge, onComplete, onBack }: ShapeDetectiveP
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [gameComplete, setGameComplete] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [shapeItems, setShapeItems] = useState<ShapeItem[]>([]);
+  const [sortedShapes, setSortedShapes] = useState<{[key: string]: ShapeItem[]}>({});
+
+  const { isDragging, draggedItem, handleDragStart, handleDrop } = useDragAndDrop({
+    onDrop: (item, dropZoneId) => {
+      handleShapeDrop(item.id, dropZoneId);
+    },
+    hapticFeedback: true,
+  });
 
   useEffect(() => {
     // Create at least 8 detective cases for proper interaction
@@ -83,19 +102,119 @@ export const ShapeDetective = ({ childAge, onComplete, onBack }: ShapeDetectiveP
       const examples = [...shape.realWorldExamples].sort(() => Math.random() - 0.5);
       const correctAnswer = examples[0];
       const wrongAnswers = examples.slice(1, 4);
+      const mode = Math.random() > 0.6 ? 'drag' : 'select'; // 40% drag mode
       
       cases.push({
         id: i,
         shape: shape,
-        question: `Find the ${shape.name.toLowerCase()}!`,
+        question: mode === 'drag' 
+          ? `Sort all the ${shape.name.toLowerCase()}s!`
+          : `Find the ${shape.name.toLowerCase()}!`,
         correctAnswer,
         options: [correctAnswer, ...wrongAnswers].sort(() => Math.random() - 0.5),
         isComplete: false,
+        mode,
       });
     }
     
     setDetectives(cases);
   }, [childAge]);
+
+  // Initialize shape items for drag mode
+  useEffect(() => {
+    if (detectives.length > 0 && currentCase < detectives.length) {
+      const currentDetective = detectives[currentCase];
+      if (currentDetective.mode === 'drag') {
+        const items: ShapeItem[] = [];
+        
+        // Add correct shapes
+        const correctShapes = currentDetective.shape.realWorldExamples
+          .slice(0, 3)
+          .map((example, index) => ({
+            id: `correct-${index}`,
+            shape: currentDetective.shape,
+            example,
+            isCorrect: true,
+          }));
+        
+        // Add incorrect shapes from other shape types
+        const otherShapes = shapes.filter(s => s.name !== currentDetective.shape.name);
+        const incorrectShapes = otherShapes
+          .slice(0, 3)
+          .map((shape, index) => ({
+            id: `incorrect-${index}`,
+            shape,
+            example: shape.realWorldExamples[0],
+            isCorrect: false,
+          }));
+        
+        items.push(...correctShapes, ...incorrectShapes);
+        setShapeItems(items.sort(() => Math.random() - 0.5));
+        setSortedShapes({});
+      }
+    }
+  }, [currentCase, detectives]);
+
+  const handleShapeDrop = async (itemId: string, dropZoneId: string) => {
+    const item = shapeItems.find(si => si.id === itemId);
+    if (!item) return;
+
+    const currentDetective = detectives[currentCase];
+    
+    if (dropZoneId === 'correct-zone' && item.isCorrect) {
+      // Correct drop
+      const newSortedShapes = { ...sortedShapes };
+      if (!newSortedShapes['correct']) {
+        newSortedShapes['correct'] = [];
+      }
+      newSortedShapes['correct'].push(item);
+      setSortedShapes(newSortedShapes);
+      
+      // Remove from available items
+      setShapeItems(prev => prev.filter(si => si.id !== itemId));
+      
+      await soundEffects.playClick();
+      
+      // Check if all correct shapes are sorted
+      const correctCount = shapeItems.filter(si => si.isCorrect).length;
+      if (newSortedShapes['correct'].length === correctCount - 1) { // -1 because we just removed one
+        await soundEffects.playSuccess();
+        setScore(prev => prev + 1);
+        
+        setTimeout(async () => {
+          if (currentCase < detectives.length - 1) {
+            setCurrentCase(prev => prev + 1);
+            setSelectedAnswer(null);
+            setShowHint(false);
+            await soundEffects.playClick();
+          } else {
+            await soundEffects.playCheer();
+            setGameComplete(true);
+          }
+        }, 2000);
+      }
+    } else if (dropZoneId === 'incorrect-zone' && !item.isCorrect) {
+      // Correct drop (incorrect item in incorrect zone)
+      const newSortedShapes = { ...sortedShapes };
+      if (!newSortedShapes['incorrect']) {
+        newSortedShapes['incorrect'] = [];
+      }
+      newSortedShapes['incorrect'].push(item);
+      setSortedShapes(newSortedShapes);
+      
+      // Remove from available items
+      setShapeItems(prev => prev.filter(si => si.id !== itemId));
+      
+      await soundEffects.playClick();
+    } else {
+      // Wrong drop
+      await soundEffects.playError();
+      setShowHint(true);
+      setTimeout(() => {
+        setShowHint(false);
+      }, 2000);
+    }
+  };
 
   const handleAnswerSelect = async (answer: string) => {
     setSelectedAnswer(answer);

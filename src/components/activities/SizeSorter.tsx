@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { soundEffects } from '@/utils/sounds';
+import { useDragAndDrop, Draggable, DropZone } from '@/hooks/useDragAndDrop';
+import { useGestureElement } from '@/hooks/useGesture';
 
 interface SizeSorterProps {
   childAge: 3 | 4 | 5 | 6;
@@ -12,10 +14,17 @@ interface SizeSorterProps {
 
 interface SizeChallenge {
   id: number;
-  items: { emoji: string; size: 'small' | 'medium' | 'large'; name: string }[];
+  items: { emoji: string; size: 'small' | 'medium' | 'large'; name: string; id: string }[];
   question: string;
   correctOrder?: number[];
   targetSize?: 'small' | 'medium' | 'large';
+  mode: 'click' | 'drag'; // New property for interaction mode
+}
+
+interface SortSlot {
+  id: string;
+  expectedSize: 'small' | 'medium' | 'large';
+  item?: { emoji: string; size: 'small' | 'medium' | 'large'; name: string; id: string };
 }
 
 const sizeItems = [
@@ -36,6 +45,15 @@ export const SizeSorter = ({ childAge, onComplete, onBack }: SizeSorterProps) =>
   const [score, setScore] = useState(0);
   const [gameComplete, setGameComplete] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [sortSlots, setSortSlots] = useState<SortSlot[]>([]);
+  const [availableItems, setAvailableItems] = useState<{ emoji: string; size: 'small' | 'medium' | 'large'; name: string; id: string }[]>([]);
+
+  const { isDragging, draggedItem, handleDragStart, handleDrop } = useDragAndDrop({
+    onDrop: (item, dropZoneId) => {
+      handleSizeDrop(item.id, dropZoneId);
+    },
+    hapticFeedback: true,
+  });
 
   useEffect(() => {
     // Create at least 8 size challenges
@@ -47,34 +65,138 @@ export const SizeSorter = ({ childAge, onComplete, onBack }: SizeSorterProps) =>
       const items = itemSet.sizes.map((sizeInfo, index) => ({
         emoji: itemSet.emoji,
         size: sizeInfo.size as 'small' | 'medium' | 'large',
-        name: sizeInfo.name
+        name: sizeInfo.name,
+        id: `item-${i}-${index}`
       }));
       
       // Shuffle items for display
       const shuffledItems = [...items].sort(() => Math.random() - 0.5);
       
       const challengeType = Math.random() > 0.5 ? 'sort' : 'find';
+      const mode = Math.random() > 0.4 ? 'drag' : 'click'; // 60% drag mode
       
       if (challengeType === 'sort') {
         newChallenges.push({
           id: i,
           items: shuffledItems,
-          question: 'Put these in order from smallest to largest!',
-          correctOrder: [0, 1, 2] // indices for small, medium, large
+          question: mode === 'drag' 
+            ? 'Drag these in order from smallest to largest!'
+            : 'Put these in order from smallest to largest!',
+          correctOrder: [0, 1, 2], // indices for small, medium, large
+          mode
         });
       } else {
         const targetSize = ['small', 'medium', 'large'][Math.floor(Math.random() * 3)] as 'small' | 'medium' | 'large';
         newChallenges.push({
           id: i,
           items: shuffledItems,
-          question: `Which one is ${targetSize}?`,
-          targetSize
+          question: mode === 'drag'
+            ? `Drag the ${targetSize} one to the correct box!`
+            : `Which one is ${targetSize}?`,
+          targetSize,
+          mode
         });
       }
     }
     
     setChallenges(newChallenges);
   }, [childAge]);
+
+  // Initialize drag elements for current challenge
+  useEffect(() => {
+    if (challenges.length > 0 && currentChallenge < challenges.length) {
+      const challenge = challenges[currentChallenge];
+      if (challenge.mode === 'drag') {
+        if (challenge.correctOrder) {
+          // Sorting challenge
+          setSortSlots([
+            { id: 'small-slot', expectedSize: 'small' },
+            { id: 'medium-slot', expectedSize: 'medium' },
+            { id: 'large-slot', expectedSize: 'large' }
+          ]);
+          setAvailableItems(challenge.items);
+        } else if (challenge.targetSize) {
+          // Find challenge
+          setSortSlots([
+            { id: 'target-slot', expectedSize: challenge.targetSize }
+          ]);
+          setAvailableItems(challenge.items);
+        }
+      } else {
+        setSortSlots([]);
+        setAvailableItems([]);
+      }
+    }
+  }, [currentChallenge, challenges]);
+
+  const handleSizeDrop = async (itemId: string, slotId: string) => {
+    const item = availableItems.find(ai => ai.id === itemId);
+    const slot = sortSlots.find(s => s.id === slotId);
+    
+    if (!item || !slot) return;
+
+    const currentChal = challenges[currentChallenge];
+    
+    if (item.size === slot.expectedSize) {
+      // Correct drop
+      const newSlots = sortSlots.map(s => 
+        s.id === slotId ? { ...s, item } : s
+      );
+      setSortSlots(newSlots);
+      
+      // Remove from available items
+      setAvailableItems(prev => prev.filter(ai => ai.id !== itemId));
+      
+      await soundEffects.playClick();
+      
+      // Check if challenge is complete
+      if (currentChal.correctOrder) {
+        // Sorting challenge - check if all slots filled correctly
+        const filledSlots = newSlots.filter(s => s.item);
+        if (filledSlots.length === 3) {
+          await soundEffects.playSuccess();
+          setScore(prev => prev + 1);
+          setShowFeedback(true);
+          
+          setTimeout(async () => {
+            if (currentChallenge < challenges.length - 1) {
+              setCurrentChallenge(prev => prev + 1);
+              setSelectedItems([]);
+              setShowFeedback(false);
+              await soundEffects.playClick();
+            } else {
+              await soundEffects.playCheer();
+              setGameComplete(true);
+            }
+          }, 2000);
+        }
+      } else if (currentChal.targetSize) {
+        // Find challenge - completed with correct drop
+        await soundEffects.playSuccess();
+        setScore(prev => prev + 1);
+        setShowFeedback(true);
+        
+        setTimeout(async () => {
+          if (currentChallenge < challenges.length - 1) {
+            setCurrentChallenge(prev => prev + 1);
+            setSelectedItems([]);
+            setShowFeedback(false);
+            await soundEffects.playClick();
+          } else {
+            await soundEffects.playCheer();
+            setGameComplete(true);
+          }
+        }, 2000);
+      }
+    } else {
+      // Wrong drop
+      await soundEffects.playError();
+      setShowFeedback(true);
+      setTimeout(() => {
+        setShowFeedback(false);
+      }, 1500);
+    }
+  };
 
   const handleItemSelect = async (itemIndex: number) => {
     const currentChal = challenges[currentChallenge];

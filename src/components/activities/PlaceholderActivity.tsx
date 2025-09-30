@@ -10,7 +10,7 @@ interface PlaceholderActivityProps {
   activityName: string;
   activityIcon: string;
   activityDescription: string;
-  activityCategory: 'english' | 'math' | 'science' | 'habits' | 'art' | 'social' | 'problem' | 'physical' | 'world';
+  activityCategory: 'english' | 'math' | 'science' | 'habits' | 'art' | 'social' | 'problem' | 'physical' | 'world' | 'languages';
 }
 
 interface QuickTask {

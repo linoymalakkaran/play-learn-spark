@@ -1,4 +1,5 @@
 export interface Child {
+  id: string;
   name: string;
   age: 3 | 4 | 5 | 6;
   progress: ChildProgress;
@@ -28,7 +29,7 @@ export interface Activity {
   id: string;
   title: string;
   description: string;
-  category: 'english' | 'math' | 'science' | 'habits' | 'art' | 'social' | 'problem' | 'physical' | 'world';
+  category: 'english' | 'math' | 'science' | 'habits' | 'art' | 'social' | 'problem' | 'physical' | 'world' | 'languages';
   subcategory: string;
   minAge: number;
   maxAge: number;

@@ -1,0 +1,196 @@
+/* Play Learn Spark Brand Colors */
+
+:root {
+  /* Primary Brand Colors */
+  --color-primary: #4ECDC4;           /* Turquoise - Learning & Growth */
+  --color-primary-light: #7ED5D0;     /* Light Turquoise */
+  --color-primary-dark: #2DB7AC;      /* Dark Turquoise */
+  
+  --color-secondary: #2196F3;         /* Blue - Trust & Stability */
+  --color-secondary-light: #64B5F6;   /* Light Blue */
+  --color-secondary-dark: #1976D2;    /* Dark Blue */
+  
+  /* Accent Colors */
+  --color-accent-gold: #FFD700;       /* Gold - Achievement & Success */
+  --color-accent-orange: #FFA726;     /* Orange - Energy & Enthusiasm */
+  --color-accent-purple: #9C27B0;     /* Purple - Creativity & Imagination */
+  --color-accent-green: #4CAF50;      /* Green - Progress & Growth */
+  --color-accent-pink: #E91E63;       /* Pink - Fun & Playfulness */
+  
+  /* Neutral Colors */
+  --color-white: #FFFFFF;
+  --color-gray-50: #F8F9FA;
+  --color-gray-100: #F1F3F4;
+  --color-gray-200: #E8EAED;
+  --color-gray-300: #DADCE0;
+  --color-gray-400: #BDC1C6;
+  --color-gray-500: #9AA0A6;
+  --color-gray-600: #80868B;
+  --color-gray-700: #5F6368;
+  --color-gray-800: #3C4043;
+  --color-gray-900: #202124;
+  
+  /* Semantic Colors */
+  --color-success: #4CAF50;
+  --color-success-light: #81C784;
+  --color-success-dark: #388E3C;
+  
+  --color-warning: #FF9800;
+  --color-warning-light: #FFB74D;
+  --color-warning-dark: #F57C00;
+  
+  --color-error: #F44336;
+  --color-error-light: #EF5350;
+  --color-error-dark: #D32F2F;
+  
+  --color-info: #2196F3;
+  --color-info-light: #64B5F6;
+  --color-info-dark: #1976D2;
+  
+  /* Background Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  --gradient-learning: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+  --gradient-playful: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 50%, #45B7D1 100%);
+  --gradient-warm: linear-gradient(135deg, #FFA726 0%, #FF7043 100%);
+  --gradient-cool: linear-gradient(135deg, #42A5F5 0%, #7986CB 100%);
+  --gradient-creative: linear-gradient(135deg, #9C27B0 0%, #E91E63 100%);
+  
+  /* Educational Theme Colors */
+  --color-alphabet: #FF6B6B;          /* Red/Pink for alphabet learning */
+  --color-numbers: #4ECDC4;           /* Turquoise for numbers */
+  --color-shapes: #9C27B0;            /* Purple for shapes */
+  --color-colors: #FFA726;            /* Orange for color learning */
+  --color-animals: #4CAF50;           /* Green for animals */
+  --color-nature: #8BC34A;            /* Light green for nature */
+  --color-music: #FF9800;             /* Orange for music */
+  --color-art: #E91E63;               /* Pink for art activities */
+  
+  /* Language-Specific Colors */
+  --color-arabic: #FF7043;            /* Warm orange for Arabic */
+  --color-malayalam: #FFA726;         /* Golden orange for Malayalam */
+  --color-english: #2196F3;           /* Blue for English */
+  --color-spanish: #4CAF50;           /* Green for Spanish */
+  --color-french: #9C27B0;            /* Purple for French */
+  
+  /* Interactive States */
+  --color-hover: rgba(78, 205, 196, 0.1);
+  --color-active: rgba(78, 205, 196, 0.2);
+  --color-focus: rgba(78, 205, 196, 0.3);
+  --color-disabled: var(--color-gray-300);
+  
+  /* Shadow Colors */
+  --shadow-light: rgba(0, 0, 0, 0.1);
+  --shadow-medium: rgba(0, 0, 0, 0.15);
+  --shadow-dark: rgba(0, 0, 0, 0.25);
+  --shadow-primary: rgba(78, 205, 196, 0.3);
+  
+  /* Border Colors */
+  --border-light: var(--color-gray-200);
+  --border-medium: var(--color-gray-300);
+  --border-dark: var(--color-gray-400);
+  
+  /* Text Colors */
+  --text-primary: var(--color-gray-900);
+  --text-secondary: var(--color-gray-700);
+  --text-muted: var(--color-gray-500);
+  --text-inverse: var(--color-white);
+  
+  /* Background Colors */
+  --bg-primary: var(--color-white);
+  --bg-secondary: var(--color-gray-50);
+  --bg-tertiary: var(--color-gray-100);
+  --bg-learning: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+}
+
+/* Age-Specific Color Schemes */
+.age-3-4 {
+  --primary-theme: var(--color-accent-pink);
+  --secondary-theme: var(--color-accent-orange);
+  --gradient-theme: linear-gradient(135deg, #E91E63 0%, #FFA726 100%);
+}
+
+.age-4-5 {
+  --primary-theme: var(--color-primary);
+  --secondary-theme: var(--color-accent-purple);
+  --gradient-theme: linear-gradient(135deg, #4ECDC4 0%, #9C27B0 100%);
+}
+
+.age-5-6 {
+  --primary-theme: var(--color-secondary);
+  --secondary-theme: var(--color-accent-green);
+  --gradient-theme: linear-gradient(135deg, #2196F3 0%, #4CAF50 100%);
+}
+
+/* Dark Mode Support (for future implementation) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #5FD8D1;
+    --color-secondary: #42A5F5;
+    --bg-primary: #121212;
+    --bg-secondary: #1E1E1E;
+    --text-primary: #FFFFFF;
+    --text-secondary: #E0E0E0;
+    --border-light: #333333;
+  }
+}
+
+/* Utility Classes for Quick Color Application */
+.text-primary { color: var(--color-primary) !important; }
+.text-secondary { color: var(--color-secondary) !important; }
+.text-accent-gold { color: var(--color-accent-gold) !important; }
+.text-accent-orange { color: var(--color-accent-orange) !important; }
+.text-learning { color: var(--color-primary) !important; }
+
+.bg-primary { background-color: var(--color-primary) !important; }
+.bg-secondary { background-color: var(--color-secondary) !important; }
+.bg-gradient-primary { background: var(--gradient-primary) !important; }
+.bg-gradient-learning { background: var(--gradient-learning) !important; }
+.bg-gradient-playful { background: var(--gradient-playful) !important; }
+
+.border-primary { border-color: var(--color-primary) !important; }
+.border-secondary { border-color: var(--color-secondary) !important; }
+
+/* Educational Category Colors */
+.category-alphabet { 
+  --category-color: var(--color-alphabet);
+  --category-bg: rgba(255, 107, 107, 0.1);
+}
+
+.category-numbers { 
+  --category-color: var(--color-numbers);
+  --category-bg: rgba(78, 205, 196, 0.1);
+}
+
+.category-shapes { 
+  --category-color: var(--color-shapes);
+  --category-bg: rgba(156, 39, 176, 0.1);
+}
+
+.category-colors { 
+  --category-color: var(--color-colors);
+  --category-bg: rgba(255, 167, 38, 0.1);
+}
+
+.category-animals { 
+  --category-color: var(--color-animals);
+  --category-bg: rgba(76, 175, 80, 0.1);
+}
+
+/* Language Learning Colors */
+.language-arabic {
+  --language-primary: var(--color-arabic);
+  --language-secondary: #FFAB91;
+  --language-gradient: linear-gradient(135deg, #FF7043 0%, #FFAB91 100%);
+}
+
+.language-malayalam {
+  --language-primary: var(--color-malayalam);
+  --language-secondary: #FFCC80;
+  --language-gradient: linear-gradient(135deg, #FFA726 0%, #FFCC80 100%);
+}
+
+.language-english {
+  --language-primary: var(--color-english);
+  --language-secondary: #90CAF9;
+  --language-gradient: linear-gradient(135deg, #2196F3 0%, #90CAF9 100%);
+}

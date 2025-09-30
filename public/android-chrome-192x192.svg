@@ -1,0 +1,33 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4ECDC4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2196F3;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="sparkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA726;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Main background circle -->
+  <circle cx="96" cy="96" r="90" fill="url(#bgGradient)" stroke="#ffffff" stroke-width="12"/>
+  
+  <!-- Open book icon -->
+  <path d="M48 60 L48 144 L144 144 L144 60 Z" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M48 60 L96 36 L144 60" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="96" y1="36" x2="96" y2="144" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- Learning spark/star -->
+  <circle cx="132" cy="72" r="18" fill="url(#sparkGradient)" stroke="#ffffff" stroke-width="3"/>
+  <path d="M132 60 L135 69 L144 72 L135 75 L132 84 L129 75 L120 72 L129 69 Z" fill="#ffffff"/>
+  
+  <!-- Play element (triangle) -->
+  <path d="M66 96 L66 120 L90 108 Z" fill="#ffffff"/>
+  
+  <!-- Small learning dots -->
+  <circle cx="36" cy="48" r="6" fill="#ffffff" opacity="0.8"/>
+  <circle cx="156" cy="156" r="6" fill="#ffffff" opacity="0.8"/>
+  <circle cx="30" cy="150" r="4" fill="#ffffff" opacity="0.6"/>
+  <circle cx="162" cy="42" r="4" fill="#ffffff" opacity="0.6"/>
+</svg>

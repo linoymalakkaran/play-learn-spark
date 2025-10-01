@@ -109,7 +109,7 @@ async function startServer() {
       await connectDatabase();
       // Initialize default data for development
       const { initializeDefaultData } = await import('./config/database');
-      initializeDefaultData();
+      await initializeDefaultData();
       logger.info('Database connected and initialized successfully');
     } catch (dbError) {
       logger.warn('Database connection failed - running without database:', dbError);

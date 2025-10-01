@@ -135,11 +135,13 @@ if %errorlevel% neq 0 (
 
 REM Build and push frontend image
 call :print_status "Building frontend Docker image..."
+cd client
 docker build -t "%REGISTRY_SERVER%/play-learn-spark-frontend:latest" .
 if %errorlevel% neq 0 (
     call :print_error "Failed to build frontend Docker image"
     exit /b 1
 )
+cd ..
 
 call :print_status "Pushing frontend Docker image..."
 docker push "%REGISTRY_SERVER%/play-learn-spark-frontend:latest"

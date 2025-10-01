@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
-import { db } from '../config/database';
+import { getDatabase } from '../config/database';
 import { logger } from '../utils/logger';
 
 const router = express.Router();
@@ -36,21 +36,28 @@ const upload = multer({
 router.get('/activities', async (req, res) => {
   try {
     const { category, difficulty, age_group } = req.query;
+    const db = getDatabase();
     
-    let activities = db.findAll('activities');
+    let query = 'SELECT * FROM activities WHERE 1=1';
+    const params: any[] = [];
     
     // Apply filters
     if (category) {
-      activities = activities.filter((a: any) => a.category === category);
+      query += ' AND category = ?';
+      params.push(category);
     }
     
     if (difficulty) {
-      activities = activities.filter((a: any) => a.difficulty === difficulty);
+      query += ' AND difficulty = ?';
+      params.push(difficulty);
     }
     
     if (age_group) {
-      activities = activities.filter((a: any) => a.age_group === age_group);
+      query += ' AND age_group LIKE ?';
+      params.push(`%${age_group}%`);
     }
+    
+    const activities = await db.all(query, params);
 
     res.json({
       success: true,
@@ -69,7 +76,8 @@ router.get('/activities', async (req, res) => {
 router.get('/activities/:id', async (req, res): Promise<void> => {
   try {
     const { id } = req.params;
-    const activity = db.findById('activities', id);
+    const db = getDatabase();
+    const activity = await db.get('SELECT * FROM activities WHERE id = ?', [id]);
 
     if (!activity) {
       res.status(404).json({
@@ -115,7 +123,12 @@ router.post('/upload',
       };
 
       // Save file info to database
-      const savedFile = db.create('uploads', fileInfo);
+      const db = getDatabase();
+      const result = await db.run(
+        'INSERT INTO uploads (filename, original_name, mimetype, size, path) VALUES (?, ?, ?, ?, ?)',
+        [fileInfo.filename, fileInfo.originalName, fileInfo.mimetype, fileInfo.size, fileInfo.path]
+      );
+      const savedFile = { id: result.lastID, ...fileInfo };
 
       logger.info(`File uploaded: ${req.file.originalname}`);
 
@@ -151,12 +164,19 @@ router.post('/activities', async (req, res): Promise<void> => {
       title,
       description,
       category,
+      type: 'activity',
       difficulty: difficulty || 'easy',
       age_group: age_group || '3-5',
+      estimated_time: 30,
       content: content || {},
     };
 
-    const savedActivity = db.create('activities', newActivity);
+    const db = getDatabase();
+    const result = await db.run(
+      'INSERT INTO activities (title, description, type, category, age_group, difficulty, estimated_time) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [newActivity.title, newActivity.description, newActivity.type, newActivity.category, newActivity.age_group, newActivity.difficulty, newActivity.estimated_time]
+    );
+    const savedActivity = { id: result.lastID, ...newActivity };
 
     logger.info(`Activity created: ${title}`);
 
@@ -180,7 +200,12 @@ router.put('/activities/:id', async (req, res): Promise<void> => {
     const { id } = req.params;
     const updates = req.body;
     
-    const updated = db.update('activities', id, updates);
+    const db = getDatabase();
+    await db.run(
+      'UPDATE activities SET title = ?, description = ?, type = ?, category = ?, age_group = ?, difficulty = ?, estimated_time = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [updates.title, updates.description, updates.type, updates.category, updates.age_group, updates.difficulty, updates.estimated_time, id]
+    );
+    const updated = await db.get('SELECT * FROM activities WHERE id = ?', [id]);
     
     if (!updated) {
       res.status(404).json({
@@ -210,7 +235,14 @@ router.put('/activities/:id', async (req, res): Promise<void> => {
 router.delete('/activities/:id', async (req, res): Promise<void> => {
   try {
     const { id } = req.params;
-    const deleted = db.delete('activities', id);
+    const db = getDatabase();
+    const activity = await db.get('SELECT * FROM activities WHERE id = ?', [id]);
+    if (!activity) {
+      res.status(404).json({ success: false, message: 'Activity not found' });
+      return;
+    }
+    await db.run('DELETE FROM activities WHERE id = ?', [id]);
+    const deleted = activity;
     
     if (!deleted) {
       res.status(404).json({
@@ -238,7 +270,8 @@ router.delete('/activities/:id', async (req, res): Promise<void> => {
 // Content recommendations
 router.get('/recommendations', async (req, res) => {
   try {
-    const activities = db.findAll('activities');
+    const db = getDatabase();
+    const activities = await db.all('SELECT * FROM activities');
     
     // Simple recommendation logic - return random activities
     const shuffled = activities.sort(() => 0.5 - Math.random());

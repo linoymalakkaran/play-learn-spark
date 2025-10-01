@@ -4,12 +4,13 @@ services:
   # Frontend React Application
   frontend:
     build:
-      context: .
+      context: ./client
       dockerfile: Dockerfile
     ports:
       - "80:80"
     environment:
       - NODE_ENV=production
+      - REACT_APP_API_URL=http://localhost:3001
     depends_on:
       - backend
     networks:
@@ -32,9 +33,11 @@ services:
       - NODE_ENV=production
       - PORT=3001
       - CORS_ORIGIN=http://localhost:80
+      - DATABASE_URL=./data/app.db
     volumes:
       - backend-uploads:/app/uploads
       - backend-logs:/app/logs
+      - backend-data:/app/data
     networks:
       - app-network
     restart: unless-stopped
@@ -52,4 +55,6 @@ volumes:
   backend-uploads:
     driver: local
   backend-logs:
+    driver: local
+  backend-data:
     driver: local

@@ -130,7 +130,9 @@ build_and_push_images() {
     
     # Build and push frontend image
     print_status "Building frontend Docker image..."
+    cd client
     docker build -t "$REGISTRY_SERVER/play-learn-spark-frontend:latest" .
+    cd ..
     
     print_status "Pushing frontend Docker image..."
     docker push "$REGISTRY_SERVER/play-learn-spark-frontend:latest"

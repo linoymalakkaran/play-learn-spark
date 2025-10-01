@@ -44,7 +44,10 @@ class GeminiService {
   private baseUrl: string = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
   constructor() {
-    this.apiKey = 'AIzaSyDKzAsS76lA3Wjes53xAzegO30-pzgM-NU';
+    this.apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+    if (!this.apiKey) {
+      console.warn('VITE_GEMINI_API_KEY not found in environment variables');
+    }
   }
 
   /**

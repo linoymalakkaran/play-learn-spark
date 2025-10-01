@@ -11,10 +11,10 @@ import {
 } from 'lucide-react';
 
 interface StickyTopMenuProps {
-  onTogglePlatform?: () => void;
+  // onTogglePlatform removed - now using navigation
 }
 
-const StickyTopMenu: React.FC<StickyTopMenuProps> = ({ onTogglePlatform }) => {
+const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -30,10 +30,22 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = ({ onTogglePlatform }) => {
       description: 'Go to main dashboard'
     },
     { 
+      path: '/activities', 
+      label: 'Learning Activities', 
+      icon: GraduationCap,
+      description: 'Browse all learning activities'
+    },
+    { 
       path: '/malayalam', 
-      label: 'Language Learning Adventures', 
+      label: 'Malayalam', 
       icon: Languages,
-      description: 'Learn Malayalam and Arabic'
+      description: 'Learn Malayalam language'
+    },
+    { 
+      path: '/arabic', 
+      label: 'Arabic', 
+      icon: BookOpen,
+      description: 'Learn Arabic language'
     }
   ];
 
@@ -43,80 +55,42 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = ({ onTogglePlatform }) => {
         <div className="flex items-center justify-between">
           {/* Left side - Navigation items */}
           <div className="flex items-center space-x-2">
-            {/* Home */}
-            <Button
-              variant={isActive('/') ? "default" : "ghost"}
-              size="sm"
-              onClick={() => navigate('/')}
-              className={`flex items-center gap-2 transition-all ${
-                isActive('/') 
-                  ? 'bg-purple-600 text-white shadow-md' 
-                  : 'hover:bg-purple-50 hover:text-purple-700'
-              }`}
-              title="Go to Home"
-            >
-              <Home className="w-4 h-4" />
-              <span className="hidden sm:inline">Home</span>
-            </Button>
-
-            {/* Language Learning Adventures */}
-            <Button
-              variant={isActive('/malayalam') || isActive('/arabic') ? "default" : "ghost"}
-              size="sm"
-              onClick={() => navigate('/malayalam')}
-              className={`flex items-center gap-2 transition-all ${
-                isActive('/malayalam') || isActive('/arabic')
-                  ? 'bg-orange-600 text-white shadow-md' 
-                  : 'hover:bg-orange-50 hover:text-orange-700'
-              }`}
-              title="Language Learning Adventures"
-            >
-              <Languages className="w-4 h-4" />
-              <span className="hidden md:inline">Language Learning Adventures</span>
-              <span className="hidden sm:inline md:hidden">Languages</span>
-            </Button>
-
-            {/* Learning Activities by Subject - Navigate to home with scroll */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                if (location.pathname !== '/') {
-                  navigate('/');
-                } else {
-                  // Scroll to activities section
-                  setTimeout(() => {
-                    const activitiesSection = document.querySelector('.category-tabs');
-                    if (activitiesSection) {
-                      activitiesSection.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }, 100);
-                }
-              }}
-              className="flex items-center gap-2 hover:bg-green-50 hover:text-green-700 transition-all"
-              title="Learning Activities by Subject"
-            >
-              <GraduationCap className="w-4 h-4" />
-              <span className="hidden lg:inline">Learning Activities by Subject</span>
-              <span className="hidden md:inline lg:hidden">Activities</span>
-              <span className="hidden sm:inline md:hidden">Learn</span>
-            </Button>
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isCurrentActive = isActive(item.path);
+              
+              return (
+                <Button
+                  key={item.path}
+                  variant={isCurrentActive ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => navigate(item.path)}
+                  className={`flex items-center gap-2 transition-all ${
+                    isCurrentActive
+                      ? 'bg-purple-600 text-white shadow-md' 
+                      : 'hover:bg-purple-50 hover:text-purple-700'
+                  }`}
+                  title={item.description}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{item.label}</span>
+                </Button>
+              );
+            })}
           </div>
 
           {/* Right side - Try Integrated Platform */}
           <div className="flex items-center">
-            {onTogglePlatform && (
-              <Button
-                onClick={onTogglePlatform}
-                size="sm"
-                className="flex items-center gap-2 bg-purple-600 text-white hover:bg-purple-700 transition-all"
-                title="Try Integrated Platform"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span className="hidden md:inline">Try Integrated Platform</span>
-                <span className="hidden sm:inline md:hidden">Platform</span>
-              </Button>
-            )}
+            <Button
+              onClick={() => navigate('/integratedplatform')}
+              size="sm"
+              className="flex items-center gap-2 bg-purple-600 text-white hover:bg-purple-700 transition-all"
+              title="Try Integrated Platform"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span className="hidden md:inline">Try Integrated Platform</span>
+              <span className="hidden sm:inline md:hidden">Platform</span>
+            </Button>
           </div>
         </div>
       </div>

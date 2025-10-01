@@ -22,6 +22,12 @@ const FooterNavigation: React.FC = () => {
       description: 'Learning Activities Dashboard'
     },
     { 
+      path: '/activities', 
+      label: 'Activities', 
+      icon: Gamepad2,
+      description: 'Browse All Learning Activities'
+    },
+    { 
       path: '/malayalam', 
       label: 'Malayalam', 
       icon: Languages,

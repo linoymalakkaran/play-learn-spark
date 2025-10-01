@@ -32,8 +32,6 @@ import {
   LazyEmotionFaces,
   LazyPizzaFractions,
   LazyPetParade,
-  LazyArabicLearning,
-  LazyMalayalamLearning,
   useActivityPreloader
 } from '@/components/common/LazyLoadWrapper';
 import { PlaceholderActivity } from './activities/PlaceholderActivity';
@@ -731,6 +729,19 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
   const handleActivityLaunch = async (activityId: string) => {
     if (isLoadingActivity) return; // Prevent multiple clicks
     
+    // Handle language learning activities with navigation
+    if (activityId === 'enhanced-malayalam-learning') {
+      await soundEffects.playClick();
+      navigate('/malayalam');
+      return;
+    }
+    
+    if (activityId === 'enhanced-arabic-learning') {
+      await soundEffects.playClick();
+      navigate('/arabic');
+      return;
+    }
+    
     setIsLoadingActivity(true);
     await soundEffects.playClick();
     
@@ -749,7 +760,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
     
     setCurrentActivity(activityId);
     setIsLoadingActivity(false);
-    await soundEffects.playMagic();
+    await soundEffects.playSuccess();
     
     // Announce successful launch
     announceSuccess(`${activityName} activity started`);
@@ -890,26 +901,6 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
       <LazyPetParade
         childAge={child.age}
         onComplete={(score) => handleActivityComplete('pet-parade', score)}
-        onBack={() => setCurrentActivity(null)}
-      />
-    );
-  }
-
-  if (currentActivity === 'enhanced-arabic-learning') {
-    return (
-      <LazyArabicLearning
-        childAge={child.age}
-        onComplete={(score) => handleActivityComplete('enhanced-arabic-learning', score)}
-        onBack={() => setCurrentActivity(null)}
-      />
-    );
-  }
-
-  if (currentActivity === 'enhanced-malayalam-learning') {
-    return (
-      <LazyMalayalamLearning
-        childAge={child.age}
-        onComplete={(score) => handleActivityComplete('enhanced-malayalam-learning', score)}
         onBack={() => setCurrentActivity(null)}
       />
     );

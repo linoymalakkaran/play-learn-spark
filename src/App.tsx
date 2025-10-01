@@ -21,15 +21,22 @@ import { assetOptimizationService } from "@/services/AssetOptimizationService";
 import { globalErrorHandler } from "@/services/GlobalErrorHandler";
 import PerformanceMonitoringService from "@/services/PerformanceMonitoringService";
 import FocusManagerService from "@/services/FocusManagerService";
-import IntegratedLearningPlatform from "@/components/IntegratedLearningPlatform";
 import BackendStatus from "@/components/BackendStatus";
 import StudentSetup from "@/components/StudentSetup";
 import { useEffect, useState } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Activities from "./pages/Activities";
+import IntegratedPlatform from "./pages/IntegratedPlatform";
 import MalayalamLearning from "./pages/MalayalamLearning";
 import ArabicLearning from "./pages/ArabicLearning";
 import AIHomeworkAnalyzer from "./pages/AIHomeworkAnalyzer";
+import EnglishReading from "./pages/activities/EnglishReading";
+import MathNumbers from "./pages/activities/MathNumbers";
+import ScienceExploration from "./pages/activities/ScienceExploration";
+import ArtCreativity from "./pages/activities/ArtCreativity";
+import SocialSkills from "./pages/activities/SocialSkills";
+import PhysicalActivities from "./pages/activities/PhysicalActivities";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,7 +51,6 @@ const queryClient = new QueryClient({
 // Main app content component that shows after student setup
 const AppContent = () => {
   const { student, isSetupComplete } = useStudent();
-  const [showIntegratedPlatform, setShowIntegratedPlatform] = useState(false);
   const [showAccessibilityTester, setShowAccessibilityTester] = useState(true);
 
   // Initialize all services including performance monitoring and focus management
@@ -83,36 +89,12 @@ const AppContent = () => {
     };
   }, []);
 
-  // Toggle between integrated platform and original app
-  const togglePlatform = () => {
-    setShowIntegratedPlatform(!showIntegratedPlatform);
-  };
 
-  // Show integrated platform if enabled
-  if (showIntegratedPlatform) {
-    return (
-      <div className="relative">
-        <div className="fixed top-4 right-4 z-50">
-          <button
-            onClick={togglePlatform}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg shadow-lg hover:bg-purple-700 transition-colors"
-          >
-            Switch to Original App
-          </button>
-        </div>
-        <IntegratedLearningPlatform
-          childId={student?.name || 'student'}
-          userName={student?.name || 'Student'}
-          userAge={student?.age || 8}
-        />
-      </div>
-    );
-  }
 
   return (
     <EnhancedErrorBoundary boundary="navigation">
       {/* Sticky Top Menu */}
-      <StickyTopMenu onTogglePlatform={togglePlatform} />
+      <StickyTopMenu />
       
       {/* Simple App Layout */}
       <div className="min-h-screen bg-gradient-to-br from-background via-primary-soft/20 to-secondary-soft/20 flex flex-col">
@@ -122,6 +104,14 @@ const AppContent = () => {
           <main id="main-content" role="main" aria-label="Main content" tabIndex={-1} className="flex-1">
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/activities" element={<Activities />} />
+              <Route path="/activities/englishreading" element={<EnglishReading />} />
+              <Route path="/activities/mathnumbers" element={<MathNumbers />} />
+              <Route path="/activities/science" element={<ScienceExploration />} />
+              <Route path="/activities/art" element={<ArtCreativity />} />
+              <Route path="/activities/social" element={<SocialSkills />} />
+              <Route path="/activities/physical" element={<PhysicalActivities />} />
+              <Route path="/integratedplatform" element={<IntegratedPlatform />} />
               <Route path="/malayalam" element={<MalayalamLearning />} />
               <Route path="/arabic" element={<ArabicLearning />} />
               <Route path="/ai-homework" element={<AIHomeworkAnalyzer />} />

@@ -6,7 +6,8 @@
 import React, { useState, useEffect } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Wifi, WifiOff, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Wifi, WifiOff, AlertTriangle, CheckCircle, X } from 'lucide-react';
 import { apiService } from '@/services/apiService';
 
 interface BackendStatusProps {
@@ -20,6 +21,7 @@ export const BackendStatus: React.FC<BackendStatusProps> = ({
 }) => {
   const [isOnline, setIsOnline] = useState<boolean | null>(null);
   const [isChecking, setIsChecking] = useState(true);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
     checkBackendStatus();
@@ -43,23 +45,29 @@ export const BackendStatus: React.FC<BackendStatusProps> = ({
   };
 
   if (showInCorner) {
-    return (
-      <div className={`fixed top-4 left-4 z-40 ${className}`}>
-        <Badge 
-          variant={isOnline ? "default" : "destructive"}
-          className="flex items-center gap-2"
-        >
-          {isChecking ? (
-            <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
-          ) : isOnline ? (
-            <CheckCircle className="w-3 h-3" />
-          ) : (
-            <WifiOff className="w-3 h-3" />
-          )}
-          {isChecking ? 'Checking...' : isOnline ? 'Online' : 'Offline Mode'}
-        </Badge>
-      </div>
-    );
+    // Show in bottom right corner with close button when offline
+    if (!isOnline && !isDismissed && !isChecking) {
+      return (
+        <div className={`fixed bottom-6 right-6 z-40 ${className}`}>
+          <div className="bg-red-600 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-sm">
+            <WifiOff className="w-4 h-4 flex-shrink-0" />
+            <div className="flex-1">
+              <div className="font-semibold text-sm">Offline Mode</div>
+              <div className="text-xs opacity-90">Limited functionality available</div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsDismissed(true)}
+              className="text-white hover:bg-red-700 h-6 w-6 p-0"
+            >
+              <X className="w-3 h-3" />
+            </Button>
+          </div>
+        </div>
+      );
+    }
+    return null; // Don't show when online or dismissed
   }
 
   if (isOnline === null || isOnline) {

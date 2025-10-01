@@ -4,10 +4,12 @@ import { Dashboard } from '@/components/Dashboard';
 import { FullScreenLoading } from '@/components/common/LoadingSpinner';
 import { HelpButton } from '@/components/common/HelpButton';
 import { useTutorial } from '@/hooks/useTutorial';
+import { useStudent } from '@/hooks/useStudent';
 import { Child } from '@/types/learning';
 import { soundEffects } from '@/utils/sounds';
 
 const Index = () => {
+  const { student } = useStudent();
   const [currentChild, setCurrentChild] = useState<Child | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -15,56 +17,56 @@ const Index = () => {
   // Enhanced loading simulation with progress
   useEffect(() => {
     const loadApp = async () => {
-      // Simulate app initialization steps
-      const steps = [
-        { message: 'Loading Play Learn Spark...', duration: 500 },
-        { message: 'Initializing sound system...', duration: 300 },
-        { message: 'Loading activities...', duration: 400 },
-        { message: 'Checking saved progress...', duration: 300 },
-        { message: 'Preparing your learning adventure...', duration: 200 }
-      ];
-
-      let totalProgress = 0;
-      const stepProgress = 100 / steps.length;
-
-      for (let i = 0; i < steps.length; i++) {
-        setLoadingProgress(totalProgress);
-        await new Promise(resolve => setTimeout(resolve, steps[i].duration));
-        totalProgress += stepProgress;
+      // If we have student info, convert to child format
+      if (student) {
+        const child: Child = {
+          id: '1',
+          name: student.name,
+          age: Math.min(6, Math.max(3, student.age || 5)) as 3 | 4 | 5 | 6,
+          progress: {
+            totalActivitiesCompleted: 0,
+            badges: [],
+            currentStreak: 0,
+            englishLevel: 1,
+            mathLevel: 1,
+            totalScore: 0,
+            averageScore: 0,
+            lastActivityDate: new Date().toISOString()
+          },
+          preferences: {
+            difficultyLevel: 2,
+            learningStyle: 'visual',
+            interests: []
+          }
+        };
+        setCurrentChild(child);
       }
 
-      // Load saved child data
-      const savedChild = localStorage.getItem('play-learn-spark-child');
-      if (savedChild) {
-        try {
-          const child = JSON.parse(savedChild);
-          setCurrentChild(child);
-          await soundEffects.playSuccess();
-        } catch (error) {
-          console.error('Error loading saved child data:', error);
-          localStorage.removeItem('play-learn-spark-child');
-          await soundEffects.playError();
-        }
-      }
-
+      // Simulate quick loading
+      setLoadingProgress(50);
+      await new Promise(resolve => setTimeout(resolve, 200));
       setLoadingProgress(100);
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 100));
       setIsLoading(false);
     };
 
     loadApp();
-  }, []);
+  }, [student]);
 
   // Handle child profile updates with enhanced feedback
   const handleChildUpdate = async (child: Child) => {
     setCurrentChild(child);
     localStorage.setItem('play-learn-spark-child', JSON.stringify(child));
-    await soundEffects.playPop();
+    if (soundEffects.playClick) {
+      await soundEffects.playClick();
+    }
   };
 
   // Reset app with confirmation
   const handleReset = async () => {
-    await soundEffects.playClick();
+    if (soundEffects.playClick) {
+      await soundEffects.playClick();
+    }
     localStorage.removeItem('play-learn-spark-child');
     setCurrentChild(null);
   };
@@ -73,15 +75,15 @@ const Index = () => {
   if (isLoading) {
     return (
       <FullScreenLoading 
-        message="Loading your learning adventure..."
+        message="Setting up your dashboard..."
         progress={loadingProgress}
         showProgress={true}
       />
     );
   }
 
-  // Show welcome screen if no child profile
-  if (!currentChild) {
+  // Show welcome screen if no child profile (but we should have student by now)
+  if (!currentChild && !student) {
     return <WelcomeScreen onChildSelected={handleChildUpdate} />;
   }
 

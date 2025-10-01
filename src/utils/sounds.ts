@@ -77,6 +77,14 @@ export class SoundEffects {
     setTimeout(() => this.createTone(783.99, 0.3), 300);
   }
 
+  async playMagic(): Promise<void> {
+    // Play a magical ascending tone sequence
+    await this.createTone(440, 0.1);
+    setTimeout(() => this.createTone(554.37, 0.1), 100);
+    setTimeout(() => this.createTone(659.25, 0.1), 200);
+    setTimeout(() => this.createTone(783.99, 0.2), 300);
+  }
+
   /**
    * Play a short pronunciation cue for a letter or word.
    * Tries to use SpeechSynthesis when available for real pronunciation,

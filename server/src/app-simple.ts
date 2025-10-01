@@ -60,9 +60,8 @@ app.use('*', (req, res) => {
 
 const startServer = async () => {
   try {
-    // Initialize database
-    const { db } = await import('./config/database');
-    logger.info('Database initialized successfully');
+    // Simple server start without database
+    logger.info('Starting simple server without database');
 
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);

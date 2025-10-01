@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/simple-server.ts"
+  ],
+  "exclude": [
+    "src/routes/**/*",
+    "src/controllers/**/*",
+    "src/models/**/*",
+    "src/app.ts",
+    "src/app-simple.ts"
+  ]
+}

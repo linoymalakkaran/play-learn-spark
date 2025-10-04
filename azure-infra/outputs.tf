@@ -72,6 +72,7 @@ output "application_insights_connection_string" {
 output "custom_domain_verification_id" {
   description = "The custom domain verification ID (if custom domain is enabled)"
   value       = var.enable_custom_domain && var.custom_domain_name != "" ? azurerm_linux_web_app.frontend.custom_domain_verification_id : null
+  sensitive   = true
 }
 
 # Docker build and push commands

@@ -24,13 +24,10 @@ terraform {
 
 # Configure the Microsoft Azure Provider
 provider "azurerm" {
+  skip_provider_registration = true
   features {
     resource_group {
       prevent_deletion_if_contains_resources = false
-    }
-    
-    app_service {
-      purge_soft_deleted_on_destroy = true
     }
   }
 }

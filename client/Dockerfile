@@ -37,6 +37,9 @@ RUN mkdir -p /tmp /var/cache/nginx/client_temp \
 # Switch to non-root user
 USER appuser
 
+# Set port for Azure App Service
+ENV WEBSITES_PORT=80
+
 # Expose port 80
 EXPOSE 80
 

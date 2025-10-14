@@ -491,9 +491,6 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
       { id: 'ancient-civilizations', title: 'Ancient Civilizations', description: 'Discover how people lived long ago!', subcategory: 'history', icon: '🏺', backgroundColor: 'from-primary to-primary-soft' },
       { id: 'world-inventions', title: 'World Inventions', description: 'See inventions from different countries!', subcategory: 'inventions', icon: '⚙️', backgroundColor: 'from-secondary to-secondary-soft' },
       { id: 'cultural-customs', title: 'Cultural Customs', description: 'Learn about different traditions!', subcategory: 'customs', icon: '🤝', backgroundColor: 'from-magic to-magic-soft' },
-      { id: 'world-alphabets', title: 'World Alphabets', description: 'See different writing systems!', subcategory: 'writing', icon: '📝', backgroundColor: 'from-success to-success-soft' },
-      { id: 'global-community', title: 'Global Community', description: 'We are all connected!', subcategory: 'community', icon: '🤝', backgroundColor: 'from-primary to-primary-soft' },
-      { id: 'environmental-awareness', title: 'Environmental Awareness', description: 'Protect our planet together!', subcategory: 'environment', icon: '🌱', backgroundColor: 'from-secondary to-secondary-soft' },
     ];
 
     // LANGUAGE LEARNING ACTIVITIES - Arabic, Malayalam, Cultural Learning
@@ -534,7 +531,7 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
     if (age >= 4) {
       englishActivities.push(
         { id: 'letter-hunt', title: 'Letter Hunt', description: 'Find letters hiding in pictures!', subcategory: 'phonics', icon: '🔤', backgroundColor: 'from-magic to-magic-soft' },
-        { id: 'rhyme-time', title: 'Rhyme Time', description: 'Find words that sound alike!', subcategory: 'phonics', icon: '🎵', backgroundColor: 'from-magic to-magic-soft' }
+        { id: 'word-rhyming', title: 'Word Rhyming', description: 'Find words that sound alike!', subcategory: 'phonics', icon: '🎵', backgroundColor: 'from-magic to-magic-soft' }
       );
     }
 

@@ -1,8 +1,16 @@
-import React, { ReactNode } from 'react';
-import { ArrowLeft, Home, Settings } from 'lucide-react';
+import React, { ReactNode, useState } from 'react';
+import { ArrowLeft, Home, Settings, User, LogOut, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface LayoutProps {
   children: ReactNode;
@@ -27,6 +35,8 @@ const Layout: React.FC<LayoutProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, isAuthenticated, logout, isLoading } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const isHomePage = location.pathname === '/';
 
   const handleBack = () => {
@@ -44,6 +54,22 @@ const Layout: React.FC<LayoutProps> = ({
   const handleSettings = () => {
     // TODO: Implement settings page
     console.log('Settings clicked - to be implemented');
+  };
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const handleProfile = () => {
+    // TODO: Navigate to profile page
+    console.log('Profile clicked - to be implemented');
   };
 
   return (
@@ -101,6 +127,54 @@ const Layout: React.FC<LayoutProps> = ({
                   >
                     <Settings className="w-5 h-5 text-blue-600" />
                   </Button>
+                )}
+
+                {/* User Menu */}
+                {isAuthenticated && user && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="flex items-center gap-2 px-3 py-2 hover:bg-blue-100 transition-colors"
+                        disabled={isLoading}
+                      >
+                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                          <User className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700 hidden sm:block">
+                          {user.profile.firstName || user.username}
+                        </span>
+                        <ChevronDown className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <div className="px-3 py-2">
+                        <p className="text-sm font-medium text-gray-900">
+                          {user.profile.firstName} {user.profile.lastName}
+                        </p>
+                        <p className="text-xs text-gray-500">{user.email}</p>
+                      </div>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleProfile} className="cursor-pointer">
+                        <User className="w-4 h-4 mr-2" />
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleSettings} className="cursor-pointer">
+                        <Settings className="w-4 h-4 mr-2" />
+                        Settings
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={handleLogout} 
+                        className="cursor-pointer text-red-600 focus:text-red-600"
+                        disabled={isLoggingOut}
+                      >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        {isLoggingOut ? 'Logging out...' : 'Logout'}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
               </div>
             </div>

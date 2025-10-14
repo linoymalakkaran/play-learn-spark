@@ -48,12 +48,10 @@ export const SizeSorter = ({ childAge, onComplete, onBack }: SizeSorterProps) =>
   const [sortSlots, setSortSlots] = useState<SortSlot[]>([]);
   const [availableItems, setAvailableItems] = useState<{ emoji: string; size: 'small' | 'medium' | 'large'; name: string; id: string }[]>([]);
 
-  const { isDragging, draggedItem, handleDragStart, handleDrop } = useDragAndDrop({
-    onDrop: (item, dropZoneId) => {
-      handleSizeDrop(item.id, dropZoneId);
-    },
-    hapticFeedback: true,
-  });
+    const { isDragging, draggedItem, activeDropZone, registerDraggable, registerDropZone } = useDragAndDrop({
+      hapticFeedback: true,
+      soundEffects: true,
+    });
 
   useEffect(() => {
     // Create at least 8 size challenges
@@ -154,7 +152,7 @@ export const SizeSorter = ({ childAge, onComplete, onBack }: SizeSorterProps) =>
         // Sorting challenge - check if all slots filled correctly
         const filledSlots = newSlots.filter(s => s.item);
         if (filledSlots.length === 3) {
-          await soundEffects.playSuccess();
+            await soundEffects.playSuccess();
           setScore(prev => prev + 1);
           setShowFeedback(true);
           
@@ -165,14 +163,14 @@ export const SizeSorter = ({ childAge, onComplete, onBack }: SizeSorterProps) =>
               setShowFeedback(false);
               await soundEffects.playClick();
             } else {
-              await soundEffects.playCheer();
+                await soundEffects.playSuccess();
               setGameComplete(true);
             }
           }, 2000);
         }
       } else if (currentChal.targetSize) {
         // Find challenge - completed with correct drop
-        await soundEffects.playSuccess();
+          await soundEffects.playSuccess();
         setScore(prev => prev + 1);
         setShowFeedback(true);
         
@@ -183,7 +181,7 @@ export const SizeSorter = ({ childAge, onComplete, onBack }: SizeSorterProps) =>
             setShowFeedback(false);
             await soundEffects.playClick();
           } else {
-            await soundEffects.playCheer();
+              await soundEffects.playSuccess();
             setGameComplete(true);
           }
         }, 2000);
@@ -205,7 +203,7 @@ export const SizeSorter = ({ childAge, onComplete, onBack }: SizeSorterProps) =>
       // "Find the size" challenge
       const selectedItem = currentChal.items[itemIndex];
       if (selectedItem.size === currentChal.targetSize) {
-        await soundEffects.playSuccess();
+          await soundEffects.playSuccess();
         setScore(prev => prev + 1);
         setShowFeedback(true);
         
@@ -216,7 +214,7 @@ export const SizeSorter = ({ childAge, onComplete, onBack }: SizeSorterProps) =>
             setSelectedItems([]);
             await soundEffects.playClick();
           } else {
-            await soundEffects.playCheer();
+              await soundEffects.playSuccess();
             setGameComplete(true);
           }
         }, 2000);
@@ -238,7 +236,7 @@ export const SizeSorter = ({ childAge, onComplete, onBack }: SizeSorterProps) =>
           const correctOrder = ['small', 'medium', 'large'];
           
           if (JSON.stringify(orderedSizes) === JSON.stringify(correctOrder)) {
-            await soundEffects.playSuccess();
+              await soundEffects.playSuccess();
             setScore(prev => prev + 1);
             setShowFeedback(true);
             
@@ -249,7 +247,7 @@ export const SizeSorter = ({ childAge, onComplete, onBack }: SizeSorterProps) =>
                 setSelectedItems([]);
                 await soundEffects.playClick();
               } else {
-                await soundEffects.playCheer();
+                  await soundEffects.playSuccess();
                 setGameComplete(true);
               }
             }, 2000);
@@ -321,7 +319,7 @@ export const SizeSorter = ({ childAge, onComplete, onBack }: SizeSorterProps) =>
     <div className="min-h-screen bg-gradient-to-br from-secondary-soft to-magic-soft p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+  <div className="flex items-center justify-between mb-6 sticky top-0 z-20 bg-gradient-to-br from-magic-soft to-success-soft bg-opacity-95 backdrop-blur">
           <Button onClick={onBack} variant="outline" className="px-4 py-2 font-['Comic_Neue'] font-bold">
             ← Back
           </Button>

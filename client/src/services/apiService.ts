@@ -446,6 +446,58 @@ export const contentService = {
   }
 };
 
+// Authentication API
+export const authService = {
+  // Login user
+  login: async (email: string, password: string) => {
+    return apiService.post('/auth/login', { email, password });
+  },
+
+  // Register new user
+  register: async (userData: {
+    email: string;
+    password: string;
+    username: string;
+    role?: string;
+    firstName: string;
+    lastName: string;
+    age?: number;
+    language?: string;
+  }) => {
+    return apiService.post('/auth/register', userData);
+  },
+
+  // Logout user
+  logout: async () => {
+    return apiService.post('/auth/logout');
+  },
+
+  // Refresh access token
+  refreshToken: async (refreshToken: string) => {
+    return apiService.post('/auth/refresh-token', { refreshToken });
+  },
+
+  // Get current user profile
+  getProfile: async () => {
+    return apiService.get('/auth/profile');
+  },
+
+  // Update user profile
+  updateProfile: async (updates: any) => {
+    return apiService.put('/auth/profile', updates);
+  },
+
+  // Change password
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    return apiService.post('/auth/change-password', { currentPassword, newPassword });
+  },
+
+  // Get user's children (for parent accounts)
+  getChildren: async () => {
+    return apiService.get('/auth/children');
+  }
+};
+
 // User Management API (placeholder for future implementation)
 export const userService = {
   // Get user profile

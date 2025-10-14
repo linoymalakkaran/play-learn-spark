@@ -7,6 +7,7 @@ import { ProgressProvider } from "@/hooks/useProgress";
 import { ContentProvider } from "@/hooks/useContent";
 import { PersonalizationProvider } from "@/hooks/usePersonalization";
 import { StudentProvider, useStudent } from "@/hooks/useStudent";
+import { AuthProvider } from "@/hooks/useAuth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { RouteTransition } from "@/components/transitions/PageTransition";
@@ -31,6 +32,7 @@ import IntegratedPlatform from "./pages/IntegratedPlatform";
 import MalayalamLearning from "./pages/MalayalamLearning";
 import ArabicLearning from "./pages/ArabicLearning";
 import AIHomeworkAnalyzer from "./pages/AIHomeworkAnalyzer";
+import AuthDemo from "./pages/AuthDemo";
 import EnglishReading from "./pages/activities/EnglishReading";
 import MathNumbers from "./pages/activities/MathNumbers";
 import ScienceExploration from "./pages/activities/ScienceExploration";
@@ -115,6 +117,7 @@ const AppContent = () => {
               <Route path="/malayalam" element={<MalayalamLearning />} />
               <Route path="/arabic" element={<ArabicLearning />} />
               <Route path="/ai-homework" element={<AIHomeworkAnalyzer />} />
+              <Route path="/auth-demo" element={<AuthDemo />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
@@ -158,23 +161,25 @@ const AppWithStudentCheck = () => {
 
   // If setup is complete, show the main app
   return (
-    <ProgressProvider>
-      <ContentProvider>
-        <PersonalizationProvider>
-          <TutorialProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <NavigationProvider>
-                  <AppContent />
-                </NavigationProvider>
-              </BrowserRouter>
-            </TooltipProvider>
-          </TutorialProvider>
-        </PersonalizationProvider>
-      </ContentProvider>
-    </ProgressProvider>
+    <AuthProvider>
+      <ProgressProvider>
+        <ContentProvider>
+          <PersonalizationProvider>
+            <TutorialProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <NavigationProvider>
+                    <AppContent />
+                  </NavigationProvider>
+                </BrowserRouter>
+              </TooltipProvider>
+            </TutorialProvider>
+          </PersonalizationProvider>
+        </ContentProvider>
+      </ProgressProvider>
+    </AuthProvider>
   );
 };
 

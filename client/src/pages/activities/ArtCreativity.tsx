@@ -48,28 +48,28 @@ const ArtCreativity = () => {
     ],
     intermediate: [
       {
-        id: 'pattern-designs',
-        title: '🔄 Pattern Designer',
-        description: 'Create repeating patterns and designs',
+        id: 'origami-creations',
+        title: '🦢 Origami Creations',
+        description: 'Fold paper into amazing animals and shapes',
         duration: '30 mins',
         difficulty: 'Medium',
-        category: 'Design'
+        category: 'Paper Art'
       },
       {
-        id: 'digital-collage',
-        title: '📸 Digital Collage Maker',
-        description: 'Combine images to tell visual stories',
+        id: 'nature-collage',
+        title: '🍂 Nature Collage',
+        description: 'Make art using leaves, flowers, and natural materials',
         duration: '35 mins',
         difficulty: 'Medium',
         category: 'Collage'
       },
       {
-        id: 'music-creation',
-        title: '🎵 Music & Art Fusion',
-        description: 'Create visual art inspired by music',
+        id: 'shadow-drawing',
+        title: '� Shadow Drawing',
+        description: 'Trace and color shadows to create unique art',
         duration: '40 mins',
         difficulty: 'Medium',
-        category: 'Mixed Media'
+        category: 'Drawing'
       }
     ],
     advanced: [

@@ -40,11 +40,9 @@ export const CountingTrain = ({ childAge, onComplete, onBack }: CountingTrainPro
   const [dragItems, setDragItems] = useState<DragItem[]>([]);
   const [countedItems, setCountedItems] = useState<string[]>([]);
   
-  const { isDragging, draggedItem, handleDragStart, handleDrop } = useDragAndDrop({
-    onDrop: (item, dropZoneId) => {
-      handleDragDrop(item.id, dropZoneId);
-    },
+  const { isDragging, draggedItem, activeDropZone, registerDraggable, registerDropZone } = useDragAndDrop({
     hapticFeedback: true,
+    soundEffects: true,
   });
 
   useEffect(() => {
@@ -133,7 +131,7 @@ export const CountingTrain = ({ childAge, onComplete, onBack }: CountingTrainPro
             setSelectedAnswer(null);
             await soundEffects.playClick();
           } else {
-            await soundEffects.playCheer();
+            await soundEffects.playSuccess();
             setGameComplete(true);
           }
         }, 2000);
@@ -155,7 +153,7 @@ export const CountingTrain = ({ childAge, onComplete, onBack }: CountingTrainPro
           setSelectedAnswer(null);
           await soundEffects.playClick();
         } else {
-          await soundEffects.playCheer();
+          await soundEffects.playSuccess();
           setGameComplete(true);
         }
       }, 2000);
@@ -220,7 +218,7 @@ export const CountingTrain = ({ childAge, onComplete, onBack }: CountingTrainPro
     <div className="min-h-screen bg-gradient-to-br from-secondary-soft to-primary-soft p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 sticky top-0 z-20 bg-gradient-to-br from-secondary-soft to-primary-soft bg-opacity-95 backdrop-blur">
           <Button onClick={onBack} variant="outline" className="px-4 py-2 font-['Comic_Neue'] font-bold">
             ← Back
           </Button>
@@ -258,10 +256,8 @@ export const CountingTrain = ({ childAge, onComplete, onBack }: CountingTrainPro
                       {dragItems.map((item) => (
                         <Draggable
                           key={item.id}
-                          id={item.id}
-                          data={item}
-                          onDragStart={handleDragStart}
-                          disabled={countedItems.includes(item.id)}
+                          item={item}
+                          className={countedItems.includes(item.id) ? 'opacity-50' : ''}
                         >
                           <div className={`
                             text-4xl p-2 rounded-lg cursor-pointer transition-all duration-300
@@ -281,7 +277,8 @@ export const CountingTrain = ({ childAge, onComplete, onBack }: CountingTrainPro
                   {/* Drop Zone */}
                   <DropZone
                     id="counting-zone"
-                    onDrop={handleDrop}
+                    accepts={["passenger", "car"]}
+                    onDrop={(item) => handleDragDrop(item.id, 'counting-zone')}
                     className="min-h-32 border-4 border-dashed border-secondary rounded-lg p-6 bg-magic-soft"
                   >
                     <div className="text-center">

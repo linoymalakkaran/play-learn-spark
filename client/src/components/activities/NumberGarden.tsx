@@ -126,7 +126,7 @@ export const NumberGarden = ({ childAge, onComplete, onBack }: NumberGardenProps
     <div className="min-h-screen bg-gradient-to-br from-secondary-soft to-primary-soft p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+  <div className="flex items-center justify-between mb-6 sticky top-0 z-20 bg-gradient-to-br from-success-soft to-primary-soft bg-opacity-95 backdrop-blur">
           <Button onClick={onBack} variant="outline" className="px-4 py-2 font-['Comic_Neue'] font-bold">
             ← Back
           </Button>

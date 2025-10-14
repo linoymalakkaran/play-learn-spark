@@ -85,11 +85,9 @@ export const ShapeDetective = ({ childAge, onComplete, onBack }: ShapeDetectiveP
   const [shapeItems, setShapeItems] = useState<ShapeItem[]>([]);
   const [sortedShapes, setSortedShapes] = useState<{[key: string]: ShapeItem[]}>({});
 
-  const { isDragging, draggedItem, handleDragStart, handleDrop } = useDragAndDrop({
-    onDrop: (item, dropZoneId) => {
-      handleShapeDrop(item.id, dropZoneId);
-    },
+  const { isDragging, draggedItem, activeDropZone, registerDraggable, registerDropZone } = useDragAndDrop({
     hapticFeedback: true,
+    soundEffects: true,
   });
 
   useEffect(() => {
@@ -188,7 +186,7 @@ export const ShapeDetective = ({ childAge, onComplete, onBack }: ShapeDetectiveP
             setShowHint(false);
             await soundEffects.playClick();
           } else {
-            await soundEffects.playCheer();
+            await soundEffects.playSuccess();
             setGameComplete(true);
           }
         }, 2000);
@@ -236,7 +234,7 @@ export const ShapeDetective = ({ childAge, onComplete, onBack }: ShapeDetectiveP
           setShowHint(false);
           await soundEffects.playClick();
         } else {
-          await soundEffects.playCheer();
+          await soundEffects.playSuccess();
           setGameComplete(true);
         }
       }, 2000);
@@ -304,7 +302,7 @@ export const ShapeDetective = ({ childAge, onComplete, onBack }: ShapeDetectiveP
     <div className="min-h-screen bg-gradient-to-br from-magic-soft to-primary-soft p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+  <div className="flex items-center justify-between mb-6 sticky top-0 z-20 bg-gradient-to-br from-magic-soft to-primary-soft bg-opacity-95 backdrop-blur">
           <Button onClick={onBack} variant="outline" className="px-4 py-2 font-['Comic_Neue'] font-bold">
             ← Back
           </Button>

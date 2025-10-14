@@ -63,14 +63,30 @@ const PhysicalActivities = () => {
         difficulty: 'Medium',
         category: 'Collage'
       },
-      {
-        id: 'music-creation',
-        title: '🎵 Music & Art Fusion',
-        description: 'Create visual art inspired by music',
-        duration: '40 mins',
-        difficulty: 'Medium',
-        category: 'Mixed Media'
-      }
+        {
+          id: 'obstacle-course',
+          title: '🏃 Obstacle Course',
+          description: 'Complete a fun indoor obstacle course for agility and strength',
+          duration: '30 mins',
+          difficulty: 'Medium',
+          category: 'Agility'
+        },
+        {
+          id: 'yoga-adventure',
+          title: '🧘 Yoga Adventure',
+          description: 'Follow a story-based yoga routine for flexibility and calm',
+          duration: '35 mins',
+          difficulty: 'Medium',
+          category: 'Flexibility'
+        },
+        {
+          id: 'music-creation',
+          title: '🎵 Music & Art Fusion',
+          description: 'Create visual art inspired by music',
+          duration: '40 mins',
+          difficulty: 'Medium',
+          category: 'Mixed Media'
+        }
     ],
     advanced: [
       {

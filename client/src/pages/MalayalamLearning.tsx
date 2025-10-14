@@ -790,20 +790,7 @@ const MalayalamLearning = () => {
             <Volume2 className="w-3 h-3 mr-1" />
             🔊
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              const exampleText = letter.example || letter.exampleTransliteration || letter.transliteration;
-              playPronunciation(exampleText);
-              soundEffects.playClick();
-            }}
-            className="bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-700 font-semibold text-xs px-2 py-1"
-          >
-            <PlayCircle className="w-3 h-3 mr-1" />
-            📝
-          </Button>
+
         </div>
         
         {selectedLetter === index && (

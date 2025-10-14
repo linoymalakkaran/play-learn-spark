@@ -63,16 +63,35 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
   };
 
   const handleSkip = async () => {
-    await soundEffects.playPop();
+    await soundEffects.playClick();
     onSkip();
   };
+
+  // Close on ESC key
+  useEffect(() => {
+    if (!isVisible) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleSkip();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [isVisible]);
 
   if (!isVisible || !currentTutorialStep) return null;
 
   const progress = ((activeStep + 1) / steps.length) * 100;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+      onClick={handleSkip} // clicking outside the card skips/closes
+      role="dialog"
+      aria-modal="true"
+      aria-label={currentTutorialStep.title}
+    >
       {/* Spotlight effect for target element */}
       {currentTutorialStep.targetElement && (
         <div className="absolute inset-0 pointer-events-none">
@@ -86,15 +105,26 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
       )}
 
       {/* Tutorial Card */}
-      <div className={`
+      <div
+        className={`
         absolute transform transition-all duration-300 ${isAnimating ? 'scale-95 opacity-50' : 'scale-100 opacity-100'}
         ${currentTutorialStep.position === 'center' ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' : ''}
         ${currentTutorialStep.position === 'top' ? 'top-4 left-1/2 -translate-x-1/2' : ''}
         ${currentTutorialStep.position === 'bottom' ? 'bottom-4 left-1/2 -translate-x-1/2' : ''}
         ${currentTutorialStep.position === 'left' ? 'left-4 top-1/2 -translate-y-1/2' : ''}
         ${currentTutorialStep.position === 'right' ? 'right-4 top-1/2 -translate-y-1/2' : ''}
-      `}>
-        <Card className="p-6 max-w-md mx-4 bg-gradient-to-br from-white via-blue-50 to-purple-50 border-2 border-primary/20 shadow-2xl">
+      `}
+        onClick={(e) => e.stopPropagation()} // prevent backdrop click
+      >
+        <Card className="relative p-6 max-w-md mx-4 bg-gradient-to-br from-white via-blue-50 to-purple-50 border-2 border-primary/20 shadow-2xl">
+          {/* Close (X) button for quick skip */}
+          <button
+            onClick={handleSkip}
+            aria-label="Skip tutorial"
+            className="absolute top-2 right-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ✕
+          </button>
           {/* Progress Bar */}
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">

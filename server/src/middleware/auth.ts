@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt, { SignOptions } from 'jsonwebtoken';
-import { User, IUser } from '../models/User';
+import * as jwt from 'jsonwebtoken';
+import { SignOptions } from 'jsonwebtoken';
+import { UserModel as User } from '../models/UserStore';
 import { logger } from '../utils/logger';
 
 // Extend Request interface to include user
 declare global {
   namespace Express {
     interface Request {
-      user?: IUser;
+      user?: User;
     }
   }
 }
@@ -21,9 +22,9 @@ export interface JWTPayload {
 }
 
 // Generate JWT token
-export const generateToken = (user: IUser): string => {
+export const generateToken = (user: User): string => {
   const payload = {
-    userId: user._id.toString(),
+    userId: user.id.toString(),
     email: user.email,
     role: user.role,
   };
@@ -36,9 +37,9 @@ export const generateToken = (user: IUser): string => {
 };
 
 // Generate refresh token
-export const generateRefreshToken = (user: IUser): string => {
+export const generateRefreshToken = (user: User): string => {
   const payload = {
-    userId: user._id.toString(),
+    userId: user.id.toString(),
     type: 'refresh',
   };
 
@@ -73,7 +74,7 @@ export const authenticateToken = async (
     ) as JWTPayload;
 
     // Fetch user from database
-    const user = await User.findById(decoded.userId).select('+password');
+    const user = await User.findByPk(parseInt(decoded.userId));
     if (!user) {
       res.status(401).json({
         success: false,
@@ -83,7 +84,7 @@ export const authenticateToken = async (
     }
 
     // Check if account is locked
-    if (user.security.lockedUntil && user.security.lockedUntil > new Date()) {
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
       res.status(423).json({
         success: false,
         message: 'Account is temporarily locked due to multiple failed login attempts',
@@ -162,7 +163,7 @@ export const authorizeOwnership = (resourceUserIdField = 'userId') => {
 
     // Check if user owns the resource
     const resourceUserId = req.params[resourceUserIdField] || req.body[resourceUserIdField];
-    if (resourceUserId && resourceUserId !== req.user._id.toString()) {
+    if (resourceUserId && resourceUserId !== req.user.id.toString()) {
       res.status(403).json({
         success: false,
         message: 'Access denied. You can only access your own resources.',
@@ -194,7 +195,7 @@ export const optionalAuth = async (
       process.env.JWT_SECRET || 'play-learn-spark-secret-key'
     ) as JWTPayload;
 
-    const user = await User.findById(decoded.userId);
+    const user = await User.findByPk(parseInt(decoded.userId));
     if (user) {
       req.user = user;
     }
@@ -217,13 +218,13 @@ export const requireSubscription = (requiredLevel: 'free' | 'premium' | 'family'
       return;
     }
 
-    const subscriptionHierarchy = {
+    const subscriptionHierarchy: { [key: string]: number } = {
       free: 1,
       premium: 2,
       family: 3,
     };
 
-    const userLevel = subscriptionHierarchy[req.user.subscription.type];
+    const userLevel = subscriptionHierarchy[req.user.subscriptionType];
     const required = subscriptionHierarchy[requiredLevel];
 
     if (userLevel < required) {
@@ -236,7 +237,7 @@ export const requireSubscription = (requiredLevel: 'free' | 'premium' | 'family'
     }
 
     // Check if subscription has expired
-    if (req.user.subscription.expiresAt && req.user.subscription.expiresAt < new Date()) {
+    if (req.user.subscriptionExpiresAt && req.user.subscriptionExpiresAt < new Date()) {
       res.status(403).json({
         success: false,
         message: 'Subscription has expired',

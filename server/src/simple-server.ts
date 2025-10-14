@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import { connectDatabase, initializeDefaultData } from './config/database';
+import authRoutes from './routes/auth.routes';
 
 // Load environment variables
 dotenv.config();
@@ -14,13 +16,19 @@ app.use(helmet());
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:8080',
+  origin: [
+    process.env.CORS_ORIGIN || 'http://localhost:8080',
+    'http://localhost:8081'
+  ],
   credentials: true
 }));
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// API Routes
+app.use('/api/auth', authRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -55,11 +63,25 @@ app.get('/', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Play Learn Spark Backend Server running on port ${PORT}`);
-  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🌐 CORS origin: ${process.env.CORS_ORIGIN || 'http://localhost:8080'}`);
-  console.log(`🔍 Health check: http://localhost:${PORT}/health`);
-});
+const startServer = async () => {
+  try {
+    // Initialize database
+    await connectDatabase();
+    await initializeDefaultData();
+    
+    app.listen(PORT, () => {
+      console.log(`🚀 Play Learn Spark Backend Server running on port ${PORT}`);
+      console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🌐 CORS origin: ${process.env.CORS_ORIGIN || 'http://localhost:8080'}`);
+      console.log(`🔍 Health check: http://localhost:${PORT}/health`);
+      console.log(`🗄️ Database: SQLite (in-memory)`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 export default app;

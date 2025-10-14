@@ -1,5 +1,5 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-import bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcryptjs';
 import { sequelize } from '../config/database';
 
 export interface UserAttributes {
@@ -88,7 +88,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public async resetLoginAttempts(): Promise<void> {
     await this.update({
       loginAttempts: 0,
-      lockedUntil: null,
+      lockedUntil: undefined,
     });
   }
 }

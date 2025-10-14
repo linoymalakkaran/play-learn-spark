@@ -1,29 +1,28 @@
 import { logger } from '../utils/logger';
 
-// Simple mock database for basic server functionality
-const mockDb = {
+// Simple in-memory database for development
+const inMemoryDb = {
   connected: true,
-  info: 'Mock database for simple server setup'
+  info: 'In-memory database for development'
 };
 
 export const connectDatabase = async () => {
-  logger.info('Using mock database - no actual database connection needed');
-  return mockDb;
+  logger.info('Using in-memory database - no external database connection needed');
+  return inMemoryDb;
 };
 
-export const db = mockDb;
+export const db = inMemoryDb;
 
-// Mock functions for compatibility
 export const closeDatabase = async () => {
-  logger.info('Mock database disconnected');
+  logger.info('In-memory database disconnected');
 };
 
 export const getDatabase = () => {
-  return mockDb;
+  return inMemoryDb;
 };
 
 export const initializeDefaultData = async () => {
-  logger.info('Mock database initialization completed');
+  logger.info('In-memory database initialization completed');
 };
 
 export default { connectDatabase, closeDatabase, getDatabase, initializeDefaultData };

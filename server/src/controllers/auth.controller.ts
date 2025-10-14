@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { User } from '../models/User';
+import { UserModel as User } from '../models/UserStore';
 import { generateToken, generateRefreshToken } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import { validationResult } from 'express-validator';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 
 // Register new user
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -30,44 +30,51 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       language = 'en',
     } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({
-      $or: [{ email }, { username }],
-    });
-
-    if (existingUser) {
+    // Check if user already exists by email
+    const existingUserByEmail = await User.findOne({ where: { email } });
+    if (existingUserByEmail) {
       res.status(409).json({
         success: false,
-        message: existingUser.email === email 
-          ? 'Email is already registered'
-          : 'Username is already taken',
+        message: 'Email is already registered',
+      });
+      return;
+    }
+
+    // Check if user already exists by username
+    const existingUserByUsername = await User.findOne({ where: { username } });
+    if (existingUserByUsername) {
+      res.status(409).json({
+        success: false,
+        message: 'Username is already taken',
       });
       return;
     }
 
     // Create new user
-    const user = new User({
+    const user = await User.create({
       email,
       password,
       username,
       role,
-      profile: {
-        firstName,
-        lastName,
-        age,
-        preferences: {
-          language,
-          difficulty: age && age <= 4 ? 'easy' : 'medium',
-          topics: [],
-        },
-      },
-      subscription: {
-        type: 'free',
-        features: ['basic_activities', 'progress_tracking'],
-      },
+      firstName,
+      lastName,
+      age,
+      language,
+      difficulty: age && age <= 4 ? 'easy' : 'medium',
+      topics: '[]', // Empty array as string
+      totalActivitiesCompleted: 0,
+      currentLevel: 1,
+      totalPoints: 0,
+      badges: '[]', // Empty array as string
+      streakDays: 0,
+      lastActiveDate: new Date(),
+      subscriptionType: 'free',
+      features: '["basic_activities", "progress_tracking"]', // Array as string
+      emailVerified: false,
+      lastLogin: new Date(),
+      loginAttempts: 0,
+      childrenIds: '[]', // Empty array as string
     });
-
-    await user.save();
 
     // Generate tokens
     const accessToken = generateToken(user);
@@ -80,12 +87,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       message: 'User registered successfully',
       data: {
         user: {
-          id: user._id,
+          id: user.id,
           email: user.email,
           username: user.username,
           role: user.role,
-          profile: user.profile,
-          subscription: user.subscription,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          subscriptionType: user.subscriptionType,
         },
         tokens: {
           accessToken,
@@ -118,7 +126,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
 
     // Find user and include password for comparison
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ where: { email } });
     if (!user) {
       res.status(401).json({
         success: false,
@@ -128,8 +136,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Check if account is locked
-    if (user.security.lockedUntil && user.security.lockedUntil > new Date()) {
-      const lockTimeRemaining = Math.ceil((user.security.lockedUntil.getTime() - Date.now()) / (1000 * 60));
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      const lockTimeRemaining = Math.ceil((user.lockedUntil.getTime() - Date.now()) / (1000 * 60));
       res.status(423).json({
         success: false,
         message: `Account is locked. Please try again in ${lockTimeRemaining} minutes.`,
@@ -149,12 +157,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Reset login attempts on successful login
-    if (user.security.loginAttempts > 0) {
+    if (user.loginAttempts > 0) {
       await user.resetLoginAttempts();
     }
 
     // Update last login
-    user.security.lastLogin = new Date();
+    user.lastLogin = new Date();
     await user.save();
 
     // Generate tokens
@@ -168,13 +176,15 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       message: 'Login successful',
       data: {
         user: {
-          id: user._id,
+          id: user.id,
           email: user.email,
           username: user.username,
           role: user.role,
-          profile: user.profile,
-          subscription: user.subscription,
-          progress: user.progress,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          subscriptionType: user.subscriptionType,
+          currentLevel: user.currentLevel,
+          totalPoints: user.totalPoints,
         },
         tokens: {
           accessToken,
@@ -211,7 +221,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     ) as any;
 
     // Find user
-    const user = await User.findById(decoded.userId);
+    const user = await User.findByPk(parseInt(decoded.userId));
     if (!user) {
       res.status(401).json({
         success: false,
@@ -255,13 +265,18 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
       message: 'Profile retrieved successfully',
       data: {
         user: {
-          id: req.user._id,
+          id: req.user.id,
           email: req.user.email,
           username: req.user.username,
           role: req.user.role,
-          profile: req.user.profile,
-          subscription: req.user.subscription,
-          progress: req.user.progress,
+          firstName: req.user.firstName,
+          lastName: req.user.lastName,
+          age: req.user.age,
+          language: req.user.language,
+          difficulty: req.user.difficulty,
+          subscriptionType: req.user.subscriptionType,
+          currentLevel: req.user.currentLevel,
+          totalPoints: req.user.totalPoints,
           createdAt: req.user.createdAt,
         },
       },
@@ -305,15 +320,15 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
     } = req.body;
 
     // Update profile fields
-    if (firstName) req.user.profile.firstName = firstName;
-    if (lastName) req.user.profile.lastName = lastName;
-    if (age !== undefined) req.user.profile.age = age;
-    if (avatarUrl !== undefined) req.user.profile.avatarUrl = avatarUrl;
+    if (firstName) req.user.firstName = firstName;
+    if (lastName) req.user.lastName = lastName;
+    if (age !== undefined) req.user.age = age;
+    if (avatarUrl !== undefined) req.user.avatarUrl = avatarUrl;
     
     if (preferences) {
-      if (preferences.language) req.user.profile.preferences.language = preferences.language;
-      if (preferences.difficulty) req.user.profile.preferences.difficulty = preferences.difficulty;
-      if (preferences.topics) req.user.profile.preferences.topics = preferences.topics;
+      if (preferences.language) req.user.language = preferences.language;
+      if (preferences.difficulty) req.user.difficulty = preferences.difficulty;
+      if (preferences.topics) req.user.topics = JSON.stringify(preferences.topics);
     }
 
     await req.user.save();
@@ -325,11 +340,15 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
       message: 'Profile updated successfully',
       data: {
         user: {
-          id: req.user._id,
+          id: req.user.id,
           email: req.user.email,
           username: req.user.username,
           role: req.user.role,
-          profile: req.user.profile,
+          firstName: req.user.firstName,
+          lastName: req.user.lastName,
+          age: req.user.age,
+          language: req.user.language,
+          difficulty: req.user.difficulty,
         },
       },
     });
@@ -366,7 +385,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     const { currentPassword, newPassword } = req.body;
 
     // Get user with password
-    const user = await User.findById(req.user._id).select('+password');
+    const user = await User.findByPk(req.user.id);
     if (!user) {
       res.status(404).json({
         success: false,
@@ -444,15 +463,16 @@ export const getChildren = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    const children = await User.find({
-      _id: { $in: req.user.children || [] },
-    }).select('-password -security');
+    const childrenIds = JSON.parse(req.user.childrenIds || '[]');
+    const children = await User.findAll();
+    // Filter children by IDs manually since we don't have Op.in
+    const filteredChildren = children.filter(child => childrenIds.includes(child.id));
 
     res.status(200).json({
       success: true,
       message: 'Children retrieved successfully',
       data: {
-        children,
+        children: filteredChildren,
       },
     });
   } catch (error) {

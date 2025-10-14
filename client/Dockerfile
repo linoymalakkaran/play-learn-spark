@@ -25,20 +25,20 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Copy built application from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Create non-root user
-RUN addgroup -g 1001 -S nginx
-RUN adduser -S nginx -u 1001
+# Create non-root user (nginx group already exists)
+RUN adduser -S -D -g nginx -u 1001 appuser
 
-# Set proper permissions
-RUN chown -R nginx:nginx /usr/share/nginx/html
-RUN chown -R nginx:nginx /var/cache/nginx
-RUN chown -R nginx:nginx /var/log/nginx
-RUN chown -R nginx:nginx /etc/nginx/conf.d
-RUN touch /var/run/nginx.pid
-RUN chown -R nginx:nginx /var/run/nginx.pid
+# Create necessary directories and set permissions
+RUN mkdir -p /tmp /var/cache/nginx/client_temp \
+    && chmod -R 755 /usr/share/nginx/html \
+    && chmod -R 777 /tmp \
+    && chmod -R 777 /var/cache/nginx
 
 # Switch to non-root user
-USER nginx
+USER appuser
+
+# Set port for Azure App Service
+ENV WEBSITES_PORT=80
 
 # Expose port 80
 EXPOSE 80

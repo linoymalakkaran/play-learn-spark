@@ -18,18 +18,16 @@ RUN adduser -S nodejs -u 1001
 COPY package*.json ./
 COPY tsconfig.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install dependencies (including dev dependencies for building)
+RUN npm ci && npm cache clean --force
 
-# Copy source code
+# Copy source code and healthcheck
 COPY src/ ./src/
+COPY healthcheck.js ./
 
 # Create required directories and set permissions
 RUN mkdir -p uploads logs data
 RUN chown -R nodejs:nodejs /app
-
-# Build TypeScript
-RUN npm run build
 
 # Switch to non-root user
 USER nodejs
@@ -41,5 +39,5 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node healthcheck.js || exit 1
 
-# Start the application
-CMD ["npm", "start"]
+# Start the application using ts-node
+CMD ["npx", "ts-node", "src/simple-server.ts"]

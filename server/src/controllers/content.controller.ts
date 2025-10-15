@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { activityStore, userStore } from '../models/UserStore';
+import { activityStore } from '../models/UserStore';
+import { User } from '../models/UserSQLite';
 import { logger } from '../utils/logger';
 
 /**
@@ -53,7 +54,7 @@ export const getAllActivities = async (req: Request, res: Response) => {
     // Get creator information
     const activitiesWithCreators = await Promise.all(
       paginatedActivities.map(async (activity) => {
-        const creator = await userStore.findByPk(activity.createdBy);
+        const creator = await User.findByPk(activity.createdBy);
         return {
           ...activity,
           creator: creator ? {

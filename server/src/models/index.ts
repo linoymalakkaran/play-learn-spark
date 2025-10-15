@@ -1,18 +1,16 @@
-// SQLite models for Play-Learn-Spark application - commented out for in-memory DB
-// export { User } from './User';
-// export { Activity } from './Activity';
-// export { Progress } from './Progress';
+// SQLite models for Play-Learn-Spark application
+export { User } from './UserSQLite';
+export { Activity } from './Activity';
+export { Progress } from './Progress';
+export { Session } from './Session';
+export { PasswordReset } from './PasswordReset';
 
-// Database connection - commented out for in-memory DB
-// export { sequelize } from '../config/database';
+// Database connection
+export { sequelize } from '../config/database-sqlite';
 
-// Re-export all models for easy importing - commented out for in-memory DB
-// export * from './User';
-// export * from './Activity';
-// export * from './Progress';
-
-export default {
-  // User,
-  // Activity,  
-  // Progress,
-};
+// Re-export all models for easy importing
+export * from './UserSQLite';
+export * from './Activity';
+export * from './Progress';
+export * from './Session';
+export * from './PasswordReset';

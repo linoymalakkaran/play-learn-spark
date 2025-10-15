@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import { connectDatabase, initializeDefaultData } from './config/database';
+import { connectDatabase, initializeDefaultData } from './config/database-sqlite';
 import authRoutes from './routes/auth.routes';
 import activityRoutes from './routes/activity.routes';
 import analyticsRoutes from './routes/analytics.routes';

@@ -1,5 +1,5 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-// import { sequelize } from '../config/database'; // Commented out for in-memory DB
+import { sequelize } from '../config/database-sqlite';
 
 export interface ProgressAttributes {
   id: number;

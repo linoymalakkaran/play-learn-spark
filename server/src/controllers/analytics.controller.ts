@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { userStore, activityStore, activityCompletionStore, progressStore } from '../models/UserStore';
+import { activityStore, activityCompletionStore, progressStore } from '../models/UserStore';
+import { User } from '../models/UserSQLite';
 import { logger } from '../utils/logger';
 
 /**
@@ -17,7 +18,7 @@ export const getProgressAnalytics = async (req: Request, res: Response) => {
     }
 
     // Get user details
-    const user = await userStore.findByPk(userId);
+    const user = await User.findByPk(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -95,7 +96,7 @@ export const getPerformanceInsights = async (req: Request, res: Response) => {
       });
     }
 
-    const user = await userStore.findByPk(userId);
+    const user = await User.findByPk(userId);
     const completions = activityCompletionStore.findByUserId(userId);
     const activities = await activityStore.findAll();
 
@@ -126,7 +127,7 @@ export const getDetailedProgressReport = async (req: Request, res: Response) => 
     
     // Check if user is authorized to view the report
     if (childId && req.user?.role === 'parent') {
-      const parent = await userStore.findByPk(req.user.id);
+      const parent = await User.findByPk(req.user.id);
       const childrenIds = JSON.parse(parent?.childrenIds || '[]');
       if (!childrenIds.includes(childId)) {
         return res.status(403).json({
@@ -137,7 +138,7 @@ export const getDetailedProgressReport = async (req: Request, res: Response) => 
     }
 
     const targetUserId = childId || userId!;
-    const user = await userStore.findByPk(targetUserId);
+    const user = await User.findByPk(targetUserId);
     const completions = activityCompletionStore.findByUserId(targetUserId);
     const activities = await activityStore.findAll();
     const progress = progressStore.findByUserId(targetUserId);

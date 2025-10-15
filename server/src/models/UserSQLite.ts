@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-import bcrypt from 'bcryptjs';
-// import { sequelize } from '../config/database'; // Commented out for in-memory DB
+import * as bcrypt from 'bcryptjs';
+import { sequelize } from '../config/database-sqlite';
 
 export interface UserAttributes {
   id: number;
@@ -70,18 +70,31 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public readonly updatedAt!: Date;
 
   // Instance methods
-  public async comparePassword(candidatePassword: string): Promise<boolean> {
-    return bcrypt.compare(candidatePassword, this.password);
+  public async validatePassword(password: string): Promise<boolean> {
+    return bcrypt.compare(password, this.password);
+  }
+
+  public isLocked(): boolean {
+    return !!(this.lockedUntil && this.lockedUntil > new Date());
   }
 
   public async incrementLoginAttempts(): Promise<void> {
-    const updates: any = { loginAttempts: this.loginAttempts + 1 };
-    
-    // If we have 5 failed attempts and are not locked yet, lock account
-    if (this.loginAttempts + 1 >= 5 && !this.lockedUntil) {
+    // If we have a previous lock that has expired, restart at 1
+    if (this.lockedUntil && this.lockedUntil < new Date()) {
+      await this.update({
+        loginAttempts: 1,
+        lockedUntil: undefined,
+      });
+      return;
+    }
+
+    const updates: Partial<UserAttributes> = { loginAttempts: this.loginAttempts + 1 };
+
+    // Lock the account after 5 failed attempts for 2 hours
+    if (this.loginAttempts + 1 >= 5 && !this.isLocked()) {
       updates.lockedUntil = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours
     }
-    
+
     await this.update(updates);
   }
 
@@ -90,6 +103,29 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
       loginAttempts: 0,
       lockedUntil: undefined,
     });
+  }
+
+  // Static methods
+  public static async findByEmail(email: string): Promise<User | null> {
+    return this.findOne({ where: { email: email.toLowerCase() } });
+  }
+
+  public static async findByUsername(username: string): Promise<User | null> {
+    return this.findOne({ where: { username } });
+  }
+
+  public static async createUser(userData: UserCreationAttributes): Promise<User> {
+    return this.create({
+      ...userData,
+      email: userData.email.toLowerCase(),
+      loginAttempts: 0,
+      lockedUntil: undefined,
+    });
+  }
+
+  // Association methods
+  public static associate() {
+    // Define associations here if needed
   }
 }
 
@@ -107,6 +143,9 @@ User.init(
       validate: {
         isEmail: true,
       },
+      set(value: string) {
+        this.setDataValue('email', value.toLowerCase());
+      },
     },
     password: {
       type: DataTypes.STRING,
@@ -120,8 +159,7 @@ User.init(
       allowNull: false,
       unique: true,
       validate: {
-        len: [3, 30],
-        is: /^[a-zA-Z0-9_]+$/,
+        len: [3, 50],
       },
     },
     role: {
@@ -133,14 +171,14 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        len: [1, 50],
+        len: [1, 100],
       },
     },
     lastName: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        len: [1, 50],
+        len: [1, 100],
       },
     },
     age: {
@@ -174,10 +212,18 @@ User.init(
       defaultValue: '[]',
       get() {
         const value = this.getDataValue('topics');
-        return value ? JSON.parse(value) : [];
+        try {
+          return value ? JSON.parse(value) : [];
+        } catch {
+          return [];
+        }
       },
-      set(value: string[]) {
-        this.setDataValue('topics', JSON.stringify(value));
+      set(value: string[] | string) {
+        if (typeof value === 'string') {
+          this.setDataValue('topics', value);
+        } else {
+          this.setDataValue('topics', JSON.stringify(value));
+        }
       },
     },
     totalActivitiesCompleted: {
@@ -201,10 +247,18 @@ User.init(
       defaultValue: '[]',
       get() {
         const value = this.getDataValue('badges');
-        return value ? JSON.parse(value) : [];
+        try {
+          return value ? JSON.parse(value) : [];
+        } catch {
+          return [];
+        }
       },
-      set(value: string[]) {
-        this.setDataValue('badges', JSON.stringify(value));
+      set(value: string[] | string) {
+        if (typeof value === 'string') {
+          this.setDataValue('badges', value);
+        } else {
+          this.setDataValue('badges', JSON.stringify(value));
+        }
       },
     },
     streakDays: {
@@ -229,13 +283,21 @@ User.init(
     features: {
       type: DataTypes.TEXT,
       allowNull: false,
-      defaultValue: '["basic_activities", "progress_tracking"]',
+      defaultValue: '[]',
       get() {
         const value = this.getDataValue('features');
-        return value ? JSON.parse(value) : [];
+        try {
+          return value ? JSON.parse(value) : [];
+        } catch {
+          return [];
+        }
       },
-      set(value: string[]) {
-        this.setDataValue('features', JSON.stringify(value));
+      set(value: string[] | string) {
+        if (typeof value === 'string') {
+          this.setDataValue('features', value);
+        } else {
+          this.setDataValue('features', JSON.stringify(value));
+        }
       },
     },
     emailVerified: {
@@ -271,30 +333,43 @@ User.init(
       defaultValue: '[]',
       get() {
         const value = this.getDataValue('childrenIds');
-        return value ? JSON.parse(value) : [];
+        try {
+          return value ? JSON.parse(value) : [];
+        } catch {
+          return [];
+        }
       },
-      set(value: number[]) {
-        this.setDataValue('childrenIds', JSON.stringify(value));
+      set(value: number[] | string) {
+        if (typeof value === 'string') {
+          this.setDataValue('childrenIds', value);
+        } else {
+          this.setDataValue('childrenIds', JSON.stringify(value));
+        }
       },
     },
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
     updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   {
     sequelize,
     modelName: 'User',
     tableName: 'users',
+    timestamps: true,
     indexes: [
-      { fields: ['email'] },
-      { fields: ['username'] },
+      { fields: ['email'], unique: true },
+      { fields: ['username'], unique: true },
       { fields: ['emailVerified'] },
       { fields: ['role'] },
+      { fields: ['lastActiveDate'] },
+      { fields: ['subscriptionType'] },
     ],
     hooks: {
       beforeCreate: async (user: User) => {

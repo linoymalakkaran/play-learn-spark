@@ -1,10 +1,13 @@
 import { Request, Response } from 'express';
-import { userStore, User } from '../models/UserStore';
+import { User } from '../models/UserSQLite';
+import { Session } from '../models/Session';
+import { PasswordReset } from '../models/PasswordReset';
 import { generateToken, generateRefreshToken } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import { validationResult } from 'express-validator';
 import { emailService } from '../services/emailService';
 import * as jwt from 'jsonwebtoken';
+import { v4 as uuidv4 } from 'uuid';
 
 // Register new user
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -32,7 +35,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     } = req.body;
 
     // Check if user already exists by email
-    const existingUserByEmail = await userStore.findOne({ where: { email } });
+    const existingUserByEmail = await User.findByEmail(email);
     if (existingUserByEmail) {
       res.status(409).json({
         success: false,
@@ -42,7 +45,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Check if user already exists by username
-    const existingUserByUsername = await userStore.findOne({ where: { username } });
+    const existingUserByUsername = await User.findByUsername(username);
     if (existingUserByUsername) {
       res.status(409).json({
         success: false,
@@ -52,7 +55,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Create new user
-    const user = await userStore.create({
+    const user = await User.createUser({
       email,
       password,
       username,
@@ -127,7 +130,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
 
     // Find user and include password for comparison
-    const user = await userStore.findOne({ where: { email } });
+    const user = await User.findOne({ where: { email } });
     if (!user) {
       res.status(401).json({
         success: false,
@@ -147,9 +150,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Verify password
-    const isPasswordValid = await userStore.comparePassword(user, password);
+    const isPasswordValid = await user.validatePassword(password);
     if (!isPasswordValid) {
-      await userStore.incrementLoginAttempts(user);
+      await user.incrementLoginAttempts();
       res.status(401).json({
         success: false,
         message: 'Invalid email or password',
@@ -159,11 +162,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     // Reset login attempts on successful login
     if (user.loginAttempts > 0) {
-      await userStore.resetLoginAttempts(user);
+      await user.resetLoginAttempts();
     }
 
     // Update last login
-    await userStore.update(user.id, { lastLogin: new Date() });
+    await user.update({ lastLogin: new Date() });
 
     // Generate tokens
     const accessToken = generateToken(user);
@@ -221,7 +224,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     ) as any;
 
     // Find user
-    const user = await userStore.findByPk(parseInt(decoded.userId));
+    const user = await User.findByPk(parseInt(decoded.userId));
     if (!user) {
       res.status(401).json({
         success: false,
@@ -332,7 +335,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
     }
 
     // Update the user in the store
-    await userStore.update(req.user.id, {
+    await req.user.update({
       firstName: req.user.firstName,
       lastName: req.user.lastName,
       age: req.user.age,
@@ -394,7 +397,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     const { currentPassword, newPassword } = req.body;
 
     // Get user with password
-    const user = await userStore.findByPk(req.user.id);
+    const user = await User.findByPk(req.user.id);
     if (!user) {
       res.status(404).json({
         success: false,
@@ -404,7 +407,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     }
 
     // Verify current password
-    const isCurrentPasswordValid = await userStore.comparePassword(user, currentPassword);
+    const isCurrentPasswordValid = await user.validatePassword(currentPassword);
     if (!isCurrentPasswordValid) {
       res.status(400).json({
         success: false,
@@ -416,7 +419,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     // Update password - hash it first
     const bcrypt = require('bcryptjs');
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await userStore.update(user.id, { password: hashedPassword });
+    await user.update({ password: hashedPassword });
 
     logger.info(`Password changed for user: ${user.email}`);
 
@@ -474,7 +477,7 @@ export const getChildren = async (req: Request, res: Response): Promise<void> =>
     }
 
     const childrenIds = JSON.parse(req.user.childrenIds || '[]');
-    const children = await userStore.findAll();
+    const children = await User.findAll();
     // Filter children by IDs manually since we don't have Op.in
     const filteredChildren = children.filter((child: User) => childrenIds.includes(child.id));
 
@@ -508,7 +511,7 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
 
   try {
     // Find user by email
-    const user = await userStore.findOne({ where: { email } });
+    const user = await User.findOne({ where: { email } });
     
     if (!user) {
       // Don't reveal if email exists or not for security
@@ -518,7 +521,7 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
     }
 
     // Generate reset token
-    const resetToken = await userStore.createPasswordResetToken(user.id);
+    const resetToken = await PasswordReset.createPasswordResetToken(user.id);
     
     if (!resetToken) {
       logger.error('Failed to generate reset token for user', { userId: user.id });
@@ -571,7 +574,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 
   try {
     // Reset password using token
-    const success = await userStore.resetPassword(token, newPassword);
+    const success = await PasswordReset.resetPassword(token, newPassword);
     
     if (!success) {
       return res.status(400).json({ 

@@ -10,7 +10,7 @@ import AdvancedFilteringService, {
   FilterCriteria 
 } from '../services/AdvancedFilteringService';
 import { logger } from '../utils/logger';
-import { User } from '../models/UserStore';
+import { User } from '../models/UserSQLite';
 
 interface AuthenticatedRequest extends Request {
   user?: User;

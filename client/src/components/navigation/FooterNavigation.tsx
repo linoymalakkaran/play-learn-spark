@@ -1,18 +1,21 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   Home, 
   BookOpen, 
   Brain, 
   Gamepad2,
   Languages,
-  Upload
+  Upload,
+  Settings
 } from 'lucide-react';
 
 const FooterNavigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, isAuthenticated } = useAuth();
 
   const navigationItems = [
     { 
@@ -46,6 +49,16 @@ const FooterNavigation: React.FC = () => {
       description: 'Upload & Analyze Homework'
     }
   ];
+
+  // Add content management for educators, parents, and admins
+  if (isAuthenticated && user && ['admin', 'educator', 'parent'].includes(user.role)) {
+    navigationItems.push({
+      path: '/content-management',
+      label: 'Content',
+      icon: Settings,
+      description: 'Manage Educational Content'
+    });
+  }
 
   const isActive = (path: string) => {
     return location.pathname === path;

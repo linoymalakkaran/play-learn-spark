@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -237,6 +238,17 @@ const AuthDemo: React.FC = () => {
                   isLoginMode ? 'Sign In' : 'Create Account'
                 )}
               </Button>
+
+              {isLoginMode && (
+                <div className="text-center">
+                  <Link 
+                    to="/forgot-password" 
+                    className="text-sm text-purple-600 hover:text-purple-800 underline"
+                  >
+                    Forgot your password?
+                  </Link>
+                </div>
+              )}
 
               <Button
                 type="button"

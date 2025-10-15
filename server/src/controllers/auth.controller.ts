@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import { UserModel as User } from '../models/UserStore';
+import { userStore, User } from '../models/UserStore';
 import { generateToken, generateRefreshToken } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import { validationResult } from 'express-validator';
+import { emailService } from '../services/emailService';
 import * as jwt from 'jsonwebtoken';
 
 // Register new user
@@ -31,7 +32,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     } = req.body;
 
     // Check if user already exists by email
-    const existingUserByEmail = await User.findOne({ where: { email } });
+    const existingUserByEmail = await userStore.findOne({ where: { email } });
     if (existingUserByEmail) {
       res.status(409).json({
         success: false,
@@ -41,7 +42,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Check if user already exists by username
-    const existingUserByUsername = await User.findOne({ where: { username } });
+    const existingUserByUsername = await userStore.findOne({ where: { username } });
     if (existingUserByUsername) {
       res.status(409).json({
         success: false,
@@ -51,7 +52,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Create new user
-    const user = await User.create({
+    const user = await userStore.create({
       email,
       password,
       username,
@@ -126,7 +127,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
 
     // Find user and include password for comparison
-    const user = await User.findOne({ where: { email } });
+    const user = await userStore.findOne({ where: { email } });
     if (!user) {
       res.status(401).json({
         success: false,
@@ -146,9 +147,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Verify password
-    const isPasswordValid = await user.comparePassword(password);
+    const isPasswordValid = await userStore.comparePassword(user, password);
     if (!isPasswordValid) {
-      await user.incrementLoginAttempts();
+      await userStore.incrementLoginAttempts(user);
       res.status(401).json({
         success: false,
         message: 'Invalid email or password',
@@ -158,12 +159,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     // Reset login attempts on successful login
     if (user.loginAttempts > 0) {
-      await user.resetLoginAttempts();
+      await userStore.resetLoginAttempts(user);
     }
 
     // Update last login
-    user.lastLogin = new Date();
-    await user.save();
+    await userStore.update(user.id, { lastLogin: new Date() });
 
     // Generate tokens
     const accessToken = generateToken(user);
@@ -221,7 +221,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     ) as any;
 
     // Find user
-    const user = await User.findByPk(parseInt(decoded.userId));
+    const user = await userStore.findByPk(parseInt(decoded.userId));
     if (!user) {
       res.status(401).json({
         success: false,
@@ -331,7 +331,16 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
       if (preferences.topics) req.user.topics = JSON.stringify(preferences.topics);
     }
 
-    await req.user.save();
+    // Update the user in the store
+    await userStore.update(req.user.id, {
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
+      age: req.user.age,
+      avatarUrl: req.user.avatarUrl,
+      language: req.user.language,
+      difficulty: req.user.difficulty,
+      topics: req.user.topics
+    });
 
     logger.info(`Profile updated for user: ${req.user.email}`);
 
@@ -385,7 +394,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     const { currentPassword, newPassword } = req.body;
 
     // Get user with password
-    const user = await User.findByPk(req.user.id);
+    const user = await userStore.findByPk(req.user.id);
     if (!user) {
       res.status(404).json({
         success: false,
@@ -395,7 +404,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     }
 
     // Verify current password
-    const isCurrentPasswordValid = await user.comparePassword(currentPassword);
+    const isCurrentPasswordValid = await userStore.comparePassword(user, currentPassword);
     if (!isCurrentPasswordValid) {
       res.status(400).json({
         success: false,
@@ -404,9 +413,10 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Update password
-    user.password = newPassword;
-    await user.save();
+    // Update password - hash it first
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await userStore.update(user.id, { password: hashedPassword });
 
     logger.info(`Password changed for user: ${user.email}`);
 
@@ -464,9 +474,9 @@ export const getChildren = async (req: Request, res: Response): Promise<void> =>
     }
 
     const childrenIds = JSON.parse(req.user.childrenIds || '[]');
-    const children = await User.findAll();
+    const children = await userStore.findAll();
     // Filter children by IDs manually since we don't have Op.in
-    const filteredChildren = children.filter(child => childrenIds.includes(child.id));
+    const filteredChildren = children.filter((child: User) => childrenIds.includes(child.id));
 
     res.status(200).json({
       success: true,
@@ -480,6 +490,108 @@ export const getChildren = async (req: Request, res: Response): Promise<void> =>
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve children',
+    });
+  }
+};
+
+/**
+ * Request password reset - generates reset token and sends email
+ */
+export const requestPasswordReset = async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ 
+      error: 'Email is required' 
+    });
+  }
+
+  try {
+    // Find user by email
+    const user = await userStore.findOne({ where: { email } });
+    
+    if (!user) {
+      // Don't reveal if email exists or not for security
+      return res.status(200).json({ 
+        message: 'If an account with that email exists, a password reset email has been sent.'
+      });
+    }
+
+    // Generate reset token
+    const resetToken = await userStore.createPasswordResetToken(user.id);
+    
+    if (!resetToken) {
+      logger.error('Failed to generate reset token for user', { userId: user.id });
+      return res.status(500).json({ 
+        error: 'Failed to generate reset token. Please try again.' 
+      });
+    }
+
+    // Send password reset email
+    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:8081'}/reset-password?token=${resetToken}`;
+    await emailService.sendPasswordResetEmail(user.email, resetToken, user.firstName || user.username);
+
+    logger.info('Password reset requested', { 
+      userId: user.id, 
+      email: user.email 
+    });
+
+    return res.status(200).json({ 
+      message: 'If an account with that email exists, a password reset email has been sent.'
+    });
+  } catch (error) {
+    logger.error('Password reset request failed', { 
+      email, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    });
+    
+    return res.status(500).json({ 
+      error: 'Failed to process password reset request. Please try again.' 
+    });
+  }
+};
+
+/**
+ * Reset password using token
+ */
+export const resetPassword = async (req: Request, res: Response) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ 
+      error: 'Reset token and new password are required' 
+    });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ 
+      error: 'Password must be at least 6 characters long' 
+    });
+  }
+
+  try {
+    // Reset password using token
+    const success = await userStore.resetPassword(token, newPassword);
+    
+    if (!success) {
+      return res.status(400).json({ 
+        error: 'Invalid or expired reset token' 
+      });
+    }
+
+    logger.info('Password reset successful', { token: token.substring(0, 10) + '...' });
+
+    return res.status(200).json({ 
+      message: 'Password has been reset successfully. You can now log in with your new password.' 
+    });
+  } catch (error) {
+    logger.error('Password reset failed', { 
+      token: token.substring(0, 10) + '...', 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    });
+    
+    return res.status(500).json({ 
+      error: 'Failed to reset password. Please try again or request a new reset link.' 
     });
   }
 };

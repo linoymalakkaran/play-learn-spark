@@ -1,5 +1,5 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-import { sequelize } from '../config/database';
+// import { sequelize } from '../config/database'; // Commented out for in-memory DB
 
 export interface ActivityAttributes {
   id: number;
@@ -291,7 +291,7 @@ Activity.init(
     },
   },
   {
-    sequelize,
+    // sequelize, // Commented out for in-memory DB
     modelName: 'Activity',
     tableName: 'activities',
     indexes: [

@@ -58,12 +58,14 @@ npm run preview
 - **Framer Motion** for smooth animations
 - **Web Audio API** for interactive sound effects
 
-### Backend (Coming Soon)
+### Backend
 - **Node.js** with Express.js
-- **MongoDB** for data storage
-- **Multiple AI Providers** (OpenAI, Hugging Face, Anthropic)
+- **In-Memory Database** for development (SQLite for production)
+- **Google AI Studio (Gemini)** as primary AI provider
+- **Multiple AI Providers** (OpenAI, Hugging Face, Anthropic) for fallback
 - **Docker** for containerization
 - **Azure App Service** for hosting
+- **JWT Authentication** for secure access
 
 ## 📁 Project Structure
 
@@ -94,6 +96,27 @@ The frontend can be deployed to various platforms:
 - **Docker**: Containerization for consistent environments
 
 ## 📝 Development Roadmap
+
+## 🤖 AI Integration
+
+**Google AI Studio (Gemini) Integration**: Our platform now includes powerful AI-driven content generation using Google's latest Gemini models.
+
+### Features
+- **Educational Content Generation**: Create age-appropriate activities automatically
+- **Story Generation**: Generate engaging stories for children
+- **Multi-language Support**: Content generation in English with expandability
+- **Safety First**: Built-in content safety filters for child-appropriate content
+
+### Quick Setup
+1. Get your API key from [Google AI Studio](https://aistudio.google.com/)
+2. Add to `.env` file: `GOOGLE_AI_API_KEY=your-api-key-here`
+3. Start the server and test AI endpoints
+
+📖 **[Read the full Google AI Integration Guide](./GOOGLE_AI_INTEGRATION_GUIDE.md)** for detailed setup and usage instructions.
+
+---
+
+## 📋 Additional Documentation
 
 See [README-plan.md](./README-plan.md) for detailed implementation plans and technical specifications.
 

@@ -104,7 +104,7 @@ class OpenAIService {
         throw new Error(`OpenAI API error: ${response.status} - ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as any;
       const content = JSON.parse(data.choices[0].message.content);
       logger.info(`Successfully generated content: ${content.title}`);
       return this.validateAndFormatContent(content, request);
@@ -147,7 +147,7 @@ class OpenAIService {
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json() as any;
       const story = JSON.parse(data.choices[0].message.content);
       logger.info(`Successfully generated story: ${story.title}`);
       return this.validateAndFormatStory(story, request);
@@ -183,7 +183,7 @@ class OpenAIService {
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json() as any;
       return data.choices[0].message.content.trim();
 
     } catch (error) {

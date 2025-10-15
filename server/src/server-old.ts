@@ -4,12 +4,16 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { connectDatabase, initializeDefaultData } from './config/database';
 import authRoutes from './routes/auth.routes';
+import activityRoutes from './routes/activity.routes';
+import analyticsRoutes from './routes/analytics.routes';
+import contentMgmtRoutes from './routes/content-mgmt.routes';
+import fileUploadRoutes from './routes/file-upload.routes';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = 3002;
 
 // Security middleware
 app.use(helmet());
@@ -27,8 +31,15 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Serve static files from uploads directory
+app.use('/uploads', express.static('uploads'));
+
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/activities', activityRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/content', contentMgmtRoutes);
+app.use('/api/files', fileUploadRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

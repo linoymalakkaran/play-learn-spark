@@ -10,12 +10,10 @@ import AdvancedFilteringService, {
   FilterCriteria 
 } from '../services/AdvancedFilteringService';
 import { logger } from '../utils/logger';
+import { User } from '../models/UserStore';
 
 interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    role: string;
-  };
+  user?: User;
 }
 
 class AdvancedFilteringController {

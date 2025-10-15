@@ -157,6 +157,12 @@ app_service_plan_sku = "B1"  # Basic tier
 enable_application_insights = true
 enable_custom_domain       = false
 
+# AI Service Configuration
+google_ai_api_key = "your-google-ai-studio-api-key-here"
+openai_api_key    = ""  # Optional backup provider
+huggingface_api_key = ""  # Optional
+anthropic_api_key   = ""  # Optional
+
 # Optional: Custom domain
 # custom_domain_name = "yourdomain.com"
 

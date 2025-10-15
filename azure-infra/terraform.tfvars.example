@@ -29,3 +29,12 @@ tags = {
   ManagedBy   = "Terraform"
   CostCenter  = "Education"
 }
+
+# AI Service API Keys
+# Get your Google AI Studio API key from: https://aistudio.google.com/
+google_ai_api_key = "your-google-ai-studio-api-key-here"
+
+# Optional: Additional AI providers for fallback
+openai_api_key      = ""
+huggingface_api_key = ""
+anthropic_api_key   = ""

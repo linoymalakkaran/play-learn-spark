@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-import * as bcrypt from 'bcryptjs';
-import { sequelize } from '../config/database';
+import bcrypt from 'bcryptjs';
+// import { sequelize } from '../config/database'; // Commented out for in-memory DB
 
 export interface UserAttributes {
   id: number;

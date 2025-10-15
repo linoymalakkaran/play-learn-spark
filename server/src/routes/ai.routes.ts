@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { logger } from '../utils/logger';
+import { googleAIService } from '../services/GoogleAIService';
 import OpenAIService from '../services/OpenAIService';
 import HuggingFaceService from '../services/HuggingFaceService';
 import AnthropicService from '../services/AnthropicService';
@@ -15,7 +16,7 @@ router.post('/generate-activity', async (req, res) => {
       language = 'English', 
       activityType = 'general', 
       difficulty = 'medium',
-      provider = 'openai',
+      provider = 'google',
       customPrompt 
     } = req.body;
 
@@ -32,6 +33,9 @@ router.post('/generate-activity', async (req, res) => {
     const request = { topic, ageGroup, language, activityType, difficulty, customPrompt };
 
     switch (provider) {
+      case 'google':
+        content = await googleAIService.generateContent(request);
+        break;
       case 'anthropic':
         content = await AnthropicService.getInstance().generateContent(request);
         break;
@@ -39,12 +43,19 @@ router.post('/generate-activity', async (req, res) => {
         content = await HuggingFaceService.getInstance().generateContent(request);
         break;
       case 'openai':
-      default:
         content = await OpenAIService.getInstance().generateContent(request);
+        break;
+      default:
+        // Default to Google AI if available, fallback to OpenAI
+        if (googleAIService.isAvailable()) {
+          content = await googleAIService.generateContent(request);
+        } else {
+          content = await OpenAIService.getInstance().generateContent(request);
+        }
         break;
     }
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         content,
@@ -54,7 +65,7 @@ router.post('/generate-activity', async (req, res) => {
     });
   } catch (error) {
     logger.error('Error in AI activity generation:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Failed to generate activity'
     });
@@ -70,7 +81,7 @@ router.post('/generate-story', async (req, res) => {
       language = 'English', 
       length = 'medium',
       includeImages = false,
-      provider = 'openai' 
+      provider = 'google' 
     } = req.body;
 
     if (!topic || !ageGroup) {
@@ -86,16 +97,26 @@ router.post('/generate-story', async (req, res) => {
     const request = { topic, ageGroup, language, length, includeImages };
 
     switch (provider) {
+      case 'google':
+        story = await googleAIService.generateStory(request);
+        break;
       case 'anthropic':
         story = await AnthropicService.getInstance().generateStory(request);
         break;
       case 'openai':
-      default:
         story = await OpenAIService.getInstance().generateStory(request);
+        break;
+      default:
+        // Default to Google AI if available, fallback to OpenAI
+        if (googleAIService.isAvailable()) {
+          story = await googleAIService.generateStory(request);
+        } else {
+          story = await OpenAIService.getInstance().generateStory(request);
+        }
         break;
     }
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         story,
@@ -105,7 +126,7 @@ router.post('/generate-story', async (req, res) => {
     });
   } catch (error) {
     logger.error('Error in AI story generation:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Failed to generate story'
     });
@@ -145,7 +166,7 @@ router.post('/generate-image', async (req, res) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         image,
@@ -154,7 +175,7 @@ router.post('/generate-image', async (req, res) => {
     });
   } catch (error) {
     logger.error('Error in AI image generation:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Failed to generate image'
     });
@@ -181,13 +202,13 @@ router.post('/check-safety', async (req, res) => {
       context
     });
 
-    res.json({
+    return res.json({
       success: true,
       data: safetyResult
     });
   } catch (error) {
     logger.error('Error in content safety check:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Failed to check content safety'
     });
@@ -214,13 +235,13 @@ router.post('/assess-educational-value', async (req, res) => {
       ageGroup
     );
 
-    res.json({
+    return res.json({
       success: true,
       data: assessment
     });
   } catch (error) {
     logger.error('Error in educational assessment:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Failed to assess educational value'
     });
@@ -233,13 +254,13 @@ router.post('/providers/setup', async (req, res) => {
     // TODO: Implement AI provider setup and configuration storage
     logger.info('AI provider setup requested');
     
-    res.json({
+    return res.json({
       success: true,
       message: 'AI provider setup endpoint - configuration storage coming soon'
     });
   } catch (error) {
     logger.error('Error in AI provider setup:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Failed to setup AI provider'
     });
@@ -278,7 +299,7 @@ router.get('/providers', async (req, res) => {
       }
     };
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         providers,
@@ -288,7 +309,7 @@ router.get('/providers', async (req, res) => {
     });
   } catch (error) {
     logger.error('Error fetching AI providers:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Failed to fetch AI providers'
     });
@@ -311,13 +332,13 @@ router.post('/classify-emotion', async (req, res) => {
 
     const emotion = await HuggingFaceService.getInstance().classifyEmotion(text);
 
-    res.json({
+    return res.json({
       success: true,
       data: emotion
     });
   } catch (error) {
     logger.error('Error in emotion classification:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Failed to classify emotion'
     });
@@ -340,7 +361,7 @@ router.post('/translate', async (req, res) => {
 
     const translatedText = await HuggingFaceService.getInstance().translateText(text, targetLanguage);
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         originalText: text,
@@ -350,7 +371,7 @@ router.post('/translate', async (req, res) => {
     });
   } catch (error) {
     logger.error('Error in translation:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Failed to translate text'
     });
@@ -360,7 +381,7 @@ router.post('/translate', async (req, res) => {
 // Get available AI providers
 router.get('/providers', (req, res) => {
   try {
-    res.json({
+    return res.json({
       success: true,
       data: {
         providers: [
@@ -372,7 +393,7 @@ router.get('/providers', (req, res) => {
     });
   } catch (error) {
     logger.error('Error getting AI providers:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Failed to get AI providers'
     });

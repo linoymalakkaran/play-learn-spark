@@ -1,53 +1,103 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { Slider } from '@/components/ui/slider';
-import { useContent, ContentItem, ContentFilter, ValidationResult } from '@/hooks/useContent';
-import { Plus, Edit, Trash2, Save, Eye, Upload, Download, Search, Filter, Globe, Accessibility, BookOpen, Gamepad2, Music, Video, Image, FileText, Users, BarChart3, CheckCircle, AlertCircle, Clock, Star } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Copy, 
+  Eye, 
+  EyeOff, 
+  Search, 
+  Filter,
+  MoreHorizontal,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  User,
+  Tag
+} from 'lucide-react';
+
+interface Activity {
+  id: number;
+  title: string;
+  description: string;
+  content: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  ageRange: string;
+  category: string;
+  tags: string[];
+  estimatedTime: number;
+  isPublic: boolean;
+  createdBy: number;
+  creator?: {
+    id: number;
+    username: string;
+    firstName: string;
+    lastName: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Category {
+  name: string;
+  totalActivities: number;
+  difficulties: {
+    easy: number;
+    medium: number;
+    hard: number;
+  };
+  averageTime: number;
+  publicActivities: number;
+}
 
 interface ContentManagementSystemProps {
   onClose?: () => void;
 }
 
-const ContentManagementSystem: React.FC<ContentManagementSystemProps> = ({ onClose }) => {
-  const {
-    content,
-    loadContent,
-    createContent,
-    updateContent,
-    deleteContent,
-    validateContent,
-    getContentAnalytics,
-    isCreatorMode,
-    toggleCreatorMode,
-    isLoading,
-    error
-  } = useContent();
-
-  const [activeTab, setActiveTab] = useState('browse');
-  const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
-  const [editingContent, setEditingContent] = useState<Partial<ContentItem> | null>(null);
-  const [filter, setFilter] = useState<ContentFilter>({});
+export const ContentManagementSystem: React.FC<ContentManagementSystemProps> = ({ onClose }) => {
+  const { user } = useAuth();
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  
+  // Filters
   const [searchTerm, setSearchTerm] = useState('');
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [validation, setValidation] = useState<ValidationResult | null>(null);
-  const [importData, setImportData] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState('');
+  const [showOnlyMyActivities, setShowOnlyMyActivities] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const contentList = Object.values(content);
-  const filteredContent = contentList.filter(item => {
-    if (searchTerm && !item.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !item.description.toLowerCase().includes(searchTerm.toLowerCase())) {
-      return false;
+  // Form state
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    content: '',
+    difficulty: 'easy' as const,
+    ageRange: '6-12',
+    category: '',
+    tags: '',
+    estimatedTime: 15,
+    isPublic: true
+  });
+
+  // Bulk operations
+  const [selectedActivities, setSelectedActivities] = useState<number[]>([]);
+  const [bulkOperation, setBulkOperation] = useState('');
     }
     
     if (filter.type && !filter.type.includes(item.type)) return false;

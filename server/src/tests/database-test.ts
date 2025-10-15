@@ -1,4 +1,4 @@
-import { sequelize } from '../config/database';
+// import { sequelize } from '../config/database'; // Commented out for in-memory DB
 import { User, Activity, Progress } from '../models';
 
 async function testDatabaseSetup() {

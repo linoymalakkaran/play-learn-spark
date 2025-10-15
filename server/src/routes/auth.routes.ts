@@ -9,6 +9,8 @@ import {
   changePassword,
   logout,
   getChildren,
+  requestPasswordReset,
+  resetPassword,
 } from '../controllers/auth.controller';
 import {
   authenticateToken,
@@ -110,10 +112,30 @@ const changePasswordValidation = [
     .withMessage('New password must contain at least one uppercase letter, one lowercase letter, and one number'),
 ];
 
+const passwordResetValidation = [
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please provide a valid email'),
+];
+
+const resetPasswordValidation = [
+  body('token')
+    .notEmpty()
+    .withMessage('Reset token is required'),
+  body('newPassword')
+    .isLength({ min: 6 })
+    .withMessage('New password must be at least 6 characters long')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .withMessage('New password must contain at least one uppercase letter, one lowercase letter, and one number'),
+];
+
 // Public routes (no authentication required)
 router.post('/register', authRateLimit(5, 15 * 60 * 1000), registerValidation, register);
 router.post('/login', authRateLimit(5, 15 * 60 * 1000), loginValidation, login);
 router.post('/refresh-token', refreshToken);
+router.post('/forgot-password', authRateLimit(3, 15 * 60 * 1000), passwordResetValidation, requestPasswordReset);
+router.post('/reset-password', authRateLimit(3, 15 * 60 * 1000), resetPasswordValidation, resetPassword);
 
 // Protected routes (authentication required)
 router.use(authenticateToken); // Apply authentication to all routes below

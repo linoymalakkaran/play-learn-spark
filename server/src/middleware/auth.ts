@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { SignOptions } from 'jsonwebtoken';
-import { UserModel as User } from '../models/UserStore';
+import { User, userStore } from '../models/UserStore';
 import { logger } from '../utils/logger';
 
 // Extend Request interface to include user
@@ -74,7 +74,7 @@ export const authenticateToken = async (
     ) as JWTPayload;
 
     // Fetch user from database
-    const user = await User.findByPk(parseInt(decoded.userId));
+    const user = await userStore.findByPk(parseInt(decoded.userId));
     if (!user) {
       res.status(401).json({
         success: false,
@@ -195,7 +195,7 @@ export const optionalAuth = async (
       process.env.JWT_SECRET || 'play-learn-spark-secret-key'
     ) as JWTPayload;
 
-    const user = await User.findByPk(parseInt(decoded.userId));
+    const user = await userStore.findByPk(parseInt(decoded.userId));
     if (user) {
       req.user = user;
     }

@@ -24,6 +24,9 @@ import PerformanceMonitoringService from "@/services/PerformanceMonitoringServic
 import FocusManagerService from "@/services/FocusManagerService";
 import BackendStatus from "@/components/BackendStatus";
 import StudentSetup from "@/components/StudentSetup";
+import { ForgotPassword } from "@/components/auth/ForgotPassword";
+import { ResetPassword } from "@/components/auth/ResetPassword";
+import { ContentManagementSystemNew } from "@/components/ContentManagementSystemNew";
 import { useEffect, useState } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -113,11 +116,15 @@ const AppContent = () => {
               <Route path="/activities/art" element={<ArtCreativity />} />
               <Route path="/activities/social" element={<SocialSkills />} />
               <Route path="/activities/physical" element={<PhysicalActivities />} />
+              <Route path="/content-management" element={<ContentManagementSystemNew />} />
               <Route path="/integratedplatform" element={<IntegratedPlatform />} />
               <Route path="/malayalam" element={<MalayalamLearning />} />
               <Route path="/arabic" element={<ArabicLearning />} />
               <Route path="/ai-homework" element={<AIHomeworkAnalyzer />} />
               <Route path="/auth-demo" element={<AuthDemo />} />
+              <Route path="/login" element={<AuthDemo />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

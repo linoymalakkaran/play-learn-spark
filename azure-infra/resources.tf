@@ -174,10 +174,27 @@ resource "azurerm_linux_web_app" "backend" {
       "DOCKER_REGISTRY_SERVER_USERNAME" = azurerm_container_registry.main.admin_username
       "DOCKER_REGISTRY_SERVER_PASSWORD" = azurerm_container_registry.main.admin_password
       "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
-      "WEBSITES_PORT"                    = "3001"
-      "PORT"                            = "3001"
+      "WEBSITES_PORT"                    = "3002"
+      "PORT"                            = "3002"
       "NODE_ENV"                        = "production"
       "CORS_ORIGIN"                     = "https://${local.frontend_app_name}.azurewebsites.net"
+      
+      # AI Service Configuration
+      "GOOGLE_AI_API_KEY"               = var.google_ai_api_key
+      "OPENAI_API_KEY"                  = var.openai_api_key
+      "HUGGINGFACE_API_KEY"             = var.huggingface_api_key
+      "ANTHROPIC_API_KEY"               = var.anthropic_api_key
+      
+      # Database and other configuration
+      "DATABASE_TYPE"                   = "memory"
+      "JWT_SECRET"                      = "azure-production-jwt-secret-change-me"
+      "JWT_EXPIRES_IN"                  = "7d"
+      "LOG_LEVEL"                       = "info"
+      "MAX_FILE_SIZE"                   = "10485760"
+      "UPLOAD_PATH"                     = "./uploads"
+      "ALLOWED_FILE_TYPES"              = "pdf,csv,jpg,jpeg,png,txt"
+      "CONTENT_SAFETY_ENABLED"          = "true"
+      "MAX_CONTENT_LENGTH"              = "10000"
     },
     var.enable_application_insights && length(azurerm_application_insights.main) > 0 ? {
       "APPINSIGHTS_INSTRUMENTATIONKEY"        = azurerm_application_insights.main[0].instrumentation_key

@@ -90,3 +90,32 @@ variable "tags" {
     ManagedBy   = "Terraform"
   }
 }
+
+# AI Service Configuration
+variable "google_ai_api_key" {
+  description = "Google AI Studio API key for AI content generation"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "openai_api_key" {
+  description = "OpenAI API key for backup AI content generation"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "huggingface_api_key" {
+  description = "Hugging Face API key for AI content generation"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "anthropic_api_key" {
+  description = "Anthropic API key for AI content generation"
+  type        = string
+  sensitive   = true
+  default     = ""
+}

@@ -116,13 +116,38 @@ The frontend can be deployed to various platforms:
 
 ---
 
-## 📋 Additional Documentation
+## � CI/CD & Deployment
+
+This project includes automated GitHub Actions pipelines for continuous integration and deployment to Azure.
+
+### Quick Deploy to Production
+```bash
+# Create and push to prod branch to trigger deployment
+git checkout -b prod
+git push origin prod
+```
+
+### Environments
+- **Development**: Automatic deployment from `develop` branch
+- **Production**: Automatic deployment from `prod` branch
+
+📖 **[Getting Started with CI/CD](.github/GETTING_STARTED.md)** - 5-minute setup guide
+📖 **[Complete Pipeline Documentation](.github/PIPELINE_README.md)** - Detailed pipeline documentation
+
+## �📋 Additional Documentation
 
 See [README-plan.md](./README-plan.md) for detailed implementation plans and technical specifications.
 
 ## 🤝 Contributing
 
 We welcome contributions! Please read our contributing guidelines and submit pull requests for any improvements.
+
+### Development Workflow
+1. Fork the repository
+2. Create feature branch from `develop`
+3. Make changes and ensure tests pass
+4. Submit PR to `develop` branch
+5. After review, changes will auto-deploy to development environment
 
 ## 📄 License
 

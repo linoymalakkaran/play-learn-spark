@@ -1,0 +1,217 @@
+name: Infrastructure Management
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Infrastructure action'
+        required: true
+        default: 'plan'
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+          - setup-resources
+          - cleanup-resources
+      environment:
+        description: 'Environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+          - both
+      confirm_destroy:
+        description: 'Type "DESTROY" to confirm destruction'
+        required: false
+        type: string
+
+env:
+  AZURE_LOCATION: eastus
+  PROJECT_NAME: play-learn-spark
+
+jobs:
+  infrastructure:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Validate destroy confirmation
+        if: github.event.inputs.action == 'destroy' || github.event.inputs.action == 'cleanup-resources'
+        run: |
+          if [[ "${{ github.event.inputs.confirm_destroy }}" != "DESTROY" ]]; then
+            echo "❌ Destruction not confirmed. Please type 'DESTROY' in the confirm_destroy field."
+            exit 1
+          fi
+          echo "✅ Destruction confirmed"
+      
+      - name: Setup Terraform
+        if: contains(fromJson('["plan", "apply", "destroy"]'), github.event.inputs.action)
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.0"
+      
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Setup Azure Resources
+        if: github.event.inputs.action == 'setup-resources'
+        run: |
+          echo "🚀 Setting up Azure resources using script..."
+          cd .github/scripts
+          ./setup-azure-resources.sh
+      
+      - name: Cleanup Azure Resources
+        if: github.event.inputs.action == 'cleanup-resources'
+        run: |
+          echo "🗑️ Cleaning up Azure resources using script..."
+          cd .github/scripts
+          ./cleanup-azure-resources.sh
+      
+      - name: Terraform Plan
+        if: github.event.inputs.action == 'plan'
+        working-directory: azure-infra
+        run: |
+          terraform init
+          
+          if [[ "${{ github.event.inputs.environment }}" == "both" ]]; then
+            echo "📋 Planning for DEV environment..."
+            terraform plan \
+              -var="environment=dev" \
+              -var="project_name=${{ env.PROJECT_NAME }}" \
+              -var="location=${{ env.AZURE_LOCATION }}" \
+              -var="app_service_plan_sku=B1" \
+              -out=dev.tfplan
+            
+            echo "📋 Planning for PROD environment..."
+            terraform plan \
+              -var="environment=prod" \
+              -var="project_name=${{ env.PROJECT_NAME }}" \
+              -var="location=${{ env.AZURE_LOCATION }}" \
+              -var="app_service_plan_sku=P1v2" \
+              -out=prod.tfplan
+          else
+            ENV="${{ github.event.inputs.environment }}"
+            SKU="B1"
+            if [[ "$ENV" == "prod" ]]; then
+              SKU="P1v2"
+            fi
+            
+            echo "📋 Planning for $ENV environment..."
+            terraform plan \
+              -var="environment=$ENV" \
+              -var="project_name=${{ env.PROJECT_NAME }}" \
+              -var="location=${{ env.AZURE_LOCATION }}" \
+              -var="app_service_plan_sku=$SKU" \
+              -out=$ENV.tfplan
+          fi
+      
+      - name: Terraform Apply
+        if: github.event.inputs.action == 'apply'
+        working-directory: azure-infra
+        run: |
+          terraform init
+          
+          if [[ "${{ github.event.inputs.environment }}" == "both" ]]; then
+            echo "🚀 Applying DEV environment..."
+            terraform apply \
+              -var="environment=dev" \
+              -var="project_name=${{ env.PROJECT_NAME }}" \
+              -var="location=${{ env.AZURE_LOCATION }}" \
+              -var="app_service_plan_sku=B1" \
+              -auto-approve
+            
+            echo "🚀 Applying PROD environment..."
+            terraform apply \
+              -var="environment=prod" \
+              -var="project_name=${{ env.PROJECT_NAME }}" \
+              -var="location=${{ env.AZURE_LOCATION }}" \
+              -var="app_service_plan_sku=P1v2" \
+              -auto-approve
+          else
+            ENV="${{ github.event.inputs.environment }}"
+            SKU="B1"
+            if [[ "$ENV" == "prod" ]]; then
+              SKU="P1v2"
+            fi
+            
+            echo "🚀 Applying $ENV environment..."
+            terraform apply \
+              -var="environment=$ENV" \
+              -var="project_name=${{ env.PROJECT_NAME }}" \
+              -var="location=${{ env.AZURE_LOCATION }}" \
+              -var="app_service_plan_sku=$SKU" \
+              -auto-approve
+          fi
+      
+      - name: Terraform Destroy
+        if: github.event.inputs.action == 'destroy'
+        working-directory: azure-infra
+        run: |
+          terraform init
+          
+          if [[ "${{ github.event.inputs.environment }}" == "both" ]]; then
+            echo "💥 Destroying DEV environment..."
+            terraform destroy \
+              -var="environment=dev" \
+              -var="project_name=${{ env.PROJECT_NAME }}" \
+              -var="location=${{ env.AZURE_LOCATION }}" \
+              -var="app_service_plan_sku=B1" \
+              -auto-approve
+            
+            echo "💥 Destroying PROD environment..."
+            terraform destroy \
+              -var="environment=prod" \
+              -var="project_name=${{ env.PROJECT_NAME }}" \
+              -var="location=${{ env.AZURE_LOCATION }}" \
+              -var="app_service_plan_sku=P1v2" \
+              -auto-approve
+          else
+            ENV="${{ github.event.inputs.environment }}"
+            SKU="B1"
+            if [[ "$ENV" == "prod" ]]; then
+              SKU="P1v2"
+            fi
+            
+            echo "💥 Destroying $ENV environment..."
+            terraform destroy \
+              -var="environment=$ENV" \
+              -var="project_name=${{ env.PROJECT_NAME }}" \
+              -var="location=${{ env.AZURE_LOCATION }}" \
+              -var="app_service_plan_sku=$SKU" \
+              -auto-approve
+          fi
+      
+      - name: Summary
+        if: always()
+        run: |
+          echo "## 🏗️ Infrastructure Management Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Action**: ${{ github.event.inputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment**: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ github.event.inputs.action }}" == "setup-resources" && "${{ job.status }}" == "success" ]]; then
+            echo "✅ Azure resources have been created successfully!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Next Steps**:" >> $GITHUB_STEP_SUMMARY
+            echo "1. Verify resources in Azure Portal" >> $GITHUB_STEP_SUMMARY
+            echo "2. Test the deployment pipeline" >> $GITHUB_STEP_SUMMARY
+            echo "3. Create and push to 'prod' branch for first deployment" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ github.event.inputs.action }}" == "cleanup-resources" && "${{ job.status }}" == "success" ]]; then
+            echo "✅ Azure resources have been cleaned up successfully!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Remember to**:" >> $GITHUB_STEP_SUMMARY
+            echo "1. Remove AZURE_CREDENTIALS from GitHub Secrets" >> $GITHUB_STEP_SUMMARY
+            echo "2. Clean up any local Terraform state files" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ job.status }}" == "success" ]]; then
+            echo "✅ Infrastructure operation completed successfully!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Infrastructure operation failed. Check the logs for details." >> $GITHUB_STEP_SUMMARY
+          fi

@@ -37,6 +37,9 @@ import ArabicLearning from "./pages/ArabicLearning";
 import RewardsPage from "./pages/RewardsPage";
 import AIHomeworkAnalyzer from "./pages/AIHomeworkAnalyzer";
 import AuthDemo from "./pages/AuthDemo";
+import AuthPage from "./pages/AuthPage";
+import UserDashboard from "./components/UserDashboard";
+import AuthGuard from "./components/auth/AuthGuard";
 import EnglishReading from "./pages/activities/EnglishReading";
 import MathNumbers from "./pages/activities/MathNumbers";
 import ScienceExploration from "./pages/activities/ScienceExploration";
@@ -124,7 +127,31 @@ const AppContent = () => {
               <Route path="/rewards" element={<RewardsPage />} />
               <Route path="/ai-homework" element={<AIHomeworkAnalyzer />} />
               <Route path="/auth-demo" element={<AuthDemo />} />
-              <Route path="/login" element={<AuthDemo />} />
+              <Route path="/login" element={
+                <AuthGuard requireAuth={false}>
+                  <AuthPage mode="login" />
+                </AuthGuard>
+              } />
+              <Route path="/register" element={
+                <AuthGuard requireAuth={false}>
+                  <AuthPage mode="register" />
+                </AuthGuard>
+              } />
+              <Route path="/auth" element={
+                <AuthGuard requireAuth={false}>
+                  <AuthPage />
+                </AuthGuard>
+              } />
+              <Route path="/profile" element={
+                <AuthGuard>
+                  <UserDashboard />
+                </AuthGuard>
+              } />
+              <Route path="/dashboard" element={
+                <AuthGuard>
+                  <UserDashboard />
+                </AuthGuard>
+              } />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

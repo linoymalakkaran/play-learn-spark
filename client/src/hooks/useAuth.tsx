@@ -40,12 +40,14 @@ interface AuthContextType {
   tokens: AuthTokens | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; message?: string }>;
   logout: () => Promise<void>;
   register: (userData: RegisterData) => Promise<{ success: boolean; message?: string }>;
   refreshToken: () => Promise<boolean>;
   updateProfile: (updates: Partial<User['profile']>) => Promise<{ success: boolean; message?: string }>;
   clearAuth: () => void;
+  saveUserProgress: (progress: any) => void;
+  getUserProgress: () => any;
 }
 
 export interface RegisterData {
@@ -64,6 +66,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const AUTH_STORAGE_KEY = 'play-learn-spark-auth';
 const TOKEN_STORAGE_KEY = 'authToken';
 const REFRESH_TOKEN_STORAGE_KEY = 'refreshToken';
+const REMEMBER_ME_KEY = 'rememberMe';
+const USER_PROGRESS_KEY = 'userProgress';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -128,7 +132,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string, rememberMe = false) => {
     setIsLoading(true);
     try {
       const response = await authService.login(email, password);
@@ -139,6 +143,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (userData && tokenData) {
           setUser(userData);
           setTokens(tokenData);
+          
+          // Store remember me preference
+          if (rememberMe) {
+            localStorage.setItem(REMEMBER_ME_KEY, 'true');
+          } else {
+            localStorage.removeItem(REMEMBER_ME_KEY);
+          }
+          
           return { success: true };
         }
       }
@@ -239,6 +251,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [tokens?.accessToken]);
 
+  const saveUserProgress = useCallback((progress: any) => {
+    try {
+      const progressData = {
+        userId: user?.id,
+        progress,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem(USER_PROGRESS_KEY, JSON.stringify(progressData));
+    } catch (error) {
+      console.warn('Failed to save user progress:', error);
+    }
+  }, [user?.id]);
+
+  const getUserProgress = useCallback(() => {
+    try {
+      const saved = localStorage.getItem(USER_PROGRESS_KEY);
+      if (saved) {
+        const progressData = JSON.parse(saved);
+        if (progressData.userId === user?.id) {
+          return progressData.progress;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.warn('Failed to load user progress:', error);
+      return null;
+    }
+  }, [user?.id]);
+
   const isAuthenticated = !!user && !!tokens?.accessToken;
 
   const value: AuthContextType = {
@@ -252,6 +293,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     refreshToken,
     updateProfile,
     clearAuth,
+    saveUserProgress,
+    getUserProgress,
   };
 
   return (

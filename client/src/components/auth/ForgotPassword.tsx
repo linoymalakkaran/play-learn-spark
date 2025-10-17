@@ -19,6 +19,12 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isValidEmail(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
     setMessage('');
@@ -35,11 +41,17 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(data.message);
+        setMessage(data.message || 'If an account with this email exists, you will receive a password reset link shortly.');
         setIsSuccess(true);
         setEmail(''); // Clear email field
       } else {
-        setError(data.error || 'Failed to send reset email');
+        if (data.error?.toLowerCase().includes('not found') || data.error?.toLowerCase().includes('does not exist')) {
+          setMessage('If an account with this email exists, you will receive a password reset link shortly.');
+          setIsSuccess(true);
+          setEmail('');
+        } else {
+          setError(data.error || 'Failed to send reset email. Please try again.');
+        }
       }
     } catch (err) {
       setError('Network error. Please check your connection and try again.');
@@ -132,25 +144,38 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
             )}
 
             <div className="text-center space-y-2">
-              <p className="text-sm text-gray-600">
-                Remember your password?{' '}
-                <Link to="/login" className="text-purple-600 hover:text-purple-800 font-medium">
-                  Sign in
-                </Link>
-              </p>
-              {isSuccess && (
-                <div className="pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setIsSuccess(false);
-                      setMessage('');
-                      setEmail('');
-                    }}
-                    className="w-full"
-                  >
-                    Send Another Reset Link
-                  </Button>
+              {!isSuccess ? (
+                <p className="text-sm text-gray-600">
+                  Remember your password?{' '}
+                  <Link to="/login" className="text-purple-600 hover:text-purple-800 font-medium">
+                    Sign in
+                  </Link>
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600">
+                    Check your email and follow the link to reset your password.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsSuccess(false);
+                        setMessage('');
+                        setEmail('');
+                      }}
+                      className="flex-1"
+                    >
+                      Send Another Link
+                    </Button>
+                    <Button
+                      variant="default"
+                      asChild
+                      className="flex-1"
+                    >
+                      <Link to="/login">Back to Login</Link>
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

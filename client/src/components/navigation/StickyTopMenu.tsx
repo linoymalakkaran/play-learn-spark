@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   Home, 
   BookOpen, 
   GraduationCap,
   Sparkles,
   Languages,
-  Brain
+  Brain,
+  LogOut,
+  User
 } from 'lucide-react';
 
 interface StickyTopMenuProps {
@@ -17,9 +20,23 @@ interface StickyTopMenuProps {
 const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, isAuthenticated, logout } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   const menuItems = [
@@ -46,6 +63,12 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
       label: 'Arabic', 
       icon: BookOpen,
       description: 'Learn Arabic language'
+    },
+    { 
+      path: '/rewards', 
+      label: 'Rewards', 
+      icon: Brain,
+      description: 'View your rewards and achievements'
     }
   ];
 
@@ -79,8 +102,9 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
             })}
           </div>
 
-          {/* Right side - Try Integrated Platform */}
-          <div className="flex items-center">
+          {/* Right side - Auth-aware actions */}
+          <div className="flex items-center space-x-2">
+            {/* Try Integrated Platform - always visible */}
             <Button
               onClick={() => navigate('/integratedplatform')}
               size="sm"
@@ -91,6 +115,52 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
               <span className="hidden md:inline">Try Integrated Platform</span>
               <span className="hidden sm:inline md:hidden">Platform</span>
             </Button>
+
+            {/* Authentication-based buttons */}
+            {isAuthenticated && user ? (
+              <>
+                {/* User Profile Button */}
+                <Button
+                  onClick={() => navigate('/profile')}
+                  size="sm"
+                  variant="outline"
+                  className="flex items-center gap-2 hover:bg-blue-50 transition-all"
+                  title="Go to Profile"
+                >
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline">{user.profile.firstName || user.username}</span>
+                </Button>
+                
+                {/* Logout Button */}
+                <Button
+                  onClick={handleLogout}
+                  size="sm"
+                  variant="outline"
+                  className="flex items-center gap-2 text-red-600 border-red-600 hover:bg-red-50 transition-all"
+                  disabled={isLoggingOut}
+                  title="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">
+                    {isLoggingOut ? 'Logging out...' : 'Logout'}
+                  </span>
+                </Button>
+              </>
+            ) : (
+              <>
+                {/* Login Button */}
+                <Button
+                  onClick={() => navigate('/login')}
+                  size="sm"
+                  variant="outline"
+                  className="flex items-center gap-2 text-blue-600 border-blue-600 hover:bg-blue-50 transition-all"
+                  title="Login"
+                >
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline">Login</span>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

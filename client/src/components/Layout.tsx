@@ -68,8 +68,7 @@ const Layout: React.FC<LayoutProps> = ({
   };
 
   const handleProfile = () => {
-    // TODO: Navigate to profile page
-    console.log('Profile clicked - to be implemented');
+    navigate('/profile');
   };
 
   return (
@@ -127,6 +126,27 @@ const Layout: React.FC<LayoutProps> = ({
                   >
                     <Settings className="w-5 h-5 text-blue-600" />
                   </Button>
+                )}
+
+                {/* Auth buttons for non-authenticated users */}
+                {!isAuthenticated && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate('/login')}
+                      className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                    >
+                      Login
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => navigate('/register')}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Register
+                    </Button>
+                  </>
                 )}
 
                 {/* User Menu */}

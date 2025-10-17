@@ -9,7 +9,8 @@ import {
   Gamepad2,
   Languages,
   Upload,
-  Settings
+  Settings,
+  Award
 } from 'lucide-react';
 
 const FooterNavigation: React.FC = () => {
@@ -41,6 +42,12 @@ const FooterNavigation: React.FC = () => {
       label: 'Arabic', 
       icon: BookOpen,
       description: 'Learn Arabic Language'
+    },
+    { 
+      path: '/rewards', 
+      label: 'Rewards', 
+      icon: Award,
+      description: 'Redeem Points for Rewards'
     },
     { 
       path: '/ai-homework', 

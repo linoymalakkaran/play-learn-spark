@@ -65,6 +65,12 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
       description: 'Learn Arabic language'
     },
     { 
+      path: '/spanish', 
+      label: 'Spanish', 
+      icon: Sparkles,
+      description: 'Learn Spanish language - ¡Aventura de Español!'
+    },
+    { 
       path: '/rewards', 
       label: 'Rewards', 
       icon: Brain,

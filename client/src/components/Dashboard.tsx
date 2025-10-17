@@ -133,7 +133,459 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
         isLocked: false,
         isCompleted: false
       },
-      // Add more activities here...
+      {
+        id: 'alphabet-adventure',
+        title: 'Alphabet Adventure',
+        description: 'Explore letters and sounds in a magical alphabet journey!',
+        category: 'english',
+        subcategory: 'alphabet',
+        minAge: 3,
+        maxAge: 6,
+        estimatedDuration: 15,
+        difficultyLevel: 1,
+        icon: '📝',
+        backgroundColor: '#E6F3FF',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'story-time',
+        title: 'Story Time',
+        description: 'Listen to exciting stories and answer fun questions!',
+        category: 'english',
+        subcategory: 'reading',
+        minAge: 4,
+        maxAge: 6,
+        estimatedDuration: 20,
+        difficultyLevel: 2,
+        icon: '📖',
+        backgroundColor: '#F0E6FF',
+        isLocked: false,
+        isCompleted: false
+      },
+
+      // Math Activities
+      {
+        id: 'number-counting',
+        title: 'Number Counting',
+        description: 'Count objects and learn numbers from 1 to 10!',
+        category: 'math',
+        subcategory: 'counting',
+        minAge: 3,
+        maxAge: 5,
+        estimatedDuration: 10,
+        difficultyLevel: 1,
+        icon: '🔢',
+        backgroundColor: '#FFE6E6',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'shape-explorer',
+        title: 'Shape Explorer',
+        description: 'Discover circles, squares, triangles and more shapes!',
+        category: 'math',
+        subcategory: 'geometry',
+        minAge: 3,
+        maxAge: 6,
+        estimatedDuration: 12,
+        difficultyLevel: 1,
+        icon: '🔺',
+        backgroundColor: '#E6FFE6',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'addition-fun',
+        title: 'Addition Fun',
+        description: 'Learn to add numbers with colorful objects and animations!',
+        category: 'math',
+        subcategory: 'arithmetic',
+        minAge: 4,
+        maxAge: 6,
+        estimatedDuration: 15,
+        difficultyLevel: 2,
+        icon: '➕',
+        backgroundColor: '#FFFACD',
+        isLocked: false,
+        isCompleted: false
+      },
+
+      // Science Activities
+      {
+        id: 'nature-explorer',
+        title: 'Nature Explorer',
+        description: 'Discover plants, flowers, and trees in our beautiful world!',
+        category: 'science',
+        subcategory: 'biology',
+        minAge: 3,
+        maxAge: 6,
+        estimatedDuration: 15,
+        difficultyLevel: 1,
+        icon: '🌱',
+        backgroundColor: '#F0FFF0',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'weather-wonders',
+        title: 'Weather Wonders',
+        description: 'Learn about sun, rain, snow and different weather patterns!',
+        category: 'science',
+        subcategory: 'meteorology',
+        minAge: 4,
+        maxAge: 6,
+        estimatedDuration: 12,
+        difficultyLevel: 1,
+        icon: '🌦️',
+        backgroundColor: '#E0F6FF',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'space-adventure',
+        title: 'Space Adventure',
+        description: 'Blast off to explore planets, stars, and the solar system!',
+        category: 'science',
+        subcategory: 'astronomy',
+        minAge: 5,
+        maxAge: 6,
+        estimatedDuration: 20,
+        difficultyLevel: 2,
+        icon: '🚀',
+        backgroundColor: '#1a1a2e',
+        isLocked: false,
+        isCompleted: false
+      },
+
+      // Habits Activities
+      {
+        id: 'daily-routine',
+        title: 'Daily Routine',
+        description: 'Learn about morning, afternoon, and evening activities!',
+        category: 'habits',
+        subcategory: 'routine',
+        minAge: 3,
+        maxAge: 6,
+        estimatedDuration: 10,
+        difficultyLevel: 1,
+        icon: '🌅',
+        backgroundColor: '#FFF8DC',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'healthy-eating',
+        title: 'Healthy Eating',
+        description: 'Discover nutritious foods and build healthy eating habits!',
+        category: 'habits',
+        subcategory: 'nutrition',
+        minAge: 3,
+        maxAge: 6,
+        estimatedDuration: 12,
+        difficultyLevel: 1,
+        icon: '🥕',
+        backgroundColor: '#FFE4E1',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'hygiene-heroes',
+        title: 'Hygiene Heroes',
+        description: 'Learn about brushing teeth, washing hands, and staying clean!',
+        category: 'habits',
+        subcategory: 'hygiene',
+        minAge: 3,
+        maxAge: 6,
+        estimatedDuration: 8,
+        difficultyLevel: 1,
+        icon: '🧼',
+        backgroundColor: '#F0FFFF',
+        isLocked: false,
+        isCompleted: false
+      },
+
+      // Art Activities
+      {
+        id: 'color-mixing',
+        title: 'Color Mixing',
+        description: 'Mix colors to create beautiful new shades and patterns!',
+        category: 'art',
+        subcategory: 'painting',
+        minAge: 3,
+        maxAge: 6,
+        estimatedDuration: 15,
+        difficultyLevel: 1,
+        icon: '🎨',
+        backgroundColor: '#FFB6C1',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'drawing-fun',
+        title: 'Drawing Fun',
+        description: 'Learn to draw simple shapes, animals, and objects!',
+        category: 'art',
+        subcategory: 'drawing',
+        minAge: 3,
+        maxAge: 6,
+        estimatedDuration: 20,
+        difficultyLevel: 1,
+        icon: '✏️',
+        backgroundColor: '#FFEFD5',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'music-maker',
+        title: 'Music Maker',
+        description: 'Create music with virtual instruments and learn about sounds!',
+        category: 'art',
+        subcategory: 'music',
+        minAge: 4,
+        maxAge: 6,
+        estimatedDuration: 12,
+        difficultyLevel: 1,
+        icon: '🎵',
+        backgroundColor: '#E6E6FA',
+        isLocked: false,
+        isCompleted: false
+      },
+
+      // Social Activities
+      {
+        id: 'family-friends',
+        title: 'Family & Friends',
+        description: 'Learn about relationships, emotions, and social interactions!',
+        category: 'social',
+        subcategory: 'relationships',
+        minAge: 3,
+        maxAge: 6,
+        estimatedDuration: 10,
+        difficultyLevel: 1,
+        icon: '👨‍👩‍👧‍👦',
+        backgroundColor: '#FFEFD5',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'community-helpers',
+        title: 'Community Helpers',
+        description: 'Meet doctors, firefighters, teachers and other helpful people!',
+        category: 'social',
+        subcategory: 'community',
+        minAge: 4,
+        maxAge: 6,
+        estimatedDuration: 15,
+        difficultyLevel: 1,
+        icon: '👮‍♂️',
+        backgroundColor: '#F0E68C',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'sharing-caring',
+        title: 'Sharing & Caring',
+        description: 'Learn about kindness, sharing, and helping others!',
+        category: 'social',
+        subcategory: 'values',
+        minAge: 3,
+        maxAge: 6,
+        estimatedDuration: 12,
+        difficultyLevel: 1,
+        icon: '💝',
+        backgroundColor: '#FFB6C1',
+        isLocked: false,
+        isCompleted: false
+      },
+
+      // Problem Solving Activities
+      {
+        id: 'puzzle-master',
+        title: 'Puzzle Master',
+        description: 'Solve fun jigsaw puzzles and brain teasers!',
+        category: 'problem',
+        subcategory: 'puzzles',
+        minAge: 4,
+        maxAge: 6,
+        estimatedDuration: 15,
+        difficultyLevel: 2,
+        icon: '🧩',
+        backgroundColor: '#DDA0DD',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'pattern-detective',
+        title: 'Pattern Detective',
+        description: 'Find and complete patterns with colors, shapes, and objects!',
+        category: 'problem',
+        subcategory: 'patterns',
+        minAge: 4,
+        maxAge: 6,
+        estimatedDuration: 12,
+        difficultyLevel: 1,
+        icon: '🔍',
+        backgroundColor: '#98FB98',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'logic-games',
+        title: 'Logic Games',
+        description: 'Use thinking skills to solve logic puzzles and challenges!',
+        category: 'problem',
+        subcategory: 'logic',
+        minAge: 5,
+        maxAge: 6,
+        estimatedDuration: 18,
+        difficultyLevel: 2,
+        icon: '🧠',
+        backgroundColor: '#FFE4E1',
+        isLocked: false,
+        isCompleted: false
+      },
+
+      // Physical Activities
+      {
+        id: 'yoga-kids',
+        title: 'Yoga for Kids',
+        description: 'Learn simple yoga poses and breathing exercises!',
+        category: 'physical',
+        subcategory: 'exercise',
+        minAge: 3,
+        maxAge: 6,
+        estimatedDuration: 10,
+        difficultyLevel: 1,
+        icon: '🧘‍♀️',
+        backgroundColor: '#F0FFFF',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'dance-party',
+        title: 'Dance Party',
+        description: 'Move and groove with fun dance moves and music!',
+        category: 'physical',
+        subcategory: 'dance',
+        minAge: 3,
+        maxAge: 6,
+        estimatedDuration: 8,
+        difficultyLevel: 1,
+        icon: '💃',
+        backgroundColor: '#FFB6C1',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'sports-fun',
+        title: 'Sports Fun',
+        description: 'Learn about different sports and practice coordination!',
+        category: 'physical',
+        subcategory: 'sports',
+        minAge: 4,
+        maxAge: 6,
+        estimatedDuration: 12,
+        difficultyLevel: 1,
+        icon: '⚽',
+        backgroundColor: '#90EE90',
+        isLocked: false,
+        isCompleted: false
+      },
+
+      // World Activities
+      {
+        id: 'world-cultures',
+        title: 'World Cultures',
+        description: 'Explore different countries, cultures, and traditions!',
+        category: 'world',
+        subcategory: 'cultures',
+        minAge: 5,
+        maxAge: 6,
+        estimatedDuration: 20,
+        difficultyLevel: 2,
+        icon: '🌍',
+        backgroundColor: '#E0FFFF',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'geography-explorer',
+        title: 'Geography Explorer',
+        description: 'Learn about continents, oceans, and famous landmarks!',
+        category: 'world',
+        subcategory: 'geography',
+        minAge: 5,
+        maxAge: 6,
+        estimatedDuration: 18,
+        difficultyLevel: 2,
+        icon: '🗺️',
+        backgroundColor: '#F5DEB3',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'animal-habitats',
+        title: 'Animal Habitats',
+        description: 'Discover where different animals live around the world!',
+        category: 'world',
+        subcategory: 'nature',
+        minAge: 4,
+        maxAge: 6,
+        estimatedDuration: 15,
+        difficultyLevel: 1,
+        icon: '🐾',
+        backgroundColor: '#F0E68C',
+        isLocked: false,
+        isCompleted: false
+      },
+
+      // Languages Activities
+      {
+        id: 'malayalam-learning',
+        title: 'Malayalam Learning',
+        description: 'Learn Malayalam letters, words, and cultural stories!',
+        category: 'languages',
+        subcategory: 'malayalam',
+        minAge: 4,
+        maxAge: 6,
+        estimatedDuration: 25,
+        difficultyLevel: 2,
+        icon: '🇮🇳',
+        backgroundColor: '#E6FFE6',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'arabic-learning',
+        title: 'Arabic Learning',
+        description: 'Explore Arabic alphabet, words, and cultural traditions!',
+        category: 'languages',
+        subcategory: 'arabic',
+        minAge: 4,
+        maxAge: 6,
+        estimatedDuration: 25,
+        difficultyLevel: 2,
+        icon: '🌙',
+        backgroundColor: '#E6E6FA',
+        isLocked: false,
+        isCompleted: false
+      },
+      {
+        id: 'spanish-basics',
+        title: 'Spanish Basics',
+        description: 'Learn basic Spanish words and phrases through fun games!',
+        category: 'languages',
+        subcategory: 'spanish',
+        minAge: 5,
+        maxAge: 6,
+        estimatedDuration: 20,
+        difficultyLevel: 2,
+        icon: '🇪🇸',
+        backgroundColor: '#FFEFD5',
+        isLocked: false,
+        isCompleted: false
+      },
     ];
 
     return baseActivities;
@@ -174,6 +626,25 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   const handleActivityClick = (activityId: string) => {
     if (isLoadingActivity) return;
+    
+    // Handle special language learning activities with dedicated pages
+    if (activityId === 'malayalam-learning') {
+      soundEffects.playClick();
+      window.location.href = 'http://localhost:8080/malayalam';
+      return;
+    }
+    
+    if (activityId === 'arabic-learning') {
+      soundEffects.playClick();
+      window.location.href = 'http://localhost:8080/arabic';
+      return;
+    }
+    
+    if (activityId === 'spanish-basics') {
+      soundEffects.playClick();
+      window.location.href = 'http://localhost:8080/spanish';
+      return;
+    }
     
     setIsLoadingActivity(true);
     announceLoading(`Loading ${activityId} activity`);

@@ -43,7 +43,7 @@ import {
 // Import all major components
 import VideoTutorialSystem from './VideoTutorialSystem';
 import AnalyticsDashboard from './AnalyticsDashboard';
-import RecommendationEngine from './RecommendationEngine';
+import { RecommendationEngine } from './RecommendationEngine';
 
 // Import custom hooks
 import {

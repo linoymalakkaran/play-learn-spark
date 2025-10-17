@@ -39,12 +39,22 @@ output "app_service_plan_name" {
 
 output "frontend_app_name" {
   description = "The name of the frontend App Service"
-  value       = azurerm_linux_web_app.frontend.name
+  value       = try(azurerm_linux_web_app.frontend.name, azurerm_linux_web_app.combined_app.name)
 }
 
 output "frontend_app_url" {
   description = "The URL of the frontend application"
-  value       = "https://${azurerm_linux_web_app.frontend.default_hostname}"
+  value       = try("https://${azurerm_linux_web_app.frontend.default_hostname}", "https://${azurerm_linux_web_app.combined_app.default_hostname}")
+}
+
+output "combined_app_name" {
+  description = "The name of the combined App Service"
+  value       = azurerm_linux_web_app.combined_app.name
+}
+
+output "combined_app_url" {
+  description = "The URL of the combined application"
+  value       = "https://${azurerm_linux_web_app.combined_app.default_hostname}"
 }
 
 output "backend_app_name" {

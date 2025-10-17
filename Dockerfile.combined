@@ -1,0 +1,195 @@
+# Multi-stage build for React + Node.js combined deployment
+# Stage 1: Build React frontend
+FROM node:20-alpine AS frontend-builder
+
+WORKDIR /app/client
+
+# Copy client package files
+COPY client/package*.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy client source
+COPY client/ ./
+
+# Build the React application
+RUN npm run build
+
+# Stage 2: Build Node.js backend
+FROM node:20-alpine AS backend-builder
+
+WORKDIR /app/server
+
+# Install system dependencies for SQLite and native modules
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    sqlite
+
+# Copy server package files
+COPY server/package*.json ./
+COPY server/tsconfig.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy server source
+COPY server/src/ ./src/
+COPY server/healthcheck.js ./
+
+# Stage 3: Production combined runtime
+FROM node:20-alpine
+
+# Install system dependencies
+RUN apk add --no-cache \
+    nginx \
+    sqlite \
+    supervisor
+
+# Create app directory
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup -g 1001 -S appuser
+RUN adduser -S appuser -u 1001 -G appuser
+
+# Copy built frontend from frontend-builder
+COPY --from=frontend-builder /app/client/dist /usr/share/nginx/html
+
+# Copy backend files from backend-builder
+COPY --from=backend-builder /app/server /app/server
+
+# Create custom nginx configuration for serving frontend and proxying API
+COPY <<EOF /etc/nginx/nginx.conf
+user appuser;
+worker_processes auto;
+error_log /dev/stderr warn;
+pid /tmp/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    
+    log_format main '\$remote_addr - \$remote_user [\$time_local] "\$request" '
+                    '\$status \$body_bytes_sent "\$http_referer" '
+                    '"\$http_user_agent" "\$http_x_forwarded_for"';
+    
+    access_log /dev/stdout main;
+    
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+    
+    # Temporary directories that nginx can write to
+    client_body_temp_path /tmp/client_body;
+    proxy_temp_path /tmp/proxy;
+    fastcgi_temp_path /tmp/fastcgi;
+    uwsgi_temp_path /tmp/uwsgi;
+    scgi_temp_path /tmp/scgi;
+    
+    server {
+        listen 80;
+        server_name localhost;
+        
+        # Serve static files (React app)
+        location / {
+            root /usr/share/nginx/html;
+            try_files \$uri \$uri/ /index.html;
+            add_header Cache-Control "no-store, no-cache, must-revalidate";
+        }
+        
+        # Proxy API requests to Node.js backend
+        location /api/ {
+            proxy_pass http://localhost:3001;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade \$http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto \$scheme;
+            proxy_cache_bypass \$http_upgrade;
+            proxy_read_timeout 300s;
+            proxy_connect_timeout 75s;
+        }
+        
+        # Health check endpoint
+        location /health {
+            access_log off;
+            return 200 "healthy\\n";
+            add_header Content-Type text/plain;
+        }
+    }
+}
+EOF
+
+# Create supervisord configuration
+COPY <<EOF /etc/supervisord.conf
+[supervisord]
+nodaemon=true
+user=root
+logfile=/dev/stdout
+logfile_maxbytes=0
+loglevel=info
+
+[program:nginx]
+command=nginx -g "daemon off;"
+autostart=true
+autorestart=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+user=appuser
+
+[program:backend]
+command=npx ts-node src/server.ts
+directory=/app/server
+autostart=true
+autorestart=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+user=appuser
+environment=NODE_ENV=production,PORT=3001
+EOF
+
+# Create required directories and set permissions
+RUN mkdir -p /app/server/uploads /app/server/logs /app/server/data /tmp/client_body /tmp/proxy /tmp/fastcgi /tmp/uwsgi /tmp/scgi \
+    && chmod -R 755 /usr/share/nginx/html \
+    && chmod -R 777 /tmp \
+    && chown -R appuser:appuser /app \
+    && chown -R appuser:appuser /usr/share/nginx/html \
+    && chown -R appuser:appuser /tmp
+
+# Install backend dependencies in production
+WORKDIR /app/server
+RUN npm ci --only=production
+
+# Switch back to app directory
+WORKDIR /app
+
+# Set environment variables for Azure App Service
+ENV NODE_ENV=production
+ENV PORT=80
+ENV WEBSITES_PORT=80
+ENV DATABASE_PATH=/app/server/data/database.sqlite
+
+# Expose port 80 for Azure App Service
+EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:80/health || exit 1
+
+# Start supervisord to run both nginx and node.js
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]

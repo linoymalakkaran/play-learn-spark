@@ -57,6 +57,12 @@ variable "backend_docker_image" {
   default     = "node:20-alpine"
 }
 
+variable "combined_docker_image" {
+  description = "Docker image for the combined frontend + backend application"
+  type        = string
+  default     = "nginx:latest"
+}
+
 variable "container_registry_name" {
   description = "Name of the Azure Container Registry"
   type        = string

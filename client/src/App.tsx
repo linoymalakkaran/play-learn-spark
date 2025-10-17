@@ -34,6 +34,7 @@ import Activities from "./pages/Activities";
 import IntegratedPlatform from "./pages/IntegratedPlatform";
 import MalayalamLearning from "./pages/MalayalamLearning";
 import ArabicLearning from "./pages/ArabicLearning";
+import RewardsPage from "./pages/RewardsPage";
 import AIHomeworkAnalyzer from "./pages/AIHomeworkAnalyzer";
 import AuthDemo from "./pages/AuthDemo";
 import EnglishReading from "./pages/activities/EnglishReading";
@@ -120,6 +121,7 @@ const AppContent = () => {
               <Route path="/integratedplatform" element={<IntegratedPlatform />} />
               <Route path="/malayalam" element={<MalayalamLearning />} />
               <Route path="/arabic" element={<ArabicLearning />} />
+              <Route path="/rewards" element={<RewardsPage />} />
               <Route path="/ai-homework" element={<AIHomeworkAnalyzer />} />
               <Route path="/auth-demo" element={<AuthDemo />} />
               <Route path="/login" element={<AuthDemo />} />

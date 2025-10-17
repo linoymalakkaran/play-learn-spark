@@ -9,6 +9,7 @@ import analyticsRoutes from './routes/analytics.routes';
 import contentMgmtRoutes from './routes/content-mgmt.routes';
 import fileUploadRoutes from './routes/file-upload.routes';
 import aiRoutes from './routes/ai.routes';
+import rewardRoutes from './routes/reward.routes';
 
 // Load environment variables
 dotenv.config();
@@ -54,6 +55,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/content', contentMgmtRoutes);
 app.use('/api/files', fileUploadRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/rewards', rewardRoutes);
 
 // Health check endpoints
 app.get('/health', (req, res) => {

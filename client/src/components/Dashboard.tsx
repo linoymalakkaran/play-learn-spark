@@ -35,6 +35,16 @@ import {
   useActivityPreloader
 } from '@/components/common/LazyLoadWrapper';
 import { PlaceholderActivity } from './activities/PlaceholderActivity';
+import { FruitBasket } from './activities/FruitBasket';
+import { VegetableGarden } from './activities/VegetableGarden';
+import { ToyBox } from './activities/ToyBox';
+import { CommunityHelpers } from './CommunityHelpers';
+import { ClothingCloset } from './ClothingCloset';
+import { KitchenWords } from './KitchenWords';
+import { PlaygroundFun } from './PlaygroundFun';
+import { RewardCard } from './RewardCard';
+import { useRewardStore } from '../stores/rewardStore';
+import { ActivityCompletionStatus } from './ActivityCompletionStatus';
 import PerformanceMonitoringService from '@/services/PerformanceMonitoringService';
 
 interface DashboardProps {
@@ -687,6 +697,14 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
 
   const activities = getActivitiesForAge(child.age);
   
+  // Get list of completed activities from activity states (using useProgress hook data)
+  const completedActivities = activities
+    .filter(activity => {
+      const state = getActivityState(activity.id);
+      return state?.status === 'completed';
+    })
+    .map(activity => activity.id);
+  
   const filteredActivities = activities.filter(activity => {
     if (activeTab === 'all') return true;
     return activity.category === activeTab;
@@ -701,6 +719,16 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
   const handleActivityComplete = (activityId: string, score: number) => {
     // Track completion in new progress system
     trackActivityComplete(activityId, score);
+    
+    // Award points in reward system
+    const isFirstTime = !completedActivities.includes(activityId);
+    const activity = activities.find(a => a.id === activityId);
+    const isNewCategory = activity ? !completedActivities.some(id => {
+      const completedActivity = activities.find(a => a.id === id);
+      return completedActivity?.category === activity.category;
+    }) : false;
+    
+    awardActivityCompletion(child.id, activityId, score, isFirstTime, isNewCategory);
     
     // Update legacy child progress system
     const newTotalActivities = child.progress.totalActivitiesCompleted + 1;
@@ -903,6 +931,76 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
     );
   }
 
+  if (currentActivity === 'fruit-basket') {
+    return (
+      <FruitBasket
+        childAge={child.age}
+        onComplete={(score) => handleActivityComplete('fruit-basket', score)}
+        onBack={() => setCurrentActivity(null)}
+      />
+    );
+  }
+
+  if (currentActivity === 'vegetable-garden') {
+    return (
+      <VegetableGarden
+        childAge={child.age}
+        onComplete={(score) => handleActivityComplete('vegetable-garden', score)}
+        onBack={() => setCurrentActivity(null)}
+      />
+    );
+  }
+
+  if (currentActivity === 'toy-box') {
+    return (
+      <ToyBox
+        childAge={child.age}
+        onComplete={(score) => handleActivityComplete('toy-box', score)}
+        onBack={() => setCurrentActivity(null)}
+      />
+    );
+  }
+
+  if (currentActivity === 'community-helpers') {
+    return (
+      <CommunityHelpers
+        childAge={child.age}
+        onComplete={(score) => handleActivityComplete('community-helpers', score)}
+        onBack={() => setCurrentActivity(null)}
+      />
+    );
+  }
+
+  if (currentActivity === 'clothing-closet') {
+    return (
+      <ClothingCloset
+        childAge={child.age}
+        onComplete={(score) => handleActivityComplete('clothing-closet', score)}
+        onBack={() => setCurrentActivity(null)}
+      />
+    );
+  }
+
+  if (currentActivity === 'kitchen-words') {
+    return (
+      <KitchenWords
+        childAge={child.age}
+        onComplete={(score) => handleActivityComplete('kitchen-words', score)}
+        onBack={() => setCurrentActivity(null)}
+      />
+    );
+  }
+
+  if (currentActivity === 'playground-fun') {
+    return (
+      <PlaygroundFun
+        childAge={child.age}
+        onComplete={(score) => handleActivityComplete('playground-fun', score)}
+        onBack={() => setCurrentActivity(null)}
+      />
+    );
+  }
+
   // Handle all other activities with interactive placeholder
   if (currentActivity) {
     const activity = activities.find(a => a.id === currentActivity);
@@ -997,19 +1095,31 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
                   </div>
                 </div>
                 
-                <Button 
-                  onClick={() => {
-                    // Clear student information
-                    if (student) {
-                      clearStudent();
-                    }
-                    onReset();
-                  }} 
-                  variant="outline" 
-                  className="px-6 py-3 font-['Comic_Neue'] font-bold border-2 border-primary/30 hover:border-primary hover:bg-primary hover:text-white transition-all duration-300 min-h-[44px] switch-learner-btn"
-                >
-                  {student ? `Change Student (${student.name})` : 'Switch Learner'} 👥
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <Button 
+                    onClick={() => {
+                      // TODO: Navigate to rewards page
+                      console.log('Navigate to rewards page');
+                    }} 
+                    className="px-6 py-3 font-['Comic_Neue'] font-bold bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white transition-all duration-300 min-h-[44px]"
+                  >
+                    🎁 View Rewards
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => {
+                      // Clear student information
+                      if (student) {
+                        clearStudent();
+                      }
+                      onReset();
+                    }} 
+                    variant="outline" 
+                    className="px-6 py-3 font-['Comic_Neue'] font-bold border-2 border-primary/30 hover:border-primary hover:bg-primary hover:text-white transition-all duration-300 min-h-[44px] switch-learner-btn"
+                  >
+                    {student ? `Change Student (${student.name})` : 'Switch Learner'} 👥
+                  </Button>
+                </div>
                 
                 {/* Tutorial Help Button */}
                 <HelpButton variant="inline" className="ml-2" />
@@ -1018,9 +1128,10 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
           </div>
         </div>
 
-
-
-
+        {/* Reward Card Section */}
+        <div className="mb-6">
+          <RewardCard childId={child.id} childAge={child.age} childName={child.name} />
+        </div>
 
         {/* Enhanced Activity Category Navigation */}
         <div className="mb-6 category-tabs">
@@ -1300,6 +1411,17 @@ export const Dashboard = ({ child, onProgressUpdate, onReset }: DashboardProps) 
                   <div className="mt-2 sm:mt-3 text-center text-xs sm:text-sm text-muted-foreground font-['Comic_Neue']">
                     Available at age {activity.minAge}
                   </div>
+                )}
+                
+                {/* Activity Completion Status */}
+                {!activity.isLocked && (
+                  <ActivityCompletionStatus
+                    activityId={activity.id}
+                    completedActivities={completedActivities}
+                    activityScores={child.progress.activityScores || {}}
+                    bestScores={child.progress.bestScores || {}}
+                    attempts={child.progress.attempts || {}}
+                  />
                 )}
               </div>
             </Card>

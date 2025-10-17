@@ -3,19 +3,39 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Beaker, Star, PlayCircle, Trophy, Target } from 'lucide-react';
-import { PlaceholderActivity } from '@/components/activities/PlaceholderActivity';
+import { ArrowLeft, Beaker, Star, PlayCircle, Trophy, Target, X } from 'lucide-react';
+import { ScienceActivity } from '@/components/activities/ScienceActivity';
 
 const ScienceExploration = () => {
   const navigate = useNavigate();
   const [activeLevel, setActiveLevel] = useState('beginner');
-  const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<any>(null);
+  const [showActivity, setShowActivity] = useState(false);
 
   const handleActivityStart = (activityId: string) => {
-    setSelectedActivity(activityId);
+    // Find the activity from all levels
+    const allActivities = [
+      ...scienceActivities.beginner,
+      ...scienceActivities.intermediate,
+      ...scienceActivities.advanced
+    ];
+    const activity = allActivities.find(act => act.id === activityId);
+    
+    if (activity) {
+      setSelectedActivity(activity);
+      setShowActivity(true);
+    }
   };
 
-  const handleBackToList = () => {
+  const handleActivityComplete = (score: number) => {
+    console.log('Activity completed with score:', score);
+    setShowActivity(false);
+    setSelectedActivity(null);
+    // Here you could save the score or update progress
+  };
+
+  const handleActivityBack = () => {
+    setShowActivity(false);
     setSelectedActivity(null);
   };
 
@@ -98,6 +118,15 @@ const ScienceExploration = () => {
         category: 'Ecology'
       },
       {
+        id: 'rock-minerals',
+        title: 'Rocks & Minerals',
+        description: 'Discover Earth\'s building blocks',
+        icon: '🪨',
+        difficulty: 'Hard',
+        duration: '32 mins',
+        category: 'Geology'
+      },
+      {
         id: 'chemical-reactions',
         title: 'Chemical Reactions',
         description: 'Safe experiments with amazing results',
@@ -119,25 +148,51 @@ const ScienceExploration = () => {
   };
 
   // If an activity is selected, show the activity component
-  if (selectedActivity) {
+  if (showActivity && selectedActivity) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-4">
         <div className="max-w-6xl mx-auto">
-          <Button 
-            onClick={handleBackToList}
-            className="mb-4 bg-blue-600 hover:bg-blue-700"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Science Exploration
-          </Button>
-          <PlaceholderActivity 
-            activityName={scienceActivities[activeLevel as keyof typeof scienceActivities].find(a => a.id === selectedActivity)?.title || selectedActivity}
-            activityIcon={scienceActivities[activeLevel as keyof typeof scienceActivities].find(a => a.id === selectedActivity)?.icon || '🔬'}
-            activityDescription={scienceActivities[activeLevel as keyof typeof scienceActivities].find(a => a.id === selectedActivity)?.description || 'Science exploration activity'}
-            activityCategory="science"
-            childAge={5}
-            onComplete={() => handleBackToList()}
-            onBack={handleBackToList}
+          {/* Activity Header */}
+          <div className="flex items-center justify-between mb-6">
+            <Button
+              variant="ghost"
+              onClick={handleActivityBack}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Science Exploration
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={handleActivityBack}
+              className="p-2"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+
+          {/* Activity Title */}
+          <div className="text-center mb-6">
+            <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-r from-green-400 to-emerald-600 flex items-center justify-center text-3xl text-white shadow-lg mb-4">
+              {selectedActivity.icon}
+            </div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+              {selectedActivity.title}
+            </h1>
+            <p className="text-gray-600 max-w-xl mx-auto">
+              {selectedActivity.description}
+            </p>
+          </div>
+
+          {/* Activity Component */}
+          <ScienceActivity
+            childAge={5} // Default age, you could make this dynamic
+            onComplete={handleActivityComplete}
+            onBack={handleActivityBack}
+            activityName={selectedActivity.title}
+            activityIcon={selectedActivity.icon}
+            activityDescription={selectedActivity.description}
+            activityId={selectedActivity.id}
           />
         </div>
       </div>

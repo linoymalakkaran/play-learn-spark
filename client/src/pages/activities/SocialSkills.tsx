@@ -4,18 +4,38 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Users, Star, PlayCircle, Trophy, Target } from 'lucide-react';
-import { PlaceholderActivity } from '@/components/activities/PlaceholderActivity';
+import { SocialActivity } from '@/components/activities/SocialActivity';
 
 const SocialSkills = () => {
   const navigate = useNavigate();
   const [activeLevel, setActiveLevel] = useState('beginner');
-  const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<any>(null);
+  const [showActivity, setShowActivity] = useState(false);
 
   const handleActivityStart = (activityId: string) => {
-    setSelectedActivity(activityId);
+    // Find the activity from all levels
+    const allActivities = [
+      ...socialActivities.beginner,
+      ...socialActivities.intermediate,
+      ...socialActivities.advanced
+    ];
+    const activity = allActivities.find(act => act.id === activityId);
+    
+    if (activity) {
+      setSelectedActivity(activity);
+      setShowActivity(true);
+    }
   };
 
-  const handleBackToList = () => {
+  const handleActivityComplete = (score: number) => {
+    console.log('Activity completed with score:', score);
+    setShowActivity(false);
+    setSelectedActivity(null);
+    // Here you could save the score or update progress
+  };
+
+  const handleActivityBack = () => {
+    setShowActivity(false);
     setSelectedActivity(null);
   };
 
@@ -110,25 +130,25 @@ const SocialSkills = () => {
   };
 
   // If an activity is selected, show the activity component
-  if (selectedActivity) {
+  if (showActivity && selectedActivity) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 p-4">
         <div className="max-w-6xl mx-auto">
           <Button 
-            onClick={handleBackToList}
+            onClick={handleActivityBack}
             className="mb-4 bg-blue-600 hover:bg-blue-700"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Social Skills
           </Button>
-          <PlaceholderActivity 
-            activityName={socialActivities[activeLevel as keyof typeof socialActivities].find(a => a.id === selectedActivity)?.title || selectedActivity}
-            activityIcon="👥"
-            activityDescription={socialActivities[activeLevel as keyof typeof socialActivities].find(a => a.id === selectedActivity)?.description || 'Social skills activity'}
-            activityCategory="social"
+          <SocialActivity
             childAge={5}
-            onComplete={() => handleBackToList()}
-            onBack={handleBackToList}
+            onComplete={handleActivityComplete}
+            onBack={handleActivityBack}
+            activityName={selectedActivity?.title || "Social Activity"}
+            activityIcon="👥"
+            activityDescription={selectedActivity?.description || "Social skills activity"}
+            activityId={selectedActivity?.id || "social-activity"}
           />
         </div>
       </div>

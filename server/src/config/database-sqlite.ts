@@ -70,11 +70,18 @@ export const getDatabase = () => {
 export const initializeDefaultData = async (): Promise<void> => {
   try {
     // Import models to ensure they're initialized
-    const { User } = await import('../models/User');
+    const { User } = await import('../models/UserSQLite');
     const { Session } = await import('../models/Session');
     const { PasswordReset } = await import('../models/PasswordReset');
     const { Progress } = await import('../models/Progress');
     const { Activity } = await import('../models/Activity');
+    const { RewardCard } = await import('../models/RewardCard');
+    const { RewardItem } = await import('../models/RewardItem');
+    const { RewardRedemption } = await import('../models/RewardRedemption');
+    const { Achievement } = await import('../models/Achievement');
+
+    // Import seed function
+    const { seedRewardData } = await import('./seedRewards');
 
     // Check if we need to seed data
     const userCount = await User.count();
@@ -136,9 +143,15 @@ export const initializeDefaultData = async (): Promise<void> => {
 
       logger.info('✅ Sample parent user created:', sampleParent.email);
       
+      // Seed reward data
+      await seedRewardData();
+      
       logger.info('✅ Database seeding completed');
     } else {
       logger.info('📊 Database already contains data, skipping seeding');
+      
+      // Always try to seed reward data if it doesn't exist
+      await seedRewardData();
     }
     
   } catch (error) {

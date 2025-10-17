@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Calculator, Star, PlayCircle, Trophy, Target } from 'lucide-react';
-import { PlaceholderActivity } from '@/components/activities/PlaceholderActivity';
+import { ArrowLeft, Calculator, Star, PlayCircle, Trophy, Target, X } from 'lucide-react';
+import { MathActivity } from '@/components/activities/MathActivity';
 
 const MathNumbers = () => {
   const navigate = useNavigate();
   const [activeLevel, setActiveLevel] = useState('beginner');
-  const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<any>(null);
+  const [showActivity, setShowActivity] = useState(false);
 
   const mathActivities = {
     beginner: [
@@ -23,89 +24,135 @@ const MathNumbers = () => {
         color: 'from-purple-400 to-purple-600'
       },
       {
-        id: 'number-garden',
-        title: 'Number Garden',
-        description: 'Plant flowers by counting correctly',
-        icon: '🌻',
+        id: 'number-recognition',
+        title: 'Number Recognition',
+        description: 'Identify and match numbers',
+        icon: '👁️',
         difficulty: 'Easy',
-        duration: '20 mins',
+        duration: '12 mins',
+        color: 'from-blue-400 to-blue-600'
+      },
+      {
+        id: 'shape-basics',
+        title: 'Basic Shapes',
+        description: 'Learn circles, squares, triangles',
+        icon: '🔷',
+        difficulty: 'Easy',
+        duration: '18 mins',
         color: 'from-green-400 to-green-600'
       },
       {
-        id: 'shape-detective',
-        title: 'Shape Detective',
-        description: 'Find and identify basic shapes',
-        icon: '🔍',
+        id: 'size-sorting',
+        title: 'Size Sorting',
+        description: 'Arrange objects by size',
+        icon: '�',
         difficulty: 'Easy',
-        duration: '18 mins',
-        color: 'from-blue-400 to-blue-600'
+        duration: '15 mins',
+        color: 'from-pink-400 to-pink-600'
       }
     ],
     intermediate: [
       {
-        id: 'addition-adventure',
-        title: 'Addition Adventure',
-        description: 'Learn to add numbers together',
+        id: 'addition-basics',
+        title: 'Addition Fun',
+        description: 'Add numbers up to 20',
         icon: '➕',
         difficulty: 'Medium',
         duration: '25 mins',
         color: 'from-orange-400 to-orange-600'
       },
       {
-        id: 'subtraction-safari',
-        title: 'Subtraction Safari',
-        description: 'Take away numbers on a safari',
+        id: 'subtraction-basics',
+        title: 'Subtraction Practice',
+        description: 'Subtract numbers within 20',
         icon: '➖',
         difficulty: 'Medium',
         duration: '25 mins',
         color: 'from-red-400 to-red-600'
       },
       {
-        id: 'pattern-puzzle',
-        title: 'Pattern Puzzles',
-        description: 'Complete number and shape patterns',
-        icon: '🧩',
+        id: 'number-patterns',
+        title: 'Number Patterns',
+        description: 'Complete number sequences',
+        icon: '🔢',
         difficulty: 'Medium',
         duration: '30 mins',
         color: 'from-teal-400 to-teal-600'
+      },
+      {
+        id: 'time-basics',
+        title: 'Telling Time',
+        description: 'Learn to read clocks',
+        icon: '🕐',
+        difficulty: 'Medium',
+        duration: '30 mins',
+        color: 'from-indigo-400 to-indigo-600'
       }
     ],
     advanced: [
       {
-        id: 'multiplication-magic',
-        title: 'Multiplication Magic',
-        description: 'Learn times tables with magic tricks',
-        icon: '✨',
+        id: 'multiplication-tables',
+        title: 'Multiplication Tables',
+        description: 'Master times tables 1-10',
+        icon: '✖️',
         difficulty: 'Hard',
         duration: '35 mins',
-        color: 'from-indigo-400 to-indigo-600'
+        color: 'from-purple-500 to-purple-700'
       },
       {
-        id: 'division-discovery',
-        title: 'Division Discovery',
-        description: 'Explore sharing and grouping',
-        icon: '📊',
+        id: 'division-basics',
+        title: 'Division Concepts',
+        description: 'Learn to divide and share',
+        icon: '➗',
         difficulty: 'Hard',
         duration: '40 mins',
-        color: 'from-pink-400 to-pink-600'
+        color: 'from-pink-500 to-pink-700'
       },
       {
         id: 'word-problems',
-        title: 'Word Problems',
-        description: 'Solve real-world math challenges',
+        title: 'Math Word Problems',
+        description: 'Solve real-world math stories',
         icon: '💭',
         difficulty: 'Hard',
         duration: '45 mins',
-        color: 'from-cyan-400 to-cyan-600'
+        color: 'from-cyan-500 to-cyan-700'
+      },
+      {
+        id: 'geometry-advanced',
+        title: 'Geometry Explorer',
+        description: 'Discover angles and measurements',
+        icon: '📐',
+        difficulty: 'Hard',
+        duration: '40 mins',
+        color: 'from-emerald-500 to-emerald-700'
       }
     ]
   };
 
   const handleActivityStart = (activityId: string) => {
-    setSelectedActivity(activityId);
+    // Find the activity from all levels
+    const allActivities = [
+      ...mathActivities.beginner,
+      ...mathActivities.intermediate,
+      ...mathActivities.advanced
+    ];
+    const activity = allActivities.find(act => act.id === activityId);
+    
+    if (activity) {
+      setSelectedActivity(activity);
+      setShowActivity(true);
+    }
   };
 
-  const handleBackToActivities = () => {
+  const handleActivityComplete = (score: number) => {
+    console.log('Activity completed with score:', score);
+    setShowActivity(false);
+    setSelectedActivity(null);
+    // Here you could save the score or update progress
+  };
+
+  const handleActivityBack = () => {
+    setShowActivity(false);
     setSelectedActivity(null);
   };
 
@@ -121,17 +168,54 @@ const MathNumbers = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 p-4">
       <div className="max-w-6xl mx-auto">
-        {selectedActivity ? (
-          <PlaceholderActivity
-            activityName={mathActivities[activeLevel as keyof typeof mathActivities].find(a => a.id === selectedActivity)?.title || selectedActivity}
-            activityIcon="🔢"
-            activityDescription={mathActivities[activeLevel as keyof typeof mathActivities].find(a => a.id === selectedActivity)?.description || 'Math learning activity'}
-            activityCategory="math"
-            childAge={5}
-            onComplete={() => handleBackToList()}
-            onBack={handleBackToList}
-          />
+        {showActivity && selectedActivity ? (
+          // Show the selected activity
+          <div>
+            {/* Activity Header */}
+            <div className="flex items-center justify-between mb-6">
+              <Button
+                variant="ghost"
+                onClick={handleActivityBack}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Math & Numbers
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={handleActivityBack}
+                className="p-2"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {/* Activity Title */}
+            <div className="text-center mb-6">
+              <div className={`w-20 h-20 mx-auto rounded-full bg-gradient-to-r ${selectedActivity.color} flex items-center justify-center text-3xl text-white shadow-lg mb-4`}>
+                {selectedActivity.icon}
+              </div>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                {selectedActivity.title}
+              </h1>
+              <p className="text-gray-600 max-w-xl mx-auto">
+                {selectedActivity.description}
+              </p>
+            </div>
+
+            {/* Activity Component */}
+            <MathActivity
+              childAge={5} // Default age, you could make this dynamic
+              onComplete={handleActivityComplete}
+              onBack={handleActivityBack}
+              activityName={selectedActivity.title}
+              activityIcon={selectedActivity.icon}
+              activityDescription={selectedActivity.description}
+              activityId={selectedActivity.id}
+            />
+          </div>
         ) : (
+          // Show the activity list (original content)
           <>
             {/* Header */}
             <div className="flex items-center justify-between mb-8">

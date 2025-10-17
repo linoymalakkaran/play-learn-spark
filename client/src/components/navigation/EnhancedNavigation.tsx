@@ -81,6 +81,9 @@ const EnhancedNavigation: React.FC<EnhancedNavigationProps> = ({ className }) =>
     const path = location.pathname;
     if (path === '/') setCurrentSection('dashboard');
     else if (path.includes('/activity')) setCurrentSection('activities');
+    else if (path.includes('/malayalam')) setCurrentSection('malayalam');
+    else if (path.includes('/arabic')) setCurrentSection('arabic');
+    else if (path.includes('/rewards')) setCurrentSection('rewards');
     else if (path.includes('/language')) setCurrentSection('languages');
     else if (path.includes('/settings')) setCurrentSection('settings');
     else if (path.includes('/ai')) setCurrentSection('ai');
@@ -139,9 +142,11 @@ const EnhancedNavigation: React.FC<EnhancedNavigationProps> = ({ className }) =>
   }, [isSearchOpen, clearSearch]);
 
   const navigationSections = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/' },
-    { id: 'activities', label: 'Activities', icon: BookOpen, path: '/activities' },
-    { id: 'languages', label: 'Languages', icon: Globe, path: '/languages' },
+    { id: 'dashboard', label: 'Home', icon: Home, path: '/' },
+    { id: 'activities', label: 'Learning Activities', icon: BookOpen, path: '/activities' },
+    { id: 'malayalam', label: 'Malayalam', icon: Globe, path: '/malayalam' },
+    { id: 'arabic', label: 'Arabic', icon: Globe, path: '/arabic' },
+    { id: 'rewards', label: 'Rewards', icon: Award, path: '/rewards' },
     { id: 'ai', label: 'AI Tools', icon: Sparkles, path: '/ai' },
     { id: 'personalization', label: 'Personalize', icon: Heart, path: '/personalization' },
     { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' }

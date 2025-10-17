@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, BookOpen, Star, PlayCircle, Trophy, Target, X } from 'lucide-react';
-import { PlaceholderActivity } from '@/components/activities/PlaceholderActivity';
+import { EnglishActivity } from '@/components/activities/EnglishActivity';
 
 const EnglishReading = () => {
   const navigate = useNavigate();
@@ -177,14 +177,14 @@ const EnglishReading = () => {
             </div>
 
             {/* Activity Component */}
-            <PlaceholderActivity
+            <EnglishActivity
               childAge={5} // Default age, you could make this dynamic
               onComplete={handleActivityComplete}
               onBack={handleActivityBack}
               activityName={selectedActivity.title}
               activityIcon={selectedActivity.icon}
               activityDescription={selectedActivity.description}
-              activityCategory="english"
+              activityId={selectedActivity.id}
             />
           </div>
         ) : (

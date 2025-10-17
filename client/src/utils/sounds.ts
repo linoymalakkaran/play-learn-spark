@@ -77,6 +77,36 @@ export class SoundEffects {
     setTimeout(() => this.createTone(783.99, 0.3), 300);
   }
 
+  async playCheer(): Promise<void> {
+    // Play a celebratory cheer sound sequence
+    await this.createTone(523.25, 0.2);
+    setTimeout(() => this.createTone(659.25, 0.2), 150);
+    setTimeout(() => this.createTone(783.99, 0.2), 300);
+    setTimeout(() => this.createTone(1046.50, 0.3), 450);
+  }
+
+  async playAnimalSound(animalName: string): Promise<void> {
+    // Use speech synthesis to say the animal name
+    if (!this.enabled) return;
+
+    try {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(animalName);
+        utterance.rate = 0.8;
+        utterance.pitch = 1.2;
+        window.speechSynthesis.speak(utterance);
+        return;
+      }
+
+      // Fallback: play a tone based on animal name
+      const code = animalName.charCodeAt(0);
+      const freq = 200 + (code % 300);
+      await this.createTone(freq, 0.3);
+    } catch (error) {
+      // Silently fail
+    }
+  }
+
   async playMagic(): Promise<void> {
     // Play a magical ascending tone sequence
     await this.createTone(440, 0.1);

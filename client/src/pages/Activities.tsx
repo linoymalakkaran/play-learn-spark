@@ -61,6 +61,20 @@ const Activities = () => {
       ]
     },
     {
+      title: 'Logic & Thinking',
+      description: 'Develop critical thinking and problem-solving skills',
+      activities: [
+        {
+          id: 'logic',
+          title: 'Logic & Problem Solving',
+          description: 'Build reasoning skills with patterns and puzzles',
+          icon: '🧩',
+          path: '/activities/logic',
+          color: 'from-purple-500 to-indigo-600'
+        }
+      ]
+    },
+    {
       title: 'Creative & Social',
       description: 'Express yourself and learn social skills',
       activities: [

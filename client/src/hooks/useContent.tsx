@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Child } from '@/types/learning';
+import { apiService } from '@/services/apiService';
 
 export interface ContentItem {
   id: string;
@@ -182,17 +183,13 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
       
       // First try to check backend availability
       try {
-        const healthCheck = await fetch('/api/health', { method: 'GET' });
-        if (healthCheck.ok) {
+        const isBackendAvailable = await apiService.checkBackendAvailability();
+        if (isBackendAvailable) {
           // Backend is available, try to load content
-          const response = await fetch('/api/content', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filter })
-          });
+          const response = await apiService.post('/content', { filter });
           
-          if (response.ok) {
-            contentItems = await response.json();
+          if (response.success && response.data) {
+            contentItems = Array.isArray(response.data) ? response.data : [];
           } else {
             throw new Error('Failed to load content from API');
           }

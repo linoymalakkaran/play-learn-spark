@@ -28,8 +28,9 @@ resource "azurerm_resource_group" "main" {
   tags     = local.common_tags
 }
 
-# Azure Container Registry
+# Azure Container Registry (Optional - only if not using Docker Hub)
 resource "azurerm_container_registry" "main" {
+  count               = var.use_docker_hub ? 0 : 1
   name                = local.container_registry_name
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location

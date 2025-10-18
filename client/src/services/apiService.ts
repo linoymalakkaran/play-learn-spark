@@ -82,9 +82,14 @@ class ApiService {
         
         // Handle common error scenarios
         if (error.response?.status === 401) {
-          // Unauthorized - redirect to login
-          localStorage.removeItem('authToken');
-          window.location.href = '/login';
+          // Unauthorized - only redirect if not already on login/auth pages
+          const currentPath = window.location.pathname;
+          const isOnAuthPage = ['/login', '/register', '/auth'].includes(currentPath);
+          
+          if (!isOnAuthPage) {
+            localStorage.removeItem('authToken');
+            window.location.href = '/login';
+          }
         } else if (error.response?.status === 403) {
           // Forbidden - show permission error
           console.error('Access forbidden');

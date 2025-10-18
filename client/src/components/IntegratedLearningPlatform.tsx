@@ -46,6 +46,7 @@ import AnalyticsDashboard from './AnalyticsDashboard';
 import { RecommendationEngine } from './RecommendationEngine';
 
 // Import custom hooks
+import { useAuthRequired } from '@/hooks/useAuthRequired';
 import {
   useRecommendations,
   useChildAnalytics,
@@ -90,6 +91,14 @@ const IntegratedLearningPlatform: React.FC<IntegratedLearningPlatformProps> = ({
   userName,
   userAge
 }) => {
+  // Auth requirement check
+  const { checkFeatureAccess, AuthRequiredModal } = useAuthRequired();
+
+  // Check if user has access to this feature
+  useEffect(() => {
+    checkFeatureAccess('integrated_platform');
+  }, []);
+
   // Backend status
   const { isOnline: backendOnline, isChecking: checkingBackend } = useBackendStatus();
 
@@ -747,6 +756,7 @@ const IntegratedLearningPlatform: React.FC<IntegratedLearningPlatformProps> = ({
           </TabsContent>
         </Tabs>
       </div>
+      {AuthRequiredModal}
     </div>
   );
 };

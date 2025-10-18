@@ -4,13 +4,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
 import LoginForm from '@/components/auth/LoginForm';
 import RegisterForm from '@/components/auth/RegisterForm';
+import GuestForm from '@/components/auth/GuestForm';
 
 interface AuthPageProps {
-  mode?: 'login' | 'register';
+  mode?: 'login' | 'register' | 'guest';
 }
 
 const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
-  const [currentMode, setCurrentMode] = useState<'login' | 'register'>(mode);
+  const [currentMode, setCurrentMode] = useState<'login' | 'register' | 'guest'>(mode);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   
@@ -29,7 +30,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
     confirmPassword: ''
   });
 
-  const { login, register } = useAuth();
+  // Guest form state
+  const [guestData, setGuestData] = useState({
+    name: '',
+    grade: ''
+  });
+
+  const { login, register, loginAsGuest } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -123,6 +130,41 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
     }
   };
 
+  const handleGuestLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    
+    // Validation
+    const newErrors: Record<string, string> = {};
+    if (!guestData.name.trim()) newErrors.name = 'Name is required';
+    else if (guestData.name.length < 2) newErrors.name = 'Name must be at least 2 characters';
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const result = await loginAsGuest(guestData.name, guestData.grade);
+      
+      if (result.success) {
+        // Redirect to profile after successful guest login
+        navigate('/profile', { replace: true });
+      } else {
+        setErrors({ 
+          submit: result.message || 'Failed to start guest session. Please try again.' 
+        });
+      }
+    } catch (error: any) {
+      setErrors({ 
+        submit: error.message || 'Failed to start guest session. Please try again.' 
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleForgotPassword = () => {
     navigate('/forgot-password');
   };
@@ -162,15 +204,19 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
               </h1>
             </div>
             <div className="text-3xl mb-2">
-              {currentMode === 'login' ? '🚪' : '🌟'}
+              {currentMode === 'login' ? '🚪' : currentMode === 'register' ? '🌟' : '👋'}
             </div>
             <h2 className="text-xl font-['Comic_Neue'] font-bold text-purple-700">
-              {currentMode === 'login' ? 'Welcome Back!' : 'Join the Adventure!'}
+              {currentMode === 'login' ? 'Welcome Back!' : 
+               currentMode === 'register' ? 'Join the Adventure!' : 
+               'Start Learning Now!'}
             </h2>
             <p className="text-sm font-['Comic_Neue'] text-purple-600 mt-2">
               {currentMode === 'login' 
                 ? 'Sign in to continue your learning journey! 🎯' 
-                : 'Create your account to start learning! 🚀'
+                : currentMode === 'register'
+                ? 'Create your account to start learning! 🚀'
+                : 'Enter your name to begin exploring! No sign-up needed! 🎮'
               }
             </p>
           </div>
@@ -189,7 +235,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
               onForgotPassword={handleForgotPassword}
               onSwitchToRegister={() => setCurrentMode('register')}
             />
-          ) : (
+          ) : currentMode === 'register' ? (
             <RegisterForm
               formData={registerData}
               rememberMe={rememberMe}
@@ -199,6 +245,18 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
               onRememberMeChange={setRememberMe}
               onSubmit={handleRegister}
               onSwitchToLogin={() => setCurrentMode('login')}
+            />
+          ) : (
+            <GuestForm
+              name={guestData.name}
+              grade={guestData.grade}
+              errors={errors}
+              isLoading={isLoading}
+              onNameChange={(name) => setGuestData(prev => ({ ...prev, name }))}
+              onGradeChange={(grade) => setGuestData(prev => ({ ...prev, grade }))}
+              onSubmit={handleGuestLogin}
+              onSwitchToLogin={() => setCurrentMode('login')}
+              onSwitchToRegister={() => setCurrentMode('register')}
             />
           )}
         </CardContent>

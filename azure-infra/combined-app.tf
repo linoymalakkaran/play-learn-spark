@@ -10,7 +10,7 @@ resource "azurerm_linux_web_app" "combined_app" {
 
     application_stack {
       docker_image_name   = var.combined_docker_image
-      docker_registry_url = "https://${azurerm_container_registry.main.login_server}"
+      docker_registry_url = var.use_docker_hub ? "https://index.docker.io" : "https://${azurerm_container_registry.main[0].login_server}"
     }
 
     # Health check configuration
@@ -31,19 +31,21 @@ resource "azurerm_linux_web_app" "combined_app" {
 
   app_settings = merge(
     {
-      # Docker Configuration
-      "DOCKER_REGISTRY_SERVER_URL"      = "https://${azurerm_container_registry.main.login_server}"
-      "DOCKER_REGISTRY_SERVER_USERNAME" = azurerm_container_registry.main.admin_username
-      "DOCKER_REGISTRY_SERVER_PASSWORD" = azurerm_container_registry.main.admin_password
+      # Application Configuration
       "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
       "WEBSITES_PORT"                    = "80"
-      
-      # Application Configuration
       "PORT"                            = "80"
       "NODE_ENV"                        = "production"
       "DATABASE_PATH"                   = "/app/server/data/database.sqlite"
       "SQLITE_DB_PATH"                  = "/app/server/data/database.sqlite"
-      
+    },
+    # Only add Docker registry settings if using ACR
+    var.use_docker_hub ? {} : {
+      "DOCKER_REGISTRY_SERVER_URL"      = "https://${azurerm_container_registry.main[0].login_server}"
+      "DOCKER_REGISTRY_SERVER_USERNAME" = azurerm_container_registry.main[0].admin_username
+      "DOCKER_REGISTRY_SERVER_PASSWORD" = azurerm_container_registry.main[0].admin_password
+    },
+    {
       # CORS Configuration
       "CORS_ORIGIN"                     = "*"
       "CORS_METHODS"                    = "GET,HEAD,PUT,PATCH,POST,DELETE"

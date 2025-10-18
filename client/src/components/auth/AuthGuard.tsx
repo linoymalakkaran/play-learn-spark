@@ -14,7 +14,8 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   requireAuth = true,
   redirectTo = '/login'
 }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const isLoggedIn = isAuthenticated || (user?.isGuest === true);
   const location = useLocation();
 
   // Show loading spinner while checking authentication
@@ -37,8 +38,8 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
     );
   }
 
-  // If authentication is not required but user is authenticated (e.g., login page)
-  if (!requireAuth && isAuthenticated) {
+  // If authentication is not required but user is logged in (authenticated or guest)
+  if (!requireAuth && isLoggedIn) {
     return (
       <Navigate 
         to="/profile" 

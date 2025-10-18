@@ -4,7 +4,20 @@
 
 Play Learn Spark is a comprehensive learning application that makes education fun and engaging for young children. Our platform combines English, Mathematics, Science, and multilingual learning (Malayalam & Arabic) with AI-powered content generation.
 
-## 🚀 Features
+## � **Deploy for FREE on Azure!**
+
+**🚀 [Deploy to Azure at $0.00/month cost!](FREE_AZURE_DEPLOYMENT_GUIDE.md)**
+
+Using Azure App Service F1 (Free Tier) + Docker Hub, you can deploy this entire application with:
+- **$0.00 monthly cost** - Completely free!
+- Full React frontend + Node.js backend
+- SQLite database included
+- CI/CD pipeline with GitHub Actions
+- HTTPS and custom domain support
+
+[📖 **Complete FREE Deployment Guide →**](FREE_AZURE_DEPLOYMENT_GUIDE.md)
+
+## �🚀 Features
 
 - **Multi-Subject Learning**: English vocabulary, Mathematics, Science experiments, and Good Habits
 - **Multilingual Support**: Native language learning for Malayalam and Arabic

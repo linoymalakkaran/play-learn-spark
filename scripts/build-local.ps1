@@ -74,5 +74,5 @@ Write-Host "1. Open http://localhost:8080 in your browser to test the applicatio
 Write-Host "2. Test the API endpoints at http://localhost:8080/api/*"
 Write-Host "3. When satisfied, run: docker stop ${CONTAINER_ID}; docker rm ${CONTAINER_ID}"
 Write-Host ""
-Write-Host "🚀 To push to Azure Container Registry, run:" -ForegroundColor Green
-Write-Host "   .\scripts\push-to-acr.ps1"
+Write-Host "🚀 To push to Docker Hub (FREE!), run:" -ForegroundColor Green
+Write-Host "   .\scripts\push-to-dockerhub.ps1"

@@ -43,7 +43,7 @@ export const connectDatabase = async (): Promise<void> => {
     logger.info('✅ SQLite database connection established successfully');
     
     // Sync models (create tables if they don't exist)
-    await sequelize.sync({ alter: process.env.NODE_ENV === 'development' });
+    await sequelize.sync({ force: false, alter: false });
     logger.info('✅ Database models synchronized');
     
   } catch (error) {

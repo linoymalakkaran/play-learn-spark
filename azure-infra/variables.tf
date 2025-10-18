@@ -63,6 +63,12 @@ variable "combined_docker_image" {
   default     = "nginx:latest"
 }
 
+variable "use_docker_hub" {
+  description = "Use Docker Hub instead of Azure Container Registry"
+  type        = bool
+  default     = false
+}
+
 variable "container_registry_name" {
   description = "Name of the Azure Container Registry"
   type        = string

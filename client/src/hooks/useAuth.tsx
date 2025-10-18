@@ -3,12 +3,14 @@ import { authService } from '@/services/apiService';
 
 export interface User {
   id: string;
-  email: string;
+  email?: string; // Optional for guest users
   username: string;
-  role: 'parent' | 'child' | 'educator' | 'admin';
+  role: 'parent' | 'child' | 'educator' | 'admin' | 'guest';
+  isGuest?: boolean; // Flag to identify guest users
   profile: {
     firstName: string;
     lastName: string;
+    grade?: string; // Add grade for students
     age?: number;
     avatarUrl?: string;
     preferences: {
@@ -18,7 +20,7 @@ export interface User {
     };
   };
   subscription: {
-    type: 'free' | 'premium' | 'family';
+    type: 'free' | 'premium' | 'family' | 'guest';
     features: string[];
   };
   progress?: {
@@ -40,7 +42,10 @@ interface AuthContextType {
   tokens: AuthTokens | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isGuest: boolean;
+  requiresAuth: (feature: string) => { allowed: boolean; message?: string };
   login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; message?: string }>;
+  loginAsGuest: (name: string, grade?: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => Promise<void>;
   register: (userData: RegisterData) => Promise<{ success: boolean; message?: string }>;
   refreshToken: () => Promise<boolean>;
@@ -86,13 +91,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const savedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
         const savedRefreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
 
-        if (savedAuth && savedToken) {
+        if (savedAuth) {
           const userData = JSON.parse(savedAuth);
           setUser(userData);
-          setTokens({
-            accessToken: savedToken,
-            refreshToken: savedRefreshToken || ''
-          });
+          
+          // Only set tokens for authenticated users (not guests)
+          if (savedToken && !userData.isGuest) {
+            setTokens({
+              accessToken: savedToken,
+              refreshToken: savedRefreshToken || ''
+            });
+          }
         }
       } catch (error) {
         console.warn('Failed to load auth state from localStorage:', error);
@@ -107,12 +116,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Save auth state to localStorage whenever it changes
   useEffect(() => {
-    if (user && tokens?.accessToken) {
+    if (user) {
       try {
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-        localStorage.setItem(TOKEN_STORAGE_KEY, tokens.accessToken);
-        if (tokens.refreshToken) {
-          localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, tokens.refreshToken);
+        
+        // Only save tokens for authenticated users (not guests)
+        if (tokens?.accessToken && !user.isGuest) {
+          localStorage.setItem(TOKEN_STORAGE_KEY, tokens.accessToken);
+          if (tokens.refreshToken) {
+            localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, tokens.refreshToken);
+          }
         }
       } catch (error) {
         console.warn('Failed to save auth state to localStorage:', error);
@@ -129,6 +142,49 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
     } catch (error) {
       console.warn('Failed to clear auth state from localStorage:', error);
+    }
+  }, []);
+
+  const loginAsGuest = useCallback(async (name: string, grade?: string) => {
+    setIsLoading(true);
+    try {
+      const guestUser: User = {
+        id: `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        username: name,
+        role: 'guest',
+        isGuest: true,
+        profile: {
+          firstName: name,
+          lastName: '',
+          grade: grade || '',
+          preferences: {
+            language: 'en',
+            difficulty: 'easy',
+            topics: []
+          }
+        },
+        subscription: {
+          type: 'guest',
+          features: ['offline_activities', 'local_progress']
+        },
+        progress: {
+          totalActivitiesCompleted: 0,
+          currentLevel: 1,
+          totalPoints: 0,
+          streakDays: 0
+        },
+        createdAt: new Date().toISOString()
+      };
+
+      setUser(guestUser);
+      setTokens(null); // No tokens for guest users
+      
+      return { success: true, message: 'Welcome! You can now use the app.' };
+    } catch (error) {
+      console.error('Guest login failed:', error);
+      return { success: false, message: 'Failed to start guest session. Please try again.' };
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -281,13 +337,41 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [user?.id]);
 
   const isAuthenticated = !!user && !!tokens?.accessToken;
+  const isGuest = !!user && user.isGuest === true;
+
+  const requiresAuth = useCallback((feature: string) => {
+    // Features that require backend authentication
+    const authRequiredFeatures = [
+      'integrated_platform',
+      'analytics_dashboard', 
+      'ai_features',
+      'content_management',
+      'cloud_sync',
+      'multiplayer',
+      'progress_sharing'
+    ];
+
+    if (authRequiredFeatures.includes(feature)) {
+      if (!isAuthenticated) {
+        return {
+          allowed: false,
+          message: 'This feature requires you to create an account. Please log in or register to continue.'
+        };
+      }
+    }
+
+    return { allowed: true };
+  }, [isAuthenticated]);
 
   const value: AuthContextType = {
     user,
     tokens,
     isLoading,
     isAuthenticated,
+    isGuest,
+    requiresAuth,
     login,
+    loginAsGuest,
     logout,
     register,
     refreshToken,

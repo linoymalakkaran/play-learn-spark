@@ -144,6 +144,11 @@ const AppContent = () => {
                   <AuthPage />
                 </AuthGuard>
               } />
+              <Route path="/guest" element={
+                <AuthGuard requireAuth={false}>
+                  <AuthPage mode="guest" />
+                </AuthGuard>
+              } />
               <Route path="/profile" element={
                 <AuthGuard>
                   <UserDashboard />

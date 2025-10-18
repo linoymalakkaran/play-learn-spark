@@ -11,24 +11,24 @@ output "resource_group_location" {
 }
 
 output "container_registry_name" {
-  description = "The name of the Azure Container Registry"
-  value       = azurerm_container_registry.main.name
+  description = "The name of the Azure Container Registry (if used)"
+  value       = var.use_docker_hub ? "Docker Hub" : azurerm_container_registry.main[0].name
 }
 
 output "container_registry_login_server" {
-  description = "The login server URL of the Azure Container Registry"
-  value       = azurerm_container_registry.main.login_server
+  description = "The login server URL of the container registry"
+  value       = var.use_docker_hub ? "index.docker.io" : azurerm_container_registry.main[0].login_server
 }
 
 output "container_registry_admin_username" {
-  description = "The admin username for the Azure Container Registry"
-  value       = azurerm_container_registry.main.admin_username
+  description = "The admin username for the Azure Container Registry (if used)"
+  value       = var.use_docker_hub ? "N/A - Using Docker Hub" : azurerm_container_registry.main[0].admin_username
   sensitive   = true
 }
 
 output "container_registry_admin_password" {
-  description = "The admin password for the Azure Container Registry"
-  value       = azurerm_container_registry.main.admin_password
+  description = "The admin password for the Azure Container Registry (if used)"
+  value       = var.use_docker_hub ? "N/A - Using Docker Hub" : azurerm_container_registry.main[0].admin_password
   sensitive   = true
 }
 

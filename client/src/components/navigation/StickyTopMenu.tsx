@@ -154,6 +154,18 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
               </>
             ) : (
               <>
+                {/* Guest Button */}
+                <Button
+                  onClick={() => navigate('/auth')}
+                  size="sm"
+                  variant="outline"
+                  className="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-50 transition-all"
+                  title="Start as Guest"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span className="hidden sm:inline">Guest</span>
+                </Button>
+                
                 {/* Login Button */}
                 <Button
                   onClick={() => navigate('/login')}

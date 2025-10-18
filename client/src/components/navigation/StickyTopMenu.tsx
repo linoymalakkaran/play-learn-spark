@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
 import { 
   Home, 
@@ -11,7 +17,8 @@ import {
   LogOut,
   User,
   MessageSquare,
-  Gamepad2
+  Gamepad2,
+  ChevronDown
 } from 'lucide-react';
 
 interface StickyTopMenuProps {
@@ -40,6 +47,42 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
     }
   };
 
+  const languageOptions = [
+    { 
+      path: '/english-learning', 
+      label: 'English', 
+      flag: '🇺🇸',
+      description: 'Learn English alphabet and phonics'
+    },
+    { 
+      path: '/hindi-learning', 
+      label: 'Hindi', 
+      flag: '🇮🇳',
+      description: 'Learn Hindi and Devanagari script'
+    },
+    { 
+      path: '/malayalam', 
+      label: 'Malayalam', 
+      flag: '🌴',
+      description: 'Learn Malayalam language'
+    },
+    { 
+      path: '/arabic', 
+      label: 'Arabic', 
+      flag: '🇸🇦',
+      description: 'Learn Arabic language'
+    },
+    { 
+      path: '/spanish', 
+      label: 'Spanish', 
+      flag: '🇪🇸',
+      description: 'Learn Spanish language - ¡Aventura de Español!'
+    }
+  ];
+
+  const isLanguagePage = languageOptions.some(lang => isActive(lang.path));
+  const currentLanguage = languageOptions.find(lang => isActive(lang.path));
+
   const menuItems = [
     { 
       path: '/', 
@@ -52,24 +95,6 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
       label: 'Learning Activities', 
       icon: GraduationCap,
       description: 'Browse all learning activities'
-    },
-    { 
-      path: '/malayalam', 
-      label: 'Malayalam', 
-      icon: Languages,
-      description: 'Learn Malayalam language'
-    },
-    { 
-      path: '/arabic', 
-      label: 'Arabic', 
-      icon: BookOpen,
-      description: 'Learn Arabic language'
-    },
-    { 
-      path: '/spanish', 
-      label: 'Spanish', 
-      icon: Languages,
-      description: 'Learn Spanish language - ¡Aventura de Español!'
     },
     { 
       path: '/rewards', 
@@ -119,6 +144,48 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
                 </Button>
               );
             })}
+
+            {/* Language Learning Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant={isLanguagePage ? "default" : "ghost"}
+                  size="sm"
+                  className={`flex items-center gap-2 transition-all ${
+                    isLanguagePage
+                      ? 'bg-purple-600 text-white shadow-md' 
+                      : 'hover:bg-purple-50 hover:text-purple-700'
+                  }`}
+                  title="Select Language to Learn"
+                >
+                  <Languages className="w-4 h-4" />
+                  <span className="hidden sm:inline">
+                    {currentLanguage ? `${currentLanguage.flag} ${currentLanguage.label}` : 'Languages'}
+                  </span>
+                  <span className="inline sm:hidden">
+                    {currentLanguage ? currentLanguage.flag : 'Lang'}
+                  </span>
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                {languageOptions.map((language) => (
+                  <DropdownMenuItem
+                    key={language.path}
+                    onClick={() => navigate(language.path)}
+                    className={`flex items-center gap-3 cursor-pointer ${
+                      isActive(language.path) ? 'bg-purple-50 text-purple-700' : ''
+                    }`}
+                  >
+                    <span className="text-lg">{language.flag}</span>
+                    <div className="flex-1">
+                      <div className="font-medium">{language.label}</div>
+                      <div className="text-xs text-gray-500">{language.description}</div>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Right side - Auth-aware actions */}

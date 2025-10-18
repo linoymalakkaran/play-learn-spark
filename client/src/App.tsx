@@ -33,6 +33,8 @@ import NotFound from "./pages/NotFound";
 import Activities from "./pages/Activities";
 import IntegratedPlatform from "./pages/IntegratedPlatform";
 import MalayalamLearning from "./pages/MalayalamLearning";
+import HindiLearning from "./pages/HindiLearning";
+import EnglishLearning from "./pages/EnglishLearning";
 import ArabicLearning from "./pages/ArabicLearning";
 import SpanishLearning from "./pages/SpanishLearning";
 import RewardsPage from "./pages/RewardsPage";
@@ -127,6 +129,8 @@ const AppContent = () => {
               <Route path="/content-management" element={<ContentManagementSystemNew />} />
               <Route path="/integratedplatform" element={<IntegratedPlatform />} />
               <Route path="/malayalam" element={<MalayalamLearning />} />
+              <Route path="/hindi-learning" element={<HindiLearning />} />
+              <Route path="/english-learning" element={<EnglishLearning />} />
               <Route path="/arabic" element={<ArabicLearning />} />
               <Route path="/spanish" element={<SpanishLearning />} />
               <Route path="/rewards" element={<RewardsPage />} />

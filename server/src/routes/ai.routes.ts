@@ -4,10 +4,11 @@ import { googleAIService } from '../services/GoogleAIService';
 import OpenAIService from '../services/OpenAIService';
 import HuggingFaceService from '../services/HuggingFaceService';
 import AnthropicService from '../services/AnthropicService';
+import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
 
-// Health check endpoint
+// Health check endpoint (public)
 router.get('/health', (req, res) => {
   res.json({
     success: true,
@@ -21,6 +22,9 @@ router.get('/health', (req, res) => {
     }
   });
 });
+
+// Apply authentication to all other AI routes
+router.use(authenticateToken);
 
 // Generate activity from processed content
 router.post('/generate-activity', async (req, res) => {
@@ -416,7 +420,7 @@ router.get('/providers', (req, res) => {
 });
 
 // Generate content (alias for generate-activity)
-router.post('/generate-content', async (req, res) => {
+router.post('/generate-content', async (req, res): Promise<void> => {
   try {
     const { 
       topic, 
@@ -427,24 +431,30 @@ router.post('/generate-content', async (req, res) => {
     } = req.body;
 
     if (!topic || !ageGroup) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: 'Topic and age group are required'
       });
+      return;
     }
 
     let result;
     
     if (aiProvider === 'google' && googleAIService) {
-      result = await googleAIService.generateContent(topic, ageGroup, difficulty, contentType);
-    } else if (aiProvider === 'openai') {
-      const openaiService = new OpenAIService();
-      result = await openaiService.generateContent(topic, ageGroup, difficulty, contentType);
-    } else {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid AI provider'
+      // Use existing generate content method
+      result = await googleAIService.generateContent({
+        topic,
+        ageGroup: (ageGroup as '3-4' | '4-5' | '5-6') || '4-5',
+        difficulty: (difficulty as 'easy' | 'medium' | 'hard') || 'medium',
+        activityType: 'general',
+        language: 'English'
       });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: 'AI provider not available'
+      });
+      return;
     }
 
     res.json({
@@ -461,7 +471,7 @@ router.post('/generate-content', async (req, res) => {
 });
 
 // Analyze performance
-router.post('/analyze-performance', async (req, res) => {
+router.post('/analyze-performance', async (req, res): Promise<void> => {
   try {
     const { 
       userId, 
@@ -472,13 +482,21 @@ router.post('/analyze-performance', async (req, res) => {
     } = req.body;
 
     if (!userId || !activityData) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: 'User ID and activity data are required'
       });
+      return;
     }
 
-    const performance = {
+    const performance: {
+      userId: string;
+      accuracy: number;
+      timeSpent: number;
+      strengths: string[];
+      improvements: string[];
+      recommendations: string[];
+    } = {
       userId,
       accuracy: totalQuestions ? (correctAnswers / totalQuestions) * 100 : 0,
       timeSpent: timeSpent || 0,

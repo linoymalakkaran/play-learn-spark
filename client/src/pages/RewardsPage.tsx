@@ -218,17 +218,17 @@ const RewardsPage: React.FC = () => {
                     Fun Games!
                   </h3>
                   <p className="text-muted-foreground font-['Comic_Neue']">
-                    {availablePoints >= 50 
+                    {availablePoints >= 10 
                       ? "Play exciting games and earn more points!" 
-                      : "Earn 50 points to unlock amazing games!"
+                      : "Earn 10 points to unlock amazing games!"
                     }
                   </p>
-                  {availablePoints < 50 && (
+                  {availablePoints < 10 && (
                     <div className="mt-2">
                       <div className="text-sm text-muted-foreground mb-1">
-                        Progress: {availablePoints}/50 points
+                        Progress: {availablePoints}/10 points
                       </div>
-                      <Progress value={(availablePoints / 50) * 100} className="w-48" />
+                      <Progress value={(availablePoints / 10) * 100} className="w-48" />
                     </div>
                   )}
                 </div>
@@ -237,13 +237,13 @@ const RewardsPage: React.FC = () => {
                 <Button
                   onClick={() => navigate('/games')}
                   className={`text-lg px-6 py-4 font-['Comic_Neue'] ${
-                    availablePoints >= 50
+                    availablePoints >= 10
                       ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
                       : 'bg-gray-300 text-gray-600 cursor-not-allowed'
                   }`}
-                  disabled={availablePoints < 50}
+                  disabled={availablePoints < 10}
                 >
-                  {availablePoints >= 50 ? (
+                  {availablePoints >= 10 ? (
                     <>
                       <Trophy className="w-5 h-5 mr-2" />
                       Play Games!
@@ -251,7 +251,7 @@ const RewardsPage: React.FC = () => {
                   ) : (
                     <>
                       <Award className="w-5 h-5 mr-2" />
-                      {50 - availablePoints} more points needed
+                      {10 - availablePoints} more points needed
                     </>
                   )}
                 </Button>

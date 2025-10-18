@@ -103,6 +103,12 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
       description: 'View your rewards and achievements'
     },
     { 
+      path: '/ai-homework', 
+      label: 'AI Homework', 
+      icon: BookOpen,
+      description: 'Get AI-powered homework help and practice'
+    },
+    { 
       path: '/games', 
       label: 'Games', 
       icon: Gamepad2,

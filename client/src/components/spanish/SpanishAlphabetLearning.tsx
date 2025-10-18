@@ -27,10 +27,34 @@ export const SpanishAlphabetLearning: React.FC<SpanishAlphabetLearningProps> = (
     soundEffects.playClick();
   }, []);
 
-  const handlePronunciation = useCallback((letter: SpanishLetter) => {
-    // In a real app, this would play audio
-    soundEffects.playSuccess();
-    console.log(`Playing pronunciation for ${letter.letter}: ${letter.pronunciation}`);
+  const handlePronunciation = useCallback(async (letter: SpanishLetter) => {
+    try {
+      // Play the letter sound using speech synthesis
+      if (soundEffects && typeof (soundEffects as any).playLetterPronunciation === 'function') {
+        await (soundEffects as any).playLetterPronunciation(letter.letter, 'es-ES');
+        await new Promise(resolve => setTimeout(resolve, 300));
+      } else if ('speechSynthesis' in window) {
+        // fallback directly to speech synthesis for the letter
+        const u = new SpeechSynthesisUtterance(letter.letter);
+        u.lang = 'es-ES'; // Spanish locale
+        u.rate = 0.8;
+        window.speechSynthesis.speak(u);
+        await new Promise(resolve => setTimeout(resolve, 300));
+      } else if (soundEffects && typeof (soundEffects as any).playClick === 'function') {
+        await (soundEffects as any).playClick();
+      }
+      
+      // Also pronounce the example word if available
+      if (letter.example && 'speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(letter.example);
+        utterance.lang = 'es-ES';
+        utterance.rate = 0.7;
+        speechSynthesis.speak(utterance);
+      }
+    } catch (e) {
+      // ignore sound errors, fallback to success sound
+      soundEffects.playSuccess();
+    }
   }, []);
 
   const handleExampleShow = useCallback(() => {

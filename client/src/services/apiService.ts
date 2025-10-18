@@ -870,4 +870,179 @@ export const feedbackService = {
   }
 };
 
+// Activity Completion API
+export const activityService = {
+  // Complete an activity
+  completeActivity: async (data: {
+    userId: number;
+    activityId: string;
+    languagePage: string;
+    score: number;
+    timeSpent: number;
+    pointsEarned: number;
+    completedAt: string;
+  }): Promise<ApiResponse<any>> => {
+    try {
+      const response = await apiService.post('/activities/complete', data);
+      return response;
+    } catch (error: any) {
+      console.error('❌ Failed to complete activity:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to complete activity'
+      };
+    }
+  },
+
+  // Get completed activities for a user
+  getCompletedActivities: async (userId: number): Promise<ApiResponse<any[]>> => {
+    try {
+      const response = await apiService.get(`/activities/completed/${userId}`);
+      return {
+        success: true,
+        data: response.data || []
+      };
+    } catch (error: any) {
+      console.error('❌ Failed to get completed activities:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to get completed activities'
+      };
+    }
+  },
+
+  // Get user progress
+  getUserProgress: async (userId: number): Promise<ApiResponse<any>> => {
+    try {
+      const response = await apiService.get(`/activities/progress/${userId}`);
+      return response;
+    } catch (error: any) {
+      console.error('❌ Failed to get user progress:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to get progress'
+      };
+    }
+  },
+
+  // Reset user progress
+  resetUserProgress: async (userId: number): Promise<ApiResponse<any>> => {
+    try {
+      const response = await apiService.delete(`/activities/progress/${userId}`);
+      return response;
+    } catch (error: any) {
+      console.error('❌ Failed to reset user progress:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to reset progress'
+      };
+    }
+  },
+
+  // Sync local data to backend
+  syncLocalData: async (data: {
+    userId: number;
+    completions: any[];
+    totalPoints: number;
+  }): Promise<ApiResponse<{ synced: number; skipped: number }>> => {
+    try {
+      const response = await apiService.post('/activities/sync-local', data);
+      return {
+        success: true,
+        data: {
+          synced: data.completions.length,
+          skipped: 0
+        }
+      };
+    } catch (error: any) {
+      console.error('❌ Failed to sync local data:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to sync data'
+      };
+    }
+  }
+};
+
+// Rewards API
+export const rewardsService = {
+  // Initialize reward card
+  initializeRewardCard: async (userId: number): Promise<ApiResponse<any>> => {
+    try {
+      const response = await apiService.post(`/rewards/cards/${userId}/initialize`);
+      return response;
+    } catch (error: any) {
+      console.error('❌ Failed to initialize reward card:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to initialize reward card'
+      };
+    }
+  },
+
+  // Get reward card
+  getRewardCard: async (userId: number): Promise<ApiResponse<any>> => {
+    try {
+      const response = await apiService.get(`/rewards/cards/${userId}`);
+      return response;
+    } catch (error: any) {
+      console.error('❌ Failed to get reward card:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to get reward card'
+      };
+    }
+  },
+
+  // Award activity completion points
+  awardActivityCompletion: async (userId: number, data: {
+    activityId: string;
+    score: number;
+    isFirstTime: boolean;
+    isNewCategory: boolean;
+  }): Promise<ApiResponse<any>> => {
+    try {
+      const response = await apiService.post(`/rewards/cards/${userId}/award-completion`, data);
+      return response;
+    } catch (error: any) {
+      console.error('❌ Failed to award activity completion:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to award points'
+      };
+    }
+  },
+
+  // Get available rewards
+  getAvailableRewards: async (userId: number): Promise<ApiResponse<any>> => {
+    try {
+      const response = await apiService.get(`/rewards/items/${userId}/available`);
+      return response;
+    } catch (error: any) {
+      console.error('❌ Failed to get available rewards:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to get rewards'
+      };
+    }
+  },
+
+  // Request reward
+  requestReward: async (userId: number, data: {
+    rewardId: string;
+    childMessage?: string;
+  }): Promise<ApiResponse<any>> => {
+    try {
+      const response = await apiService.post(`/rewards/redemptions/${userId}/request`, data);
+      return response;
+    } catch (error: any) {
+      console.error('❌ Failed to request reward:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to request reward'
+      };
+    }
+  }
+};
+
 export default apiService;

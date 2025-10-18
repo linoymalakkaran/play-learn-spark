@@ -1,0 +1,35 @@
+{
+  "name": "play-learn-spark-api-tests",
+  "version": "1.0.0",
+  "description": "Comprehensive API testing suite for Play Learn Spark backend",
+  "main": "test-backend-api.js",
+  "scripts": {
+    "test": "node test-backend-api.js",
+    "test:verbose": "DEBUG=* node test-backend-api.js",
+    "test:windows": "test-backend-api.bat",
+    "test:bash": "bash test-backend-api.sh"
+  },
+  "keywords": [
+    "api",
+    "testing",
+    "backend",
+    "educational",
+    "platform"
+  ],
+  "author": "Play Learn Spark Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.12.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "."
+  },
+  "bugs": {
+    "url": "."
+  },
+  "homepage": "."
+}

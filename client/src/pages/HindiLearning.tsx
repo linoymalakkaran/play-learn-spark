@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Volume2, Star, Trophy, BookOpen, Target, Users, Heart } from 'lucide-react';
+import { ArrowLeft, Volume2, Star, Trophy, BookOpen, Target, Users, Heart, CheckCircle } from 'lucide-react';
+import { soundEffects } from '@/utils/sounds';
+import { useActivityCompletion } from '@/hooks/useActivityCompletion';
+import { ActivityCompletionBadge } from '@/components/ActivityCompletionBadge';
+import { PointsEarnedModal } from '@/components/PointsEarnedModal';
 
 // Types
 interface HindiLetter {
@@ -460,62 +464,89 @@ const HindiLearning = () => {
   const navigate = useNavigate();
   const [selectedLetter, setSelectedLetter] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
-  const [completedActivities, setCompletedActivities] = useState<Set<string>>(new Set());
   const [currentLevel, setCurrentLevel] = useState(1);
   const [levelProgress, setLevelProgress] = useState<{[key: number]: number}>({1: 0, 2: 0});
   const [unlockedLevels, setUnlockedLevels] = useState<Set<number>>(new Set([1]));
   const [showMatching, setShowMatching] = useState(false);
+  
+  // Activity completion system
+  const {
+    completeActivity,
+    isActivityCompleted,
+    getCompletedActivities,
+    getTotalPointsEarned,
+    isLoading: activityLoading,
+    error: activityError
+  } = useActivityCompletion('hindi');
 
-  // Load progress from localStorage
+  // Points earned modal state
+  const [showPointsModal, setShowPointsModal] = useState(false);
+  const [lastPointsEarned, setLastPointsEarned] = useState(0);
+  const [lastActivityName, setLastActivityName] = useState('');
+
+  // Load progress from localStorage (keeping basic UI state)
   useEffect(() => {
     const savedProgress = localStorage.getItem('hindi-progress');
     if (savedProgress) {
       const data = JSON.parse(savedProgress);
       setProgress(data.progress || 0);
-      setCompletedActivities(new Set(data.completedActivities || []));
       setCurrentLevel(data.currentLevel || 1);
       setLevelProgress(data.levelProgress || {1: 0, 2: 0});
       setUnlockedLevels(new Set(data.unlockedLevels || [1]));
     }
   }, []);
 
-  // Save progress to localStorage
+  // Save progress to localStorage (keeping basic UI state)
   useEffect(() => {
     const progressData = {
       progress,
-      completedActivities: Array.from(completedActivities),
       currentLevel,
       levelProgress,
       unlockedLevels: Array.from(unlockedLevels)
     };
     localStorage.setItem('hindi-progress', JSON.stringify(progressData));
-  }, [progress, completedActivities, currentLevel, levelProgress, unlockedLevels]);
+  }, [progress, currentLevel, levelProgress, unlockedLevels]);
 
   const getCurrentLevelData = () => {
     return learningLevels.find(level => level.id === currentLevel) || learningLevels[0];
   };
 
-  const markActivityComplete = (activityId: string) => {
-    if (!completedActivities.has(activityId)) {
-      const newCompleted = new Set(completedActivities);
-      newCompleted.add(activityId);
-      setCompletedActivities(newCompleted);
+  const markActivityComplete = async (activityId: string, activityName: string = 'Hindi Activity', score: number = 100) => {
+    if (isActivityCompleted(activityId)) {
+      return; // Already completed
+    }
+
+    try {
+      const result = await completeActivity(activityId, 'hindi', score);
       
-      // Update level progress
-      const newLevelProgress = { ...levelProgress };
-      newLevelProgress[currentLevel] = (newLevelProgress[currentLevel] || 0) + 5;
-      setLevelProgress(newLevelProgress);
-      
-      // Update overall progress
-      const newProgress = Math.min(progress + 2, 100);
-      setProgress(newProgress);
-      
-      // Check if new level should be unlocked
-      if (newLevelProgress[currentLevel] >= learningLevels.find(l => l.id === currentLevel + 1)?.unlockRequirement && !unlockedLevels.has(currentLevel + 1)) {
-        const newUnlocked = new Set(unlockedLevels);
-        newUnlocked.add(currentLevel + 1);
-        setUnlockedLevels(newUnlocked);
+      if (result.success) {
+        // Update level progress (UI state)
+        const newLevelProgress = { ...levelProgress };
+        newLevelProgress[currentLevel] = (newLevelProgress[currentLevel] || 0) + 5;
+        setLevelProgress(newLevelProgress);
+        
+        // Update overall progress (UI state)
+        const newProgress = Math.min(progress + 2, 100);
+        setProgress(newProgress);
+        
+        // Check if new level should be unlocked
+        if (newLevelProgress[currentLevel] >= 50 && !unlockedLevels.has(currentLevel + 1)) {
+          const newUnlocked = new Set(unlockedLevels);
+          newUnlocked.add(currentLevel + 1);
+          setUnlockedLevels(newUnlocked);
+        }
+
+        // Show points earned modal
+        setLastPointsEarned(result.pointsEarned);
+        setLastActivityName(activityName);
+        setShowPointsModal(true);
+
+        console.log(`Activity completed: ${activityName} (+${result.pointsEarned} points)`);
+      } else {
+        console.warn('Failed to complete activity:', result.error);
       }
+    } catch (error) {
+      console.error('Error completing activity:', error);
     }
   };
 
@@ -524,28 +555,73 @@ const HindiLearning = () => {
     console.log(`Playing sound: ${audioKey}`);
   };
 
+  const playPronunciation = async (text: string, letter?: string) => {
+    // Use enhanced letter pronunciation if letter is provided
+    if (letter) {
+      try {
+        if (soundEffects && typeof (soundEffects as any).playLetterPronunciation === 'function') {
+          await (soundEffects as any).playLetterPronunciation(letter, 'hi-IN');
+          await new Promise(resolve => setTimeout(resolve, 300));
+        } else if ('speechSynthesis' in window) {
+          // fallback directly to speech synthesis for the letter
+          const u = new SpeechSynthesisUtterance(letter);
+          u.lang = 'hi-IN';
+          u.rate = 0.8;
+          window.speechSynthesis.speak(u);
+          await new Promise(resolve => setTimeout(resolve, 300));
+        } else if (soundEffects && typeof (soundEffects as any).playClick === 'function') {
+          await (soundEffects as any).playClick();
+        }
+      } catch (e) {
+        // ignore sound errors
+      }
+    }
+    
+    // Also use speech synthesis for the transliteration
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'hi-IN'; // Hindi locale
+      utterance.rate = 0.7;
+      speechSynthesis.speak(utterance);
+    }
+  };
+
   // Letter Card Component
-  const LetterCard = ({ letter, index }: { letter: HindiLetter, index: number }) => (
-    <Card 
-      key={index}
-      className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
-        selectedLetter === index ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:shadow-md'
-      }`}
-      onClick={() => {
-        setSelectedLetter(selectedLetter === index ? null : index);
-        markActivityComplete(`letter-${index}`);
-        playSound(letter.audioKey);
-      }}
-    >
-      <CardContent className="p-4 text-center">
-        <div className="text-4xl font-bold mb-2 text-indigo-600">{letter.letter}</div>
-        <div className="text-sm text-gray-600 mb-1">{letter.transliteration}</div>
-        <div className="text-xs text-gray-500">{letter.phonetic}</div>
-        <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
-          <div className="font-medium text-indigo-600">{letter.example}</div>
-          <div className="text-gray-600">{letter.exampleTransliteration}</div>
-          <div className="text-gray-700">{letter.exampleEnglish}</div>
-        </div>
+  const LetterCard = ({ letter, index }: { letter: HindiLetter, index: number }) => {
+    const activityId = `letter-${index}`;
+    const isCompleted = isActivityCompleted(activityId);
+
+    return (
+      <Card 
+        key={index}
+        className={`cursor-pointer transition-all duration-200 hover:scale-105 relative ${
+          selectedLetter === index ? 'ring-2 ring-blue-500 bg-blue-50' : 
+          isCompleted ? 'bg-green-50 border-green-200' : 'hover:shadow-md'
+        }`}
+        onClick={() => {
+          setSelectedLetter(selectedLetter === index ? null : index);
+          if (!isCompleted) {
+            markActivityComplete(activityId, `Hindi Letter ${letter.letter} (${letter.transliteration})`);
+          }
+          playPronunciation(letter.transliteration, letter.letter);
+        }}
+      >
+        <CardContent className="p-4 text-center">
+          {/* Completion Badge */}
+          {isCompleted && (
+            <div className="absolute top-2 right-2">
+              <ActivityCompletionBadge isCompleted={true} size="sm" />
+            </div>
+          )}
+          
+          <div className="text-4xl font-bold mb-2 text-indigo-600">{letter.letter}</div>
+          <div className="text-sm text-gray-600 mb-1">{letter.transliteration}</div>
+          <div className="text-xs text-gray-500">{letter.phonetic}</div>
+          <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+            <div className="font-medium text-indigo-600">{letter.example}</div>
+            <div className="text-gray-600">{letter.exampleTransliteration}</div>
+            <div className="text-gray-700">{letter.exampleEnglish}</div>
+          </div>
         {letter.funFact && (
           <div className="mt-2 text-xs text-blue-600 font-medium">💡 {letter.funFact}</div>
         )}
@@ -555,44 +631,61 @@ const HindiLearning = () => {
           className="mt-2 h-6 w-6 p-0"
           onClick={(e) => {
             e.stopPropagation();
-            playSound(letter.audioKey);
+            playPronunciation(letter.transliteration, letter.letter);
           }}
         >
           <Volume2 className="h-3 w-3" />
         </Button>
       </CardContent>
     </Card>
-  );
+    );
+  };
 
   // Vocabulary Card Component
-  const VocabularyCard = ({ word, index }: { word: typeof basicVocabulary[0], index: number }) => (
-    <Card 
-      key={index}
-      className="cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md"
-      onClick={() => {
-        markActivityComplete(`vocab-${index}`);
-        playSound(`vocab-${word.hindi}`);
-      }}
-    >
-      <CardContent className="p-4 text-center">
-        <div className="text-3xl font-bold mb-2 text-green-600">{word.hindi}</div>
-        <div className="text-sm text-gray-600 mb-1">{word.transliteration}</div>
-        <div className="text-sm font-medium text-gray-800">{word.english}</div>
-        <div className="text-xs text-blue-600 mt-1 font-medium">{word.category}</div>
-        <Button
-          size="sm"
-          variant="ghost"
-          className="mt-2 h-6 w-6 p-0"
-          onClick={(e) => {
-            e.stopPropagation();
-            playSound(`vocab-${word.hindi}`);
-          }}
-        >
-          <Volume2 className="h-3 w-3" />
-        </Button>
-      </CardContent>
-    </Card>
-  );
+  const VocabularyCard = ({ word, index }: { word: typeof basicVocabulary[0], index: number }) => {
+    const activityId = `vocab-${index}`;
+    const isCompleted = isActivityCompleted(activityId);
+
+    return (
+      <Card 
+        key={index}
+        className={`cursor-pointer transition-all duration-200 hover:scale-105 relative ${
+          isCompleted ? 'bg-green-50 border-green-200' : 'hover:shadow-md'
+        }`}
+        onClick={() => {
+          if (!isCompleted) {
+            markActivityComplete(activityId, `Hindi Vocabulary: ${word.english} (${word.hindi})`);
+          }
+          playPronunciation(word.transliteration, word.hindi);
+        }}
+      >
+        <CardContent className="p-4 text-center">
+          {/* Completion Badge */}
+          {isCompleted && (
+            <div className="absolute top-2 right-2">
+              <ActivityCompletionBadge isCompleted={true} size="sm" />
+            </div>
+          )}
+          
+          <div className="text-3xl font-bold mb-2 text-green-600">{word.hindi}</div>
+          <div className="text-sm text-gray-600 mb-1">{word.transliteration}</div>
+          <div className="text-sm font-medium text-gray-800">{word.english}</div>
+          <div className="text-xs text-blue-600 mt-1 font-medium">{word.category}</div>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="mt-2 h-6 w-6 p-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              playPronunciation(word.transliteration, word.hindi);
+            }}
+          >
+            <Volume2 className="h-3 w-3" />
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  };
 
   // Number Card Component
   const NumberCard = ({ num }: { num: typeof hindiNumbers[0] }) => (
@@ -600,7 +693,7 @@ const HindiLearning = () => {
       className="cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md"
       onClick={() => {
         markActivityComplete(`number-${num.number}`);
-        playSound(`number-${num.number}`);
+        playPronunciation(num.transliteration, num.hindi);
       }}
     >
       <CardContent className="p-4 text-center">
@@ -613,7 +706,7 @@ const HindiLearning = () => {
           className="mt-2 h-6 w-6 p-0"
           onClick={(e) => {
             e.stopPropagation();
-            playSound(`number-${num.number}`);
+            playPronunciation(num.transliteration, num.hindi);
           }}
         >
           <Volume2 className="h-3 w-3" />
@@ -808,7 +901,7 @@ const HindiLearning = () => {
                       className="cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md"
                       onClick={() => {
                         markActivityComplete(`sign-${index}`);
-                        playSound(sign.audioKey);
+                        playPronunciation(sign.exampleTransliteration, sign.sign);
                       }}
                     >
                       <CardContent className="p-3 text-center">
@@ -823,7 +916,7 @@ const HindiLearning = () => {
                           className="mt-2 h-6 w-6 p-0"
                           onClick={(e) => {
                             e.stopPropagation();
-                            playSound(sign.audioKey);
+                            playPronunciation(sign.exampleTransliteration, sign.sign);
                           }}
                         >
                           <Volume2 className="h-3 w-3" />
@@ -876,7 +969,7 @@ const HindiLearning = () => {
                     className="cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
                     onClick={() => {
                       markActivityComplete(`phrase-${index}`);
-                      playSound(`phrase-${phrase.hindi}`);
+                      playPronunciation(phrase.transliteration, phrase.hindi);
                     }}
                   >
                     <CardContent className="p-4">
@@ -890,7 +983,7 @@ const HindiLearning = () => {
                         className="mt-2 h-6 w-6 p-0"
                         onClick={(e) => {
                           e.stopPropagation();
-                          playSound(`phrase-${phrase.hindi}`);
+                          playPronunciation(phrase.transliteration, phrase.hindi);
                         }}
                       >
                         <Volume2 className="h-3 w-3" />
@@ -943,6 +1036,15 @@ const HindiLearning = () => {
           </div>
         </div>
       </div>
+      
+      {/* Points Earned Modal */}
+      <PointsEarnedModal
+        isOpen={showPointsModal}
+        onClose={() => setShowPointsModal(false)}
+        pointsEarned={lastPointsEarned}
+        activityName={lastActivityName}
+        totalPoints={getTotalPointsEarned()}
+      />
     </div>
   );
 };

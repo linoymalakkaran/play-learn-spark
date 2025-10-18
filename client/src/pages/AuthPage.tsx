@@ -48,6 +48,25 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
     return password.length >= 4;
   };
 
+  // Generate username from email prefix
+  const generateUsernameFromEmail = (email: string) => {
+    if (!email) return '';
+    
+    // Get the part before @
+    const prefix = email.split('@')[0];
+    
+    // Replace dots and other special chars with underscores
+    // Keep only letters, numbers, and underscores
+    const cleanPrefix = prefix.replace(/[^a-zA-Z0-9_]/g, '_');
+    
+    // Ensure it's between 3 and 30 characters
+    if (cleanPrefix.length < 3) {
+      return cleanPrefix + '123'; // Add numbers if too short
+    }
+    
+    return cleanPrefix.substring(0, 30); // Truncate if too long
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
@@ -65,14 +84,21 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
 
     setIsLoading(true);
     try {
-      await login(email, password, rememberMe);
+      const result = await login(email, password, rememberMe);
       
-      // Redirect to intended page or profile
-      const from = (location.state as any)?.from?.pathname || '/profile';
-      navigate(from, { replace: true });
+      if (result.success) {
+        // Redirect to intended page or profile
+        const from = (location.state as any)?.from?.pathname || '/profile';
+        navigate(from, { replace: true });
+      } else {
+        setErrors({ 
+          submit: result.message || 'Login failed. Please check your credentials.' 
+        });
+      }
     } catch (error: any) {
+      console.error('Login error:', error);
       setErrors({ 
-        submit: error.message || 'Login failed. Please check your credentials.' 
+        submit: error?.message || 'An unexpected error occurred. Please try again.' 
       });
     } finally {
       setIsLoading(false);
@@ -106,21 +132,28 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
 
     setIsLoading(true);
     try {
-      await register({
+      const result = await register({
         email: registerData.email,
         password: registerData.password,
         firstName: registerData.firstName,
         lastName: registerData.lastName,
-        username: registerData.email, // Use email as username
+        username: generateUsernameFromEmail(registerData.email), // Generate username from email prefix
         grade: registerData.grade,
         role: 'child' // Default role
       });
       
-      // Redirect to profile after successful registration
-      navigate('/profile', { replace: true });
+      if (result.success) {
+        // Redirect to profile after successful registration
+        navigate('/profile', { replace: true });
+      } else {
+        setErrors({ 
+          submit: result.message || 'Registration failed. Please try again.' 
+        });
+      }
     } catch (error: any) {
+      console.error('Registration error:', error);
       setErrors({ 
-        submit: error.message || 'Registration failed. Please try again.' 
+        submit: error?.message || 'An unexpected error occurred. Please try again.' 
       });
     } finally {
       setIsLoading(false);

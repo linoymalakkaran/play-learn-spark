@@ -40,8 +40,8 @@ export const useRewardStore = create<RewardState>()(
         const newCard: RewardCard = {
           id: `card-${childId}`,
           childId,
-          totalPoints: 0,
-          availablePoints: 0,
+          totalPoints: 15, // Give 15 starter points for new users
+          availablePoints: 15, // Give 15 starter points for new users
           currentLevel: 'bronze',
           achievements: [],
           redeemedRewards: [],

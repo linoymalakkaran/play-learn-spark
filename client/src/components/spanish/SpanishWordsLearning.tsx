@@ -27,10 +27,25 @@ export const SpanishWordsLearning: React.FC<SpanishWordsLearningProps> = ({
     soundEffects.playClick();
   }, []);
 
-  const handlePronunciation = useCallback((word: SpanishWord) => {
-    // In a real app, this would play audio
-    soundEffects.playSuccess();
-    console.log(`Playing pronunciation for ${word.spanish}: ${word.pronunciation}`);
+  const handlePronunciation = useCallback(async (word: SpanishWord) => {
+    try {
+      // Play the word sound using speech synthesis
+      if (soundEffects && typeof (soundEffects as any).playLetterPronunciation === 'function') {
+        await (soundEffects as any).playLetterPronunciation(word.spanish, 'es-ES');
+        await new Promise(resolve => setTimeout(resolve, 300));
+      } else if ('speechSynthesis' in window) {
+        // fallback directly to speech synthesis for the word
+        const u = new SpeechSynthesisUtterance(word.spanish);
+        u.lang = 'es-ES'; // Spanish locale
+        u.rate = 0.8;
+        window.speechSynthesis.speak(u);
+      } else if (soundEffects && typeof (soundEffects as any).playClick === 'function') {
+        await (soundEffects as any).playClick();
+      }
+    } catch (e) {
+      // ignore sound errors, fallback to success sound
+      soundEffects.playSuccess();
+    }
   }, []);
 
   const handleShowMeaning = useCallback(() => {

@@ -7,6 +7,9 @@ import { PlayCircle, Volume2, Star, ArrowLeft, Trophy, Lock, CheckCircle, Target
 import { useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import { soundEffects } from '@/utils/sounds';
+import { useActivityCompletion } from '@/hooks/useActivityCompletion';
+import { ActivityCompletionBadge } from '@/components/ActivityCompletionBadge';
+import { PointsEarnedModal } from '@/components/PointsEarnedModal';
 
 // Level system
 interface LearningLevel {
@@ -639,11 +642,25 @@ const MalayalamLearning = () => {
   const navigate = useNavigate();
   const [selectedLetter, setSelectedLetter] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
-  const [completedActivities, setCompletedActivities] = useState<Set<string>>(new Set());
   const [currentLevel, setCurrentLevel] = useState(1);
   const [levelProgress, setLevelProgress] = useState<{[key: number]: number}>({1: 0, 2: 0});
   const [unlockedLevels, setUnlockedLevels] = useState<Set<number>>(new Set([1]));
   const [showMatching, setShowMatching] = useState(false);
+  
+  // Activity completion system
+  const {
+    completeActivity,
+    isActivityCompleted,
+    getCompletedActivities,
+    getTotalPointsEarned,
+    isLoading: activityLoading,
+    error: activityError
+  } = useActivityCompletion('malayalam');
+
+  // Points earned modal state
+  const [showPointsModal, setShowPointsModal] = useState(false);
+  const [lastPointsEarned, setLastPointsEarned] = useState(0);
+  const [lastActivityName, setLastActivityName] = useState('');
 
   // Load progress from localStorage
   useEffect(() => {
@@ -658,8 +675,8 @@ const MalayalamLearning = () => {
     }
   }, []);
 
-  // Save progress to localStorage
-  const saveProgress = (newProgress: number, activityId: string, level: number = currentLevel) => {
+  // Save progress to localStorage and award activity points
+  const saveProgress = async (newProgress: number, activityId: string, level: number = currentLevel) => {
     const newCompleted = new Set(completedActivities);
     newCompleted.add(activityId);
     setCompletedActivities(newCompleted);
@@ -685,6 +702,13 @@ const MalayalamLearning = () => {
       levelProgress: newLevelProgress,
       unlockedLevels: Array.from(newUnlocked)
     }));
+
+    // Award points for activity completion
+    try {
+      await completeActivity(activityId, 'malayalam');
+    } catch (error) {
+      console.error('Failed to award points for Malayalam activity:', error);
+    }
   };
 
   const switchLevel = (level: number) => {
@@ -1006,11 +1030,17 @@ const MalayalamLearning = () => {
                           )}
                           <h3 className="font-bold text-lg">{level.title}</h3>
                         </div>
-                        {isUnlocked && (
-                          <Badge variant={isActive ? "default" : "secondary"}>
-                            {levelProgressPercent}%
-                          </Badge>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <ActivityCompletionBadge 
+                            isCompleted={isActivityCompleted(`level${level.id}-complete`)}
+                            points={50}
+                          />
+                          {isUnlocked && (
+                            <Badge variant={isActive ? "default" : "secondary"}>
+                              {levelProgressPercent}%
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                       
                       <p className="text-sm text-gray-600 mb-3">{level.description}</p>
@@ -1150,6 +1180,12 @@ const MalayalamLearning = () => {
                 {/* Level 1 Tab Completion Button */}
                 {currentLevel === 1 && (
                   <div className="mt-6 text-center">
+                    <div className="flex items-center justify-center gap-3 mb-3">
+                      <ActivityCompletionBadge 
+                        isCompleted={isActivityCompleted('level1-alphabet-complete')}
+                        points={50}
+                      />
+                    </div>
                     <Button 
                       onClick={() => markTabComplete('alphabet')}
                       disabled={completedActivities.has('level1-alphabet-complete')}
@@ -1211,6 +1247,12 @@ const MalayalamLearning = () => {
                 {/* Level 1 Tab Completion Button */}
                 {currentLevel === 1 && (
                   <div className="mt-6 text-center">
+                    <div className="flex items-center justify-center gap-3 mb-3">
+                      <ActivityCompletionBadge 
+                        isCompleted={isActivityCompleted('level1-vocabulary-complete')}
+                        points={50}
+                      />
+                    </div>
                     <Button 
                       onClick={() => markTabComplete('vocabulary')}
                       disabled={completedActivities.has('level1-vocabulary-complete')}
@@ -1267,6 +1309,12 @@ const MalayalamLearning = () => {
                 {/* Level 1 Tab Completion Button */}
                 {currentLevel === 1 && (
                   <div className="mt-6 text-center">
+                    <div className="flex items-center justify-center gap-3 mb-3">
+                      <ActivityCompletionBadge 
+                        isCompleted={isActivityCompleted('level1-numbers-complete')}
+                        points={50}
+                      />
+                    </div>
                     <Button 
                       onClick={() => markTabComplete('numbers')}
                       disabled={completedActivities.has('level1-numbers-complete')}
@@ -1567,6 +1615,9 @@ const MalayalamLearning = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Points Earned Modal */}
+      <PointsEarnedModal />
     </div>
   );
 };

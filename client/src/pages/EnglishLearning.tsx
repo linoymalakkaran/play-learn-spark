@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Volume2, Star, Trophy, BookOpen, Target, Users, Heart } from 'lucide-react';
+import { ArrowLeft, Volume2, Star, Trophy, BookOpen, Target, Users, Heart, CheckCircle } from 'lucide-react';
+import { soundEffects } from '@/utils/sounds';
+import { useActivityCompletion } from '@/hooks/useActivityCompletion';
+import { ActivityCompletionBadge } from '@/components/ActivityCompletionBadge';
+import { PointsEarnedModal } from '@/components/PointsEarnedModal';
 
 // Types
 interface EnglishLetter {
@@ -284,11 +288,25 @@ const EnglishLearning = () => {
   const navigate = useNavigate();
   const [selectedLetter, setSelectedLetter] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
-  const [completedActivities, setCompletedActivities] = useState<Set<string>>(new Set());
   const [currentLevel, setCurrentLevel] = useState(1);
   const [levelProgress, setLevelProgress] = useState<{[key: number]: number}>({1: 0, 2: 0});
   const [unlockedLevels, setUnlockedLevels] = useState<Set<number>>(new Set([1]));
   const [showMatching, setShowMatching] = useState(false);
+  
+  // Activity completion system
+  const {
+    completeActivity,
+    isActivityCompleted,
+    getCompletedActivities,
+    getTotalPointsEarned,
+    isLoading: activityLoading,
+    error: activityError
+  } = useActivityCompletion('english');
+
+  // Points earned modal state
+  const [showPointsModal, setShowPointsModal] = useState(false);
+  const [lastPointsEarned, setLastPointsEarned] = useState(0);
+  const [lastActivityName, setLastActivityName] = useState('');
 
   // Load progress from localStorage
   useEffect(() => {
@@ -319,33 +337,77 @@ const EnglishLearning = () => {
     return learningLevels.find(level => level.id === currentLevel) || learningLevels[0];
   };
 
-  const markActivityComplete = (activityId: string) => {
-    if (!completedActivities.has(activityId)) {
-      const newCompleted = new Set(completedActivities);
-      newCompleted.add(activityId);
-      setCompletedActivities(newCompleted);
+  const handleActivityComplete = async (activityId: string, activityName: string, score: number = 100) => {
+    if (isActivityCompleted(activityId)) {
+      return; // Already completed
+    }
+
+    try {
+      const result = await completeActivity(activityId, 'english', score);
       
-      // Update level progress
-      const newLevelProgress = { ...levelProgress };
-      newLevelProgress[currentLevel] = (newLevelProgress[currentLevel] || 0) + 5;
-      setLevelProgress(newLevelProgress);
-      
-      // Update overall progress
-      const newProgress = Math.min(progress + 2, 100);
-      setProgress(newProgress);
-      
-      // Check if new level should be unlocked
-      if (newLevelProgress[currentLevel] >= learningLevels.find(l => l.id === currentLevel + 1)?.unlockRequirement && !unlockedLevels.has(currentLevel + 1)) {
-        const newUnlocked = new Set(unlockedLevels);
-        newUnlocked.add(currentLevel + 1);
-        setUnlockedLevels(newUnlocked);
+      if (result.success) {
+        // Update level progress
+        const newLevelProgress = { ...levelProgress };
+        newLevelProgress[currentLevel] = (newLevelProgress[currentLevel] || 0) + 5;
+        setLevelProgress(newLevelProgress);
+        
+        // Update overall progress
+        const newProgress = Math.min(progress + 2, 100);
+        setProgress(newProgress);
+        
+        // Check if new level should be unlocked
+        if (newLevelProgress[currentLevel] >= learningLevels.find(l => l.id === currentLevel + 1)?.unlockRequirement && !unlockedLevels.has(currentLevel + 1)) {
+          const newUnlocked = new Set(unlockedLevels);
+          newUnlocked.add(currentLevel + 1);
+          setUnlockedLevels(newUnlocked);
+        }
+
+        // Show points earned modal
+        setLastPointsEarned(result.pointsEarned);
+        setLastActivityName(activityName);
+        setShowPointsModal(true);
+      } else if (result.error) {
+        console.error('Failed to complete activity:', result.error);
       }
+    } catch (error) {
+      console.error('Activity completion error:', error);
     }
   };
 
   const playSound = (audioKey: string) => {
     // Mock sound implementation
     console.log(`Playing sound: ${audioKey}`);
+  };
+
+  const playPronunciation = async (text: string, letter?: string) => {
+    // Use enhanced letter pronunciation if letter is provided
+    if (letter) {
+      try {
+        if (soundEffects && typeof (soundEffects as any).playLetterPronunciation === 'function') {
+          await (soundEffects as any).playLetterPronunciation(letter, 'en-US');
+          await new Promise(resolve => setTimeout(resolve, 300));
+        } else if ('speechSynthesis' in window) {
+          // fallback directly to speech synthesis for the letter
+          const u = new SpeechSynthesisUtterance(letter);
+          u.lang = 'en-US';
+          u.rate = 0.8;
+          window.speechSynthesis.speak(u);
+          await new Promise(resolve => setTimeout(resolve, 300));
+        } else if (soundEffects && typeof (soundEffects as any).playClick === 'function') {
+          await (soundEffects as any).playClick();
+        }
+      } catch (e) {
+        // ignore sound errors
+      }
+    }
+    
+    // Also use speech synthesis for the phonics/text
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US'; // English locale
+      utterance.rate = 0.7;
+      speechSynthesis.speak(utterance);
+    }
   };
 
   // Letter Card Component
@@ -357,8 +419,8 @@ const EnglishLearning = () => {
       }`}
       onClick={() => {
         setSelectedLetter(selectedLetter === index ? null : index);
-        markActivityComplete(`letter-${index}`);
-        playSound(letter.audioKey);
+        handleActivityComplete(`letter-${index}`, `English Letter ${letter.uppercase}`, 100);
+        playPronunciation(letter.letter, letter.letter);
       }}
     >
       <CardContent className="p-4 text-center">
@@ -375,17 +437,23 @@ const EnglishLearning = () => {
         {letter.funFact && (
           <div className="mt-2 text-xs text-green-600 font-medium">💡 {letter.funFact}</div>
         )}
-        <Button
-          size="sm"
-          variant="ghost"
-          className="mt-2 h-6 w-6 p-0"
-          onClick={(e) => {
-            e.stopPropagation();
-            playSound(letter.audioKey);
-          }}
-        >
-          <Volume2 className="h-3 w-3" />
-        </Button>
+        <div className="flex items-center justify-between mt-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-6 w-6 p-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              playPronunciation(letter.letter, letter.letter);
+            }}
+          >
+            <Volume2 className="h-3 w-3" />
+          </Button>
+          <ActivityCompletionBadge 
+            isCompleted={isActivityCompleted(`letter-${index}`)} 
+            size="sm"
+          />
+        </div>
       </CardContent>
     </Card>
   );
@@ -396,8 +464,8 @@ const EnglishLearning = () => {
       key={index}
       className="cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md"
       onClick={() => {
-        markActivityComplete(`vocab-${index}`);
-        playSound(`vocab-${word.english}`);
+        handleActivityComplete(`vocab-${index}`, `English Word: ${word.english}`, 100);
+        playPronunciation(word.english, word.english);
       }}
     >
       <CardContent className="p-4 text-center">
@@ -405,17 +473,23 @@ const EnglishLearning = () => {
         <div className="text-sm text-gray-600 mb-1">{word.phonics}</div>
         <div className="text-sm font-medium text-gray-800">{word.description}</div>
         <div className="text-xs text-blue-600 mt-1 font-medium">{word.category}</div>
-        <Button
-          size="sm"
-          variant="ghost"
-          className="mt-2 h-6 w-6 p-0"
-          onClick={(e) => {
-            e.stopPropagation();
-            playSound(`vocab-${word.english}`);
-          }}
-        >
-          <Volume2 className="h-3 w-3" />
-        </Button>
+        <div className="flex items-center justify-between mt-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-6 w-6 p-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              playPronunciation(word.english, word.english);
+            }}
+          >
+            <Volume2 className="h-3 w-3" />
+          </Button>
+          <ActivityCompletionBadge 
+            isCompleted={isActivityCompleted(`vocab-${index}`)} 
+            size="sm"
+          />
+        </div>
       </CardContent>
     </Card>
   );
@@ -425,8 +499,8 @@ const EnglishLearning = () => {
     <Card 
       className="cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md"
       onClick={() => {
-        markActivityComplete(`number-${num.number}`);
-        playSound(`number-${num.number}`);
+        handleActivityComplete(`number-${num.number}`, `English Number: ${num.english}`, 100);
+        playPronunciation(num.english, num.english);
       }}
     >
       <CardContent className="p-4 text-center">
@@ -439,7 +513,7 @@ const EnglishLearning = () => {
           className="mt-2 h-6 w-6 p-0"
           onClick={(e) => {
             e.stopPropagation();
-            playSound(`number-${num.number}`);
+            playPronunciation(num.english, num.english);
           }}
         >
           <Volume2 className="h-3 w-3" />
@@ -455,7 +529,7 @@ const EnglishLearning = () => {
       className="cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md"
       onClick={() => {
         markActivityComplete(`phonics-${index}`);
-        playSound(`phonics-${phonics.sound}`);
+        playPronunciation(phonics.examples[0], phonics.letters);
       }}
     >
       <CardContent className="p-4 text-center">
@@ -471,7 +545,7 @@ const EnglishLearning = () => {
           className="mt-2 h-6 w-6 p-0"
           onClick={(e) => {
             e.stopPropagation();
-            playSound(`phonics-${phonics.sound}`);
+            playPronunciation(phonics.examples[0], phonics.letters);
           }}
         >
           <Volume2 className="h-3 w-3" />
@@ -711,7 +785,7 @@ const EnglishLearning = () => {
                     className="cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
                     onClick={() => {
                       markActivityComplete(`phrase-${index}`);
-                      playSound(`phrase-${phrase.english}`);
+                      playPronunciation(phrase.english, phrase.english);
                     }}
                   >
                     <CardContent className="p-4">
@@ -725,7 +799,7 @@ const EnglishLearning = () => {
                         className="mt-2 h-6 w-6 p-0"
                         onClick={(e) => {
                           e.stopPropagation();
-                          playSound(`phrase-${phrase.english}`);
+                          playPronunciation(phrase.english, phrase.english);
                         }}
                       >
                         <Volume2 className="h-3 w-3" />
@@ -778,6 +852,15 @@ const EnglishLearning = () => {
           </div>
         </div>
       </div>
+      
+      {/* Points Earned Modal */}
+      <PointsEarnedModal
+        isOpen={showPointsModal}
+        onClose={() => setShowPointsModal(false)}
+        pointsEarned={lastPointsEarned}
+        activityName={lastActivityName}
+        totalPoints={getTotalPointsEarned()}
+      />
     </div>
   );
 };

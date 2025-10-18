@@ -490,7 +490,7 @@ const GamePage: React.FC = () => {
   }, [childId, initializeRewardCard]);
   
   const availablePoints = getAvailablePoints(childId) || 0;
-  const isUnlocked = availablePoints >= 50;
+  const isUnlocked = availablePoints >= 10; // Reduced from 50 to 10 to make games more accessible
 
   // Available games
   const games: GameInfo[] = [
@@ -601,17 +601,17 @@ const GamePage: React.FC = () => {
                 </h2>
                 <div className="space-y-4">
                   <p className="text-xl font-['Comic_Neue'] text-gray-600">
-                    You need <span className="font-bold text-purple-600">50 points</span> to unlock fun games!
+                    You need <span className="font-bold text-purple-600">10 points</span> to unlock fun games!
                   </p>
                   <div className="bg-gray-100 rounded-full p-4">
                     <div className="flex items-center justify-between text-lg font-['Comic_Neue']">
                       <span>Your Points: {availablePoints} ⭐</span>
-                      <span>Need: 50 ⭐</span>
+                      <span>Need: 10 ⭐</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-4 mt-2">
                       <div 
                         className="bg-gradient-to-r from-purple-500 to-pink-500 h-4 rounded-full transition-all duration-500"
-                        style={{ width: `${Math.min((availablePoints / 50) * 100, 100)}%` }}
+                        style={{ width: `${Math.min((availablePoints / 10) * 100, 100)}%` }}
                       ></div>
                     </div>
                   </div>

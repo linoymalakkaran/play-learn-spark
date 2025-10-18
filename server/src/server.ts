@@ -92,7 +92,9 @@ app.get('/api/health', (req, res) => {
       analytics: '/api/analytics',
       content: '/api/content',
       files: '/api/files',
-      ai: '/api/ai'
+      ai: '/api/ai',
+      feedback: '/api/feedback',
+      rewards: '/api/rewards'
     }
   });
 });
@@ -120,7 +122,9 @@ app.get('/', (req, res) => {
       analytics: '/api/analytics', 
       content: '/api/content',
       files: '/api/files',
-      ai: '/api/ai'
+      ai: '/api/ai',
+      feedback: '/api/feedback',
+      rewards: '/api/rewards'
     },
     database: 'In-Memory (Development)',
     uploadDirs: uploadDirs
@@ -164,7 +168,9 @@ app.use('*', (req, res) => {
       '/api/analytics',
       '/api/content', 
       '/api/files',
-      '/api/ai'
+      '/api/ai',
+      '/api/feedback',
+      '/api/rewards'
     ]
   });
 });
@@ -193,6 +199,8 @@ const startServer = async () => {
       console.log(`   📝 Content: http://localhost:${PORT}/api/content`);
       console.log(`   📁 Files: http://localhost:${PORT}/api/files`);
       console.log(`   🤖 AI: http://localhost:${PORT}/api/ai`);
+      console.log(`   💬 Feedback: http://localhost:${PORT}/api/feedback`);
+      console.log(`   🏆 Rewards: http://localhost:${PORT}/api/rewards`);
       console.log('');
       console.log('📂 Upload Directories:');
       uploadDirs.forEach(dir => {

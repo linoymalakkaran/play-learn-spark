@@ -8,6 +8,7 @@ import { validationResult } from 'express-validator';
 import { emailService } from '../services/emailService';
 import * as jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
+import { tokenBlacklist } from '../utils/tokenBlacklist';
 
 // Register new user
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -538,8 +539,15 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
 // Logout (for token blacklisting in future)
 export const logout = async (req: Request, res: Response): Promise<void> => {
   try {
-    // In a more advanced implementation, you would blacklist the token
-    // For now, we'll just send a success response
+    // Get the token from the authorization header
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (token) {
+      // Add token to blacklist
+      tokenBlacklist.add(token);
+      logger.info(`Token blacklisted for user: ${req.user?.email || 'Unknown'}`);
+    }
     
     logger.info(`User logged out: ${req.user?.email || 'Unknown'}`);
 

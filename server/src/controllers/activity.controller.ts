@@ -229,3 +229,59 @@ export const resetUserProgress = async (req: Request, res: Response): Promise<vo
     });
   }
 };
+
+// Get activity types
+export const getActivityTypes = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const types = [
+      'math',
+      'english',
+      'science',
+      'art',
+      'physical',
+      'logic',
+      'social',
+      'music',
+      'coding',
+      'geography'
+    ];
+    
+    res.status(200).json({
+      success: true,
+      message: 'Activity types retrieved successfully',
+      data: { types }
+    });
+  } catch (error) {
+    logger.error('Get activity types error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve activity types'
+    });
+  }
+};
+
+// Get activity categories
+export const getActivityCategories = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const categories = [
+      { id: 'beginner', name: 'Beginner', description: 'Simple activities for young learners' },
+      { id: 'intermediate', name: 'Intermediate', description: 'Moderate difficulty activities' },
+      { id: 'advanced', name: 'Advanced', description: 'Challenging activities for experienced learners' },
+      { id: 'creative', name: 'Creative', description: 'Art and creativity focused activities' },
+      { id: 'analytical', name: 'Analytical', description: 'Logic and problem-solving activities' },
+      { id: 'physical', name: 'Physical', description: 'Movement and exercise activities' }
+    ];
+    
+    res.status(200).json({
+      success: true,
+      message: 'Activity categories retrieved successfully',
+      data: { categories }
+    });
+  } catch (error) {
+    logger.error('Get activity categories error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve activity categories'
+    });
+  }
+};

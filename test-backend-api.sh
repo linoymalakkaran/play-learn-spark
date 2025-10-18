@@ -167,7 +167,11 @@ test_authentication() {
     if [[ $? -eq 0 ]]; then
         ACCESS_TOKEN=$(echo "$reg_response" | grep -o '"accessToken":"[^"]*"' | cut -d'"' -f4)
         REFRESH_TOKEN=$(echo "$reg_response" | grep -o '"refreshToken":"[^"]*"' | cut -d'"' -f4)
-        USER_ID=$(echo "$reg_response" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
+        # Try different patterns for user ID extraction
+        USER_ID=$(echo "$reg_response" | grep -o '"id":[0-9]*' | head -1 | cut -d':' -f2)
+        if [[ -z "$USER_ID" ]]; then
+            USER_ID=$(echo "$reg_response" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
+        fi
         print_info "Extracted ACCESS_TOKEN: ${ACCESS_TOKEN:0:20}..."
         print_info "Extracted USER_ID: $USER_ID"
     fi

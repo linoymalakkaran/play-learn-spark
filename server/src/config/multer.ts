@@ -45,6 +45,7 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCa
     'application/pdf',
     'text/csv',
     'application/csv',
+    'text/plain', // Add plain text files for testing
     'image/jpeg',
     'image/jpg',
     'image/png',
@@ -53,13 +54,13 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCa
   ];
 
   // Check file extension as additional security
-  const allowedExtensions = ['.pdf', '.csv', '.jpg', '.jpeg', '.png', '.gif', '.webp'];
+  const allowedExtensions = ['.pdf', '.csv', '.txt', '.jpg', '.jpeg', '.png', '.gif', '.webp'];
   const fileExtension = path.extname(file.originalname).toLowerCase();
 
   if (allowedTypes.includes(file.mimetype) && allowedExtensions.includes(fileExtension)) {
     cb(null, true);
   } else {
-    cb(new Error(`File type not allowed. Supported types: PDF, CSV, JPEG, PNG, GIF, WebP`));
+    cb(new Error(`File type not allowed. Supported types: PDF, CSV, TXT, JPEG, PNG, GIF, WebP`));
   }
 };
 

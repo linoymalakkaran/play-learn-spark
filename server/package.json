@@ -4,7 +4,9 @@
   "description": "Backend server for Play Learn Spark educational platform with AI-powered content generation",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "nodemon src/server.ts",
+    "dev": "nodemon --watch src --ext ts,js,json --exec ts-node src/server.ts",
+    "dev:verbose": "nodemon --watch src --ext ts,js,json --exec ts-node --transpile-only src/server.ts",
+    "dev:debug": "nodemon --watch src --ext ts,js,json --exec node --inspect=0.0.0.0:9229 -r ts-node/register src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "test": "jest",
@@ -12,7 +14,8 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "docker:build": "docker build -t play-learn-spark-backend .",
-    "docker:run": "docker run -p 3001:3001 --env-file .env play-learn-spark-backend"
+    "docker:run": "docker run -p 3001:3001 --env-file .env play-learn-spark-backend",
+    "check:routes": "ts-node scripts/check-routes.ts"
   },
   "keywords": [
     "education",

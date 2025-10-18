@@ -3,6 +3,7 @@ import * as jwt from 'jsonwebtoken';
 import { SignOptions } from 'jsonwebtoken';
 import { User } from '../models/UserSQLite';
 import { logger } from '../utils/logger';
+import { tokenBlacklist } from '../utils/tokenBlacklist';
 
 // Extend Request interface to include user
 declare global {
@@ -64,6 +65,15 @@ export const authenticateToken = async (
       res.status(401).json({
         success: false,
         message: 'Access token is required',
+      });
+      return;
+    }
+
+    // Check if token is blacklisted
+    if (tokenBlacklist.has(token)) {
+      res.status(401).json({
+        success: false,
+        message: 'Token has been invalidated',
       });
       return;
     }

@@ -345,6 +345,44 @@ export class FileUploadController {
 
     return Object.keys(mapping).length > 0 ? mapping : null;
   }
+
+  /**
+   * List uploaded files
+   */
+  listUploads = async (req: Request, res: Response) => {
+    try {
+      const uploads: { [key: string]: any[] } = {
+        images: [],
+        documents: [],
+        csv: [],
+        content: []
+      };
+
+      // Check each upload directory
+      for (const [type, dirPath] of Object.entries(UPLOAD_PATHS)) {
+        if (fs.existsSync(dirPath)) {
+          const files = fs.readdirSync(dirPath);
+          uploads[type] = files.map(filename => ({
+            filename,
+            path: `/uploads/${type}/${filename}`,
+            size: fs.statSync(path.join(dirPath, filename)).size,
+            uploadedAt: fs.statSync(path.join(dirPath, filename)).mtime
+          }));
+        }
+      }
+
+      res.json({
+        success: true,
+        message: 'Upload list retrieved successfully',
+        data: uploads
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to list uploads'
+      });
+    }
+  }
 }
 
 export const fileUploadController = new FileUploadController();

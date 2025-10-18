@@ -46,22 +46,24 @@ export const feedbackController = {
 
       // Send email notifications
       try {
-        // Send notification to admin
-        await emailService.sendFeedbackNotification({
-          name: feedback.name,
-          email: feedback.email,
-          subject: feedback.subject,
-          message: feedback.message,
-          rating: feedback.rating,
-          feedbackType: feedback.feedbackType
-        });
+        // Send notification to admin (only if email service is configured)
+        if (emailService && typeof emailService.sendFeedbackNotification === 'function') {
+          await emailService.sendFeedbackNotification({
+            name: feedback.name,
+            email: feedback.email,
+            subject: feedback.subject,
+            message: feedback.message,
+            rating: feedback.rating,
+            feedbackType: feedback.feedbackType
+          });
 
-        // Send confirmation to user
-        await emailService.sendFeedbackConfirmation(
-          feedback.email,
-          feedback.name,
-          feedback.subject
-        );
+          // Send confirmation to user
+          await emailService.sendFeedbackConfirmation(
+            feedback.email,
+            feedback.name,
+            feedback.subject
+          );
+        }
       } catch (emailError) {
         logger.warn('Failed to send feedback emails:', emailError);
         // Continue even if email fails

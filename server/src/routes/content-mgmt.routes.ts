@@ -13,7 +13,12 @@ import { authenticateToken, authorizeRoles } from '../middleware/auth';
 
 const router = Router();
 
-// All routes require authentication
+// Public routes (no authentication required)
+router.get('/', getAllActivities);
+router.get('/activities', getAllActivities);
+router.get('/categories', getCategories);
+
+// All other routes require authentication
 router.use(authenticateToken);
 
 // Validation middleware
@@ -99,10 +104,6 @@ const bulkOperationValidation = [
     .isInt({ min: 1 })
     .withMessage('All activity IDs must be positive integers')
 ];
-
-// Public routes (accessible to all authenticated users)
-router.get('/activities', getAllActivities);
-router.get('/categories', getCategories);
 
 // Content creation routes (educators, parents, admin)
 router.post('/activities', 

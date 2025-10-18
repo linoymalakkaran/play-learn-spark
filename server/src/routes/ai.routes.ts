@@ -7,6 +7,21 @@ import AnthropicService from '../services/AnthropicService';
 
 const router = Router();
 
+// Health check endpoint
+router.get('/health', (req, res) => {
+  res.json({
+    success: true,
+    message: 'AI service is running',
+    timestamp: new Date().toISOString(),
+    services: {
+      google: !!process.env.GOOGLE_AI_API_KEY,
+      openai: !!process.env.OPENAI_API_KEY,
+      huggingface: !!process.env.HUGGINGFACE_API_KEY,
+      anthropic: !!process.env.ANTHROPIC_API_KEY
+    }
+  });
+});
+
 // Generate activity from processed content
 router.post('/generate-activity', async (req, res) => {
   try {
@@ -396,6 +411,103 @@ router.get('/providers', (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Failed to get AI providers'
+    });
+  }
+});
+
+// Generate content (alias for generate-activity)
+router.post('/generate-content', async (req, res) => {
+  try {
+    const { 
+      topic, 
+      ageGroup, 
+      difficulty = 'medium',
+      contentType = 'activity',
+      aiProvider = 'google'
+    } = req.body;
+
+    if (!topic || !ageGroup) {
+      return res.status(400).json({
+        success: false,
+        error: 'Topic and age group are required'
+      });
+    }
+
+    let result;
+    
+    if (aiProvider === 'google' && googleAIService) {
+      result = await googleAIService.generateContent(topic, ageGroup, difficulty, contentType);
+    } else if (aiProvider === 'openai') {
+      const openaiService = new OpenAIService();
+      result = await openaiService.generateContent(topic, ageGroup, difficulty, contentType);
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid AI provider'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    logger.error('Error generating content:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate content'
+    });
+  }
+});
+
+// Analyze performance
+router.post('/analyze-performance', async (req, res) => {
+  try {
+    const { 
+      userId, 
+      activityData, 
+      timeSpent, 
+      correctAnswers, 
+      totalQuestions 
+    } = req.body;
+
+    if (!userId || !activityData) {
+      return res.status(400).json({
+        success: false,
+        error: 'User ID and activity data are required'
+      });
+    }
+
+    const performance = {
+      userId,
+      accuracy: totalQuestions ? (correctAnswers / totalQuestions) * 100 : 0,
+      timeSpent: timeSpent || 0,
+      strengths: [],
+      improvements: [],
+      recommendations: []
+    };
+
+    // Basic performance analysis
+    if (performance.accuracy >= 90) {
+      performance.strengths.push('Excellent understanding of the material');
+      performance.recommendations.push('Try more challenging activities');
+    } else if (performance.accuracy >= 70) {
+      performance.strengths.push('Good grasp of concepts');
+      performance.recommendations.push('Practice similar activities for mastery');
+    } else {
+      performance.improvements.push('Review fundamental concepts');
+      performance.recommendations.push('Start with easier activities');
+    }
+
+    res.json({
+      success: true,
+      data: performance
+    });
+  } catch (error) {
+    logger.error('Error analyzing performance:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to analyze performance'
     });
   }
 });

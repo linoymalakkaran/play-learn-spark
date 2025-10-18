@@ -5,7 +5,9 @@ import {
   createActivity,
   completeActivity,
   getUserProgress,
-  resetUserProgress
+  resetUserProgress,
+  getActivityTypes,
+  getActivityCategories
 } from '../controllers/activity.controller';
 import { authenticateToken as requireAuth, optionalAuth } from '../middleware/auth';
 
@@ -13,6 +15,8 @@ const router = Router();
 
 // Public routes (no authentication required)
 router.get('/', getActivities);
+router.get('/types', getActivityTypes);
+router.get('/categories', getActivityCategories);
 router.get('/:id', getActivityById);
 
 // Protected routes (authentication required)

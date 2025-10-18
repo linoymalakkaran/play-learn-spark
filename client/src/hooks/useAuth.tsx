@@ -63,6 +63,7 @@ export interface RegisterData {
   firstName: string;
   lastName: string;
   age?: number;
+  grade?: string;
   language?: string;
 }
 
@@ -148,6 +149,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const loginAsGuest = useCallback(async (name: string, grade?: string) => {
     setIsLoading(true);
     try {
+      // Try to use backend guest login if available
+      try {
+        const response = await authService.loginAsGuest(name, grade);
+
+        if (response.success && response.data) {
+          const userData = (response.data as any).user;
+          const tokenData = (response.data as any).tokens;
+          if (userData && tokenData) {
+            // Mark user as guest and add grade info
+            userData.isGuest = true;
+            userData.profile = userData.profile || {};
+            userData.profile.grade = grade || '';
+            
+            setUser(userData);
+            setTokens(tokenData);
+            
+            // Store auth data in localStorage for guest
+            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
+            localStorage.setItem(TOKEN_STORAGE_KEY, tokenData.accessToken);
+            localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, tokenData.refreshToken);
+            
+            return { success: true, message: 'Welcome! You can now use the app with full features.' };
+          }
+        }
+      } catch (apiError) {
+        console.warn('Backend guest login failed, falling back to local guest:', apiError);
+      }
+
+      // Fallback to local guest user if backend is not available
       const guestUser: User = {
         id: `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         username: name,
@@ -177,9 +207,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       };
 
       setUser(guestUser);
-      setTokens(null); // No tokens for guest users
+      setTokens(null); // No tokens for local guest users
       
-      return { success: true, message: 'Welcome! You can now use the app.' };
+      // Store guest user locally
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(guestUser));
+      
+      return { success: true, message: 'Welcome! You can now use the app (offline mode).' };
     } catch (error) {
       console.error('Guest login failed:', error);
       return { success: false, message: 'Failed to start guest session. Please try again.' };

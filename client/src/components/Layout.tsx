@@ -134,14 +134,6 @@ const Layout: React.FC<LayoutProps> = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate('/auth')}
-                      className="text-green-600 border-green-600 hover:bg-green-50"
-                    >
-                      Start as Guest
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
                       onClick={() => navigate('/login')}
                       className="text-blue-600 border-blue-600 hover:bg-blue-50"
                     >

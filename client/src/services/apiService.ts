@@ -458,6 +458,11 @@ export const authService = {
     return apiService.post('/auth/login', { email, password });
   },
 
+  // Guest login
+  loginAsGuest: async (name: string, grade?: string) => {
+    return apiService.post('/auth/guest-login', { name, grade });
+  },
+
   // Register new user
   register: async (userData: {
     email: string;
@@ -466,6 +471,7 @@ export const authService = {
     role?: string;
     firstName: string;
     lastName: string;
+    grade?: string;
     age?: number;
     language?: string;
   }) => {
@@ -760,6 +766,108 @@ export const withCache = async <T>(
   }
   
   return result;
+};
+
+// Feedback Service
+export interface FeedbackData {
+  name: string;
+  email: string;
+  rating: number;
+  feedbackType: 'review' | 'suggestion' | 'complaint' | 'general';
+  subject: string;
+  message: string;
+  isPublic?: boolean;
+}
+
+export interface Feedback {
+  id: string;
+  name: string;
+  rating: number;
+  feedbackType: string;
+  subject: string;
+  message: string;
+  createdAt: string;
+}
+
+export interface FeedbackStats {
+  totalFeedback: number;
+  approvedFeedback: number;
+  averageRating: string;
+  ratingDistribution: Array<{ rating: number; count: number }>;
+  typeDistribution: Array<{ feedbackType: string; count: number }>;
+}
+
+export const feedbackService = {
+  // Submit new feedback
+  async submitFeedback(feedbackData: FeedbackData): Promise<ApiResponse> {
+    try {
+      const response = await apiService.post('/feedback', feedbackData);
+      return {
+        success: true,
+        data: response.data,
+        message: 'Thank you for your feedback!'
+      };
+    } catch (error: any) {
+      console.error('❌ Failed to submit feedback:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to submit feedback'
+      };
+    }
+  },
+
+  // Get public feedback with pagination and filters
+  async getPublicFeedback(params?: {
+    page?: number;
+    limit?: number;
+    type?: string;
+    rating?: number;
+  }): Promise<ApiResponse<{
+    feedback: Feedback[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalItems: number;
+      itemsPerPage: number;
+    };
+  }>> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.page) queryParams.append('page', params.page.toString());
+      if (params?.limit) queryParams.append('limit', params.limit.toString());
+      if (params?.type && params.type !== 'all') queryParams.append('type', params.type);
+      if (params?.rating && params.rating > 0) queryParams.append('rating', params.rating.toString());
+
+      const response = await apiService.get(`/feedback/public?${queryParams.toString()}`);
+      return {
+        success: true,
+        data: (response.data as any)?.data || { feedback: [], pagination: { currentPage: 1, totalPages: 1, totalItems: 0, itemsPerPage: 10 } }
+      };
+    } catch (error: any) {
+      console.error('❌ Failed to fetch public feedback:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to fetch feedback'
+      };
+    }
+  },
+
+  // Get feedback statistics
+  async getFeedbackStats(): Promise<ApiResponse<FeedbackStats>> {
+    try {
+      const response = await apiService.get('/feedback/stats');
+      return {
+        success: true,
+        data: (response.data as any)?.data || { totalFeedback: 0, approvedFeedback: 0, averageRating: '0', ratingDistribution: [], typeDistribution: [] }
+      };
+    } catch (error: any) {
+      console.error('❌ Failed to fetch feedback stats:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to fetch statistics'
+      };
+    }
+  }
 };
 
 export default apiService;

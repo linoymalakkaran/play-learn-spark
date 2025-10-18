@@ -39,6 +39,9 @@ import RewardsPage from "./pages/RewardsPage";
 import AIHomeworkAnalyzer from "./pages/AIHomeworkAnalyzer";
 import AuthDemo from "./pages/AuthDemo";
 import AuthPage from "./pages/AuthPage";
+import ProfilePage from "./pages/ProfilePage";
+import FeedbackPage from "./pages/FeedbackPage";
+import GamePage from "./pages/GamePage";
 import UserDashboard from "./components/UserDashboard";
 import AuthGuard from "./components/auth/AuthGuard";
 import EnglishReading from "./pages/activities/EnglishReading";
@@ -127,6 +130,8 @@ const AppContent = () => {
               <Route path="/arabic" element={<ArabicLearning />} />
               <Route path="/spanish" element={<SpanishLearning />} />
               <Route path="/rewards" element={<RewardsPage />} />
+              <Route path="/games" element={<GamePage />} />
+              <Route path="/feedback" element={<FeedbackPage />} />
               <Route path="/ai-homework" element={<AIHomeworkAnalyzer />} />
               <Route path="/auth-demo" element={<AuthDemo />} />
               <Route path="/login" element={
@@ -151,7 +156,7 @@ const AppContent = () => {
               } />
               <Route path="/profile" element={
                 <AuthGuard>
-                  <UserDashboard />
+                  <ProfilePage />
                 </AuthGuard>
               } />
               <Route path="/dashboard" element={

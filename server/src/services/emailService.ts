@@ -247,6 +247,155 @@ class EmailService {
     });
   }
 
+  async sendFeedbackNotification(feedbackData: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+    rating: number;
+    feedbackType: string;
+  }): Promise<boolean> {
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.FROM_EMAIL || 'playlearnspark@gmail.com';
+    
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>New Feedback Received</title>
+        <style>
+          ${this.getEmailStyles()}
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🌟 New Feedback Received!</h1>
+          </div>
+          <div class="content">
+            <h2>Customer Feedback Details</h2>
+            
+            <div class="info-box">
+              <p><strong>👤 Name:</strong> ${feedbackData.name}</p>
+              <p><strong>📧 Email:</strong> ${feedbackData.email}</p>
+              <p><strong>⭐ Rating:</strong> ${'★'.repeat(feedbackData.rating)}${'☆'.repeat(5 - feedbackData.rating)} (${feedbackData.rating}/5)</p>
+              <p><strong>📋 Type:</strong> ${feedbackData.feedbackType.charAt(0).toUpperCase() + feedbackData.feedbackType.slice(1)}</p>
+              <p><strong>📝 Subject:</strong> ${feedbackData.subject}</p>
+            </div>
+            
+            <div class="message-box">
+              <h3>💬 Message:</h3>
+              <p>${feedbackData.message.replace(/\n/g, '<br>')}</p>
+            </div>
+            
+            <p><em>This feedback was submitted through the Play & Learn Spark feedback form.</em></p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const textContent = `
+      New Feedback Received!
+      
+      Customer Details:
+      Name: ${feedbackData.name}
+      Email: ${feedbackData.email}
+      Rating: ${feedbackData.rating}/5 stars
+      Type: ${feedbackData.feedbackType}
+      Subject: ${feedbackData.subject}
+      
+      Message:
+      ${feedbackData.message}
+      
+      This feedback was submitted through the Play & Learn Spark feedback form.
+    `;
+
+    return await this.sendEmail({
+      to: adminEmail,
+      subject: `🔔 New ${feedbackData.feedbackType} from ${feedbackData.name}`,
+      html: htmlContent,
+      text: textContent
+    });
+  }
+
+  async sendFeedbackConfirmation(email: string, name: string, subject: string): Promise<boolean> {
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Feedback Received - Thank You!</title>
+        <style>
+          ${this.getEmailStyles()}
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🙏 Thank You for Your Feedback!</h1>
+          </div>
+          <div class="content">
+            <h2>Hello ${name}!</h2>
+            
+            <p>Thank you for taking the time to share your feedback with us. We truly appreciate your input!</p>
+            
+            <div class="info-box">
+              <p><strong>📝 Your Feedback:</strong> "${subject}"</p>
+              <p><strong>📅 Submitted:</strong> ${new Date().toLocaleDateString()}</p>
+            </div>
+            
+            <p>Our team will review your feedback carefully. If you have any questions or need immediate assistance, please don't hesitate to contact us.</p>
+            
+            <p>We're constantly working to improve Play & Learn Spark, and your feedback helps us make the platform better for everyone!</p>
+            
+            <p>Best regards,<br>The Play & Learn Spark Team</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const textContent = `
+      Thank You for Your Feedback!
+      
+      Hello ${name}!
+      
+      Thank you for taking the time to share your feedback with us. We truly appreciate your input!
+      
+      Your Feedback: "${subject}"
+      Submitted: ${new Date().toLocaleDateString()}
+      
+      Our team will review your feedback carefully. If you have any questions or need immediate assistance, please don't hesitate to contact us.
+      
+      We're constantly working to improve Play & Learn Spark, and your feedback helps us make the platform better for everyone!
+      
+      Best regards,
+      The Play & Learn Spark Team
+    `;
+
+    return await this.sendEmail({
+      to: email,
+      subject: '✅ Thank you for your feedback!',
+      html: htmlContent,
+      text: textContent
+    });
+  }
+
+  private getEmailStyles(): string {
+    return `
+      body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+      .container { max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+      .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+      .header h1 { margin: 0; font-size: 28px; }
+      .content { padding: 30px; }
+      .info-box { background-color: #f8f9ff; border-left: 4px solid #667eea; padding: 15px; margin: 20px 0; }
+      .message-box { background-color: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 15px; margin: 20px 0; }
+      .button { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; }
+      .feature { background-color: #e8f5e8; padding: 8px 12px; margin: 5px 0; border-radius: 15px; display: inline-block; }
+    `;
+  }
+
   isEmailConfigured(): boolean {
     return this.isConfigured;
   }

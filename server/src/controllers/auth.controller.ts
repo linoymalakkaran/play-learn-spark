@@ -31,6 +31,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       firstName,
       lastName,
       age,
+      grade,
       language = 'en',
     } = req.body;
 
@@ -63,6 +64,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       firstName,
       lastName,
       age,
+      grade,
+      isGuest: false,
       language,
       difficulty: age && age <= 4 ? 'easy' : 'medium',
       topics: '[]', // Empty array as string
@@ -200,6 +203,102 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({
       success: false,
       message: 'Internal server error during login',
+    });
+  }
+};
+
+// Guest login - login with the default guest user and update name/grade
+export const loginAsGuest = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { name, grade } = req.body;
+
+    if (!name || !name.trim()) {
+      res.status(400).json({
+        success: false,
+        message: 'Name is required for guest access',
+      });
+      return;
+    }
+
+    // Find the default guest user
+    let guestUser = await User.findOne({ 
+      where: { 
+        email: 'guest@playlearnspark.com',
+        isGuest: true 
+      } 
+    });
+
+    if (!guestUser) {
+      // If no guest user exists, create one
+      guestUser = await User.createUser({
+        email: 'guest@playlearnspark.com',
+        password: 'guest123',
+        username: 'guest_user',
+        role: 'guest',
+        firstName: name.trim(),
+        lastName: 'Guest',
+        isGuest: true,
+        grade: grade || '',
+        language: 'en',
+        difficulty: 'easy',
+        topics: '["all"]',
+        emailVerified: false,
+        subscriptionType: 'free',
+        features: '["basic_activities"]',
+        totalActivitiesCompleted: 0,
+        currentLevel: 1,
+        totalPoints: 0,
+        badges: '[]',
+        streakDays: 0,
+        lastActiveDate: new Date(),
+        lastLogin: new Date(),
+        loginAttempts: 0,
+        childrenIds: '[]',
+      });
+    } else {
+      // Update the guest user with new name and grade
+      await guestUser.update({
+        firstName: name.trim(),
+        grade: grade || '',
+        lastActiveDate: new Date(),
+        lastLogin: new Date(),
+      });
+    }
+
+    // Generate tokens for the guest user
+    const accessToken = generateToken(guestUser);
+    const refreshToken = generateRefreshToken(guestUser);
+
+    logger.info(`Guest user logged in: ${name} (Grade: ${grade || 'not specified'})`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Guest login successful',
+      data: {
+        user: {
+          id: guestUser.id,
+          email: guestUser.email,
+          username: guestUser.username,
+          role: guestUser.role,
+          firstName: guestUser.firstName,
+          lastName: guestUser.lastName,
+          grade: guestUser.grade,
+          isGuest: guestUser.isGuest,
+          subscriptionType: guestUser.subscriptionType,
+          currentLevel: guestUser.currentLevel,
+          totalPoints: guestUser.totalPoints,
+        },
+        tokens: {
+          accessToken,
+          refreshToken,
+        },
+      },
+    });
+  } catch (error) {
+    logger.error('Guest login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error during guest login',
     });
   }
 };

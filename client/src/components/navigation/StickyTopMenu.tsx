@@ -6,11 +6,12 @@ import {
   Home, 
   BookOpen, 
   GraduationCap,
-  Sparkles,
   Languages,
   Brain,
   LogOut,
-  User
+  User,
+  MessageSquare,
+  Gamepad2
 } from 'lucide-react';
 
 interface StickyTopMenuProps {
@@ -67,7 +68,7 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
     { 
       path: '/spanish', 
       label: 'Spanish', 
-      icon: Sparkles,
+      icon: Languages,
       description: 'Learn Spanish language - ¡Aventura de Español!'
     },
     { 
@@ -75,6 +76,18 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
       label: 'Rewards', 
       icon: Brain,
       description: 'View your rewards and achievements'
+    },
+    { 
+      path: '/games', 
+      label: 'Games', 
+      icon: Gamepad2,
+      description: 'Play fun games and earn points!'
+    },
+    { 
+      path: '/feedback', 
+      label: 'Feedback', 
+      icon: MessageSquare,
+      description: 'Share your feedback and read reviews'
     }
   ];
 
@@ -117,7 +130,7 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
               className="flex items-center gap-2 bg-purple-600 text-white hover:bg-purple-700 transition-all"
               title="Try Integrated Platform"
             >
-              <Sparkles className="w-4 h-4" />
+              <GraduationCap className="w-4 h-4" />
               <span className="hidden md:inline">Try Integrated Platform</span>
               <span className="hidden sm:inline md:hidden">Platform</span>
             </Button>
@@ -154,18 +167,6 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
               </>
             ) : (
               <>
-                {/* Guest Button */}
-                <Button
-                  onClick={() => navigate('/auth')}
-                  size="sm"
-                  variant="outline"
-                  className="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-50 transition-all"
-                  title="Start as Guest"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  <span className="hidden sm:inline">Guest</span>
-                </Button>
-                
                 {/* Login Button */}
                 <Button
                   onClick={() => navigate('/login')}

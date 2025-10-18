@@ -291,7 +291,7 @@ class FocusManagerService {
     if (!parent) return;
 
     const role = parent.getAttribute('role');
-    const focusableElements = this.getFocusableElements(parent);
+    const focusableElements = this.getFocusableElements(parent as HTMLElement);
     const currentIndex = focusableElements.indexOf(target);
 
     if (currentIndex === -1) return;
@@ -473,7 +473,9 @@ class FocusManagerService {
     if (event.shiftKey) modifiers.push('shift');
     if (event.metaKey) modifiers.push('meta');
     
-    modifiers.push(event.key.toLowerCase());
+    if (event.key) {
+      modifiers.push(event.key.toLowerCase());
+    }
     return modifiers.join('+');
   }
 

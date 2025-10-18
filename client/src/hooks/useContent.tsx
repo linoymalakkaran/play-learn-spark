@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Child } from '@/types/learning';
 import { apiService } from '@/services/apiService';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface ContentItem {
   id: string;
@@ -171,6 +172,7 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
   const [error, setError] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState(0);
   const [isCreatorMode, setIsCreatorMode] = useState(false);
+  const { isAuthenticated, isGuest } = useAuth();
 
   // Load content from API/storage
   const loadContent = useCallback(async (filter?: ContentFilter): Promise<ContentItem[]> => {
@@ -181,25 +183,31 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
       // Check if backend is available before making API call
       let contentItems: ContentItem[] = [];
       
-      // First try to check backend availability
-      try {
-        const isBackendAvailable = await apiService.checkBackendAvailability();
-        if (isBackendAvailable) {
-          // Backend is available, try to load content
-          const response = await apiService.post('/content', { filter });
-          
-          if (response.success && response.data) {
-            contentItems = Array.isArray(response.data) ? response.data : [];
+      // Only make API calls if user is authenticated (either logged in or as guest)
+      if (isAuthenticated || isGuest) {
+        // First try to check backend availability
+        try {
+          const isBackendAvailable = await apiService.checkBackendAvailability();
+          if (isBackendAvailable) {
+            // Backend is available, try to load content
+            const response = await apiService.post('/content', { filter });
+            
+            if (response.success && response.data) {
+              contentItems = Array.isArray(response.data) ? response.data : [];
+            } else {
+              throw new Error('Failed to load content from API');
+            }
           } else {
-            throw new Error('Failed to load content from API');
+            throw new Error('Backend not available');
           }
-        } else {
+        } catch (apiError) {
+          console.log('📱 API not available, using local fallback');
           throw new Error('Backend not available');
         }
-      } catch (apiError) {
-        // Backend not available or API failed, use fallback
-        console.log('📱 Using local content - backend not available');
-        throw apiError;
+      } else {
+        // Not authenticated, skip API call and use local content
+        console.log('📱 Using local content - user not authenticated');
+        throw new Error('User not authenticated');
       }
       
       // Update local state if we got content from API
@@ -228,7 +236,7 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isAuthenticated, isGuest]);
 
   // Get specific content with language and difficulty adaptation
   const getContent = useCallback((id: string, language = 'en', difficulty?: number): ContentItem | null => {
@@ -510,10 +518,12 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
     };
   }, []);
 
-  // Initialize with default content
+  // Initialize with default content only when authenticated
   useEffect(() => {
-    loadContent();
-  }, [loadContent]);
+    if (isAuthenticated || isGuest) {
+      loadContent();
+    }
+  }, [loadContent, isAuthenticated, isGuest]);
 
   const value: ContentContextType = {
     content,

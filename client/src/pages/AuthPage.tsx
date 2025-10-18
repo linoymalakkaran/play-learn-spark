@@ -25,9 +25,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
     firstName: '',
     lastName: '',
     email: '',
-    username: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    grade: ''
   });
 
   // Guest form state
@@ -45,10 +45,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
   };
 
   const validatePassword = (password: string) => {
-    return password.length >= 8 &&
-           /[A-Z]/.test(password) &&
-           /[a-z]/.test(password) &&
-           /[0-9]/.test(password);
+    return password.length >= 4;
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -92,11 +89,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
     if (!registerData.lastName) newErrors.lastName = 'Last name is required';
     if (!registerData.email) newErrors.email = 'Email is required';
     else if (!validateEmail(registerData.email)) newErrors.email = 'Please enter a valid email';
-    if (!registerData.username) newErrors.username = 'Username is required';
-    else if (registerData.username.length < 3) newErrors.username = 'Username must be at least 3 characters';
+    if (!registerData.grade) newErrors.grade = 'Please select your grade';
     if (!registerData.password) newErrors.password = 'Password is required';
     else if (!validatePassword(registerData.password)) {
-      newErrors.password = 'Password must be at least 8 characters with uppercase, lowercase, and number';
+      newErrors.password = 'Password must be at least 4 characters';
     }
     if (!registerData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
     else if (registerData.password !== registerData.confirmPassword) {
@@ -115,7 +111,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
         password: registerData.password,
         firstName: registerData.firstName,
         lastName: registerData.lastName,
-        username: registerData.username,
+        username: registerData.email, // Use email as username
+        grade: registerData.grade,
         role: 'child' // Default role
       });
       

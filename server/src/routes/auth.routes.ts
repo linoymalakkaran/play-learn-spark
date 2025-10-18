@@ -3,6 +3,7 @@ import { body } from 'express-validator';
 import {
   register,
   login,
+  loginAsGuest,
   refreshToken,
   getProfile,
   updateProfile,
@@ -27,10 +28,8 @@ const registerValidation = [
     .normalizeEmail()
     .withMessage('Please provide a valid email'),
   body('password')
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters long')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('Password must contain at least one uppercase letter, one lowercase letter, and one number'),
+    .isLength({ min: 4 })
+    .withMessage('Password must be at least 4 characters long'),
   body('username')
     .isLength({ min: 3, max: 30 })
     .withMessage('Username must be between 3 and 30 characters')
@@ -48,10 +47,10 @@ const registerValidation = [
     .optional()
     .isIn(['parent', 'child', 'educator'])
     .withMessage('Role must be parent, child, or educator'),
-  body('age')
+  body('grade')
     .optional()
-    .isInt({ min: 3, max: 12 })
-    .withMessage('Age must be between 3 and 12 for child accounts'),
+    .isString()
+    .withMessage('Grade must be a string'),
   body('language')
     .optional()
     .isIn(['en', 'ar', 'ml', 'es', 'fr'])
@@ -66,6 +65,17 @@ const loginValidation = [
   body('password')
     .notEmpty()
     .withMessage('Password is required'),
+];
+
+const guestLoginValidation = [
+  body('name')
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Name must be between 2 and 50 characters'),
+  body('grade')
+    .optional()
+    .isString()
+    .withMessage('Grade must be a string'),
 ];
 
 const updateProfileValidation = [
@@ -133,6 +143,7 @@ const resetPasswordValidation = [
 // Public routes (no authentication required)
 router.post('/register', authRateLimit(5, 15 * 60 * 1000), registerValidation, register);
 router.post('/login', authRateLimit(5, 15 * 60 * 1000), loginValidation, login);
+router.post('/guest-login', authRateLimit(10, 15 * 60 * 1000), guestLoginValidation, loginAsGuest);
 router.post('/refresh-token', refreshToken);
 router.post('/forgot-password', authRateLimit(3, 15 * 60 * 1000), passwordResetValidation, requestPasswordReset);
 router.post('/reset-password', authRateLimit(3, 15 * 60 * 1000), resetPasswordValidation, resetPassword);

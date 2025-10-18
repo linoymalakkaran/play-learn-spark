@@ -97,6 +97,7 @@ export const initializeDefaultData = async (): Promise<void> => {
         role: 'admin',
         firstName: 'Admin',
         lastName: 'User',
+        isGuest: false,
         language: 'en',
         difficulty: 'medium',
         topics: 'math,science,reading',
@@ -124,6 +125,7 @@ export const initializeDefaultData = async (): Promise<void> => {
         role: 'parent',
         firstName: 'Test',
         lastName: 'Parent',
+        isGuest: false,
         language: 'en',
         difficulty: 'medium',
         topics: 'math,science',
@@ -142,6 +144,34 @@ export const initializeDefaultData = async (): Promise<void> => {
       });
 
       logger.info('✅ Sample parent user created:', sampleParent.email);
+      
+      // Create default guest user
+      const defaultGuest = await User.create({
+        email: 'guest@playlearnspark.com',
+        password: 'guest123',
+        username: 'guest_user',
+        role: 'guest',
+        firstName: 'Guest',
+        lastName: 'User',
+        isGuest: true,
+        language: 'en',
+        difficulty: 'easy',
+        topics: 'all',
+        emailVerified: false,
+        subscriptionType: 'free',
+        features: 'basic_activities',
+        totalActivitiesCompleted: 0,
+        currentLevel: 1,
+        totalPoints: 0,
+        badges: '[]',
+        streakDays: 0,
+        lastActiveDate: new Date(),
+        lastLogin: new Date(),
+        loginAttempts: 0,
+        childrenIds: '[]',
+      });
+
+      logger.info('✅ Default guest user created:', defaultGuest.email);
       
       // Seed reward data
       await seedRewardData();

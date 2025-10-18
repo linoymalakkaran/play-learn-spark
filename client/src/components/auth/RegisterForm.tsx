@@ -10,9 +10,9 @@ interface RegisterFormProps {
     firstName: string;
     lastName: string;
     email: string;
-    username: string;
     password: string;
     confirmPassword: string;
+    grade: string;
   };
   rememberMe: boolean;
   errors: Record<string, string>;
@@ -36,44 +36,30 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Password validation helpers
+  // Password validation helpers - simplified
   const getPasswordStrength = (password: string) => {
-    let strength = 0;
-    if (password.length >= 8) strength++;
-    if (/[A-Z]/.test(password)) strength++;
-    if (/[a-z]/.test(password)) strength++;
-    if (/[0-9]/.test(password)) strength++;
-    if (/[^A-Za-z0-9]/.test(password)) strength++;
-    return strength;
+    if (password.length >= 4) return 'Good';
+    return 'Too Short';
   };
 
-  const getPasswordStrengthText = (strength: number) => {
-    switch (strength) {
-      case 0:
-      case 1:
-        return { text: 'Very Weak', color: 'text-red-600', bg: 'bg-red-100' };
-      case 2:
-        return { text: 'Weak', color: 'text-orange-600', bg: 'bg-orange-100' };
-      case 3:
-        return { text: 'Medium', color: 'text-yellow-600', bg: 'bg-yellow-100' };
-      case 4:
-        return { text: 'Strong', color: 'text-green-600', bg: 'bg-green-100' };
-      case 5:
-        return { text: 'Very Strong', color: 'text-green-700', bg: 'bg-green-200' };
-      default:
-        return { text: '', color: '', bg: '' };
-    }
+  const getPasswordStrengthColor = (password: string) => {
+    if (password.length >= 4) return 'text-green-600';
+    return 'text-red-600';
   };
 
-  const passwordStrength = getPasswordStrength(formData.password);
-  const passwordStrengthInfo = getPasswordStrengthText(passwordStrength);
-
-  const passwordValidation = [
-    { test: formData.password.length >= 8, text: 'At least 8 characters' },
-    { test: /[A-Z]/.test(formData.password), text: 'One uppercase letter' },
-    { test: /[a-z]/.test(formData.password), text: 'One lowercase letter' },
-    { test: /[0-9]/.test(formData.password), text: 'One number' },
-    { test: /[^A-Za-z0-9]/.test(formData.password), text: 'One special character' }
+  const grades = [
+    { value: '1', label: 'Grade 1' },
+    { value: '2', label: 'Grade 2' },
+    { value: '3', label: 'Grade 3' },
+    { value: '4', label: 'Grade 4' },
+    { value: '5', label: 'Grade 5' },
+    { value: '6', label: 'Grade 6' },
+    { value: '7', label: 'Grade 7' },
+    { value: '8', label: 'Grade 8' },
+    { value: '9', label: 'Grade 9' },
+    { value: '10', label: 'Grade 10' },
+    { value: '11', label: 'Grade 11' },
+    { value: '12', label: 'Grade 12' }
   ];
 
   return (
@@ -126,7 +112,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
       <div>
         <Label htmlFor="email" className="text-sm font-['Comic_Neue'] font-bold text-purple-700 flex items-center gap-2">
-          📧 Email Address
+          📧 Email Address (This will be your username)
         </Label>
         <Input
           id="email"
@@ -147,30 +133,35 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       </div>
 
       <div>
-        <Label htmlFor="username" className="text-sm font-['Comic_Neue'] font-bold text-purple-700 flex items-center gap-2">
-          🏷️ Username
+        <Label htmlFor="grade" className="text-sm font-['Comic_Neue'] font-bold text-purple-700 flex items-center gap-2">
+          � Select Your Grade
         </Label>
-        <Input
-          id="username"
-          type="text"
-          value={formData.username}
-          onChange={(e) => onFormDataChange('username', e.target.value)}
-          placeholder="Choose a cool username"
-          className={`mt-1 border-2 rounded-xl font-['Comic_Neue'] ${
-            errors.username ? 'border-red-400' : 'border-purple-200 focus:border-purple-500'
+        <select
+          id="grade"
+          value={formData.grade}
+          onChange={(e) => onFormDataChange('grade', e.target.value)}
+          className={`mt-1 w-full border-2 rounded-xl font-['Comic_Neue'] p-3 ${
+            errors.grade ? 'border-red-400' : 'border-purple-200 focus:border-purple-500'
           }`}
           disabled={isLoading}
-        />
-        {errors.username && (
+        >
+          <option value="">Choose your grade...</option>
+          {grades.map((grade) => (
+            <option key={grade.value} value={grade.value}>
+              {grade.label}
+            </option>
+          ))}
+        </select>
+        {errors.grade && (
           <p className="mt-1 text-sm text-red-600 font-['Comic_Neue'] flex items-center gap-1">
-            ❌ {errors.username}
+            ❌ {errors.grade}
           </p>
         )}
       </div>
 
       <div>
         <Label htmlFor="password" className="text-sm font-['Comic_Neue'] font-bold text-purple-700 flex items-center gap-2">
-          🔐 Create Password
+          🔐 Create Password (minimum 4 characters)
         </Label>
         <div className="relative mt-1">
           <Input
@@ -178,7 +169,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             type={showPassword ? 'text' : 'password'}
             value={formData.password}
             onChange={(e) => onFormDataChange('password', e.target.value)}
-            placeholder="Create a strong password"
+            placeholder="Create your password"
             className={`pr-12 border-2 rounded-xl font-['Comic_Neue'] ${
               errors.password ? 'border-red-400' : 'border-purple-200 focus:border-purple-500'
             }`}
@@ -195,25 +186,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         </div>
         
         {formData.password && (
-          <div className="mt-3 space-y-2">
-            <div className={`text-xs px-3 py-2 rounded-xl font-['Comic_Neue'] font-bold ${passwordStrengthInfo.bg} ${passwordStrengthInfo.color}`}>
-              🔒 Password Strength: {passwordStrengthInfo.text}
-            </div>
-            <div className="bg-purple-50 rounded-xl p-3 space-y-1">
-              <p className="text-xs font-['Comic_Neue'] font-bold text-purple-700 mb-2">✅ Password Checklist:</p>
-              {passwordValidation.map((rule, index) => (
-                <div key={index} className="flex items-center text-xs font-['Comic_Neue']">
-                  {rule.test ? (
-                    <div className="text-green-600 mr-2">✅</div>
-                  ) : (
-                    <div className="text-gray-400 mr-2">⚪</div>
-                  )}
-                  <span className={rule.test ? 'text-green-600 font-bold' : 'text-gray-500'}>
-                    {rule.text}
-                  </span>
-                </div>
-              ))}
-            </div>
+          <div className="mt-2">
+            <p className={`text-sm font-['Comic_Neue'] font-bold ${getPasswordStrengthColor(formData.password)}`}>
+              🔒 Password: {getPasswordStrength(formData.password)}
+            </p>
           </div>
         )}
         {errors.password && (

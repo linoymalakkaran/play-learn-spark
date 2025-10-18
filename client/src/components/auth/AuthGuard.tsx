@@ -27,8 +27,8 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
     );
   }
 
-  // If authentication is required but user is not authenticated
-  if (requireAuth && !isAuthenticated) {
+  // If authentication is required but user is not logged in (neither authenticated nor guest)
+  if (requireAuth && !isLoggedIn) {
     return (
       <Navigate 
         to={redirectTo} 
@@ -38,11 +38,12 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
     );
   }
 
-  // If authentication is not required but user is logged in (authenticated or guest)
-  if (!requireAuth && isLoggedIn) {
+  // If authentication is not required but user is logged in, redirect to home
+  // BUT prevent redirect if already on home page to avoid loops
+  if (!requireAuth && isLoggedIn && location.pathname !== '/') {
     return (
       <Navigate 
-        to="/profile" 
+        to="/" 
         replace 
       />
     );

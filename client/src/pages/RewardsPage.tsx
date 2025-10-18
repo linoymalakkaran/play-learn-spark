@@ -207,6 +207,59 @@ const RewardsPage: React.FC = () => {
           </CardContent>
         </Card>
 
+        {/* Fun Games Section */}
+        <Card className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border-green-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="text-6xl">🎮</div>
+                <div>
+                  <h3 className="text-2xl font-bold text-primary font-['Fredoka_One']">
+                    Fun Games!
+                  </h3>
+                  <p className="text-muted-foreground font-['Comic_Neue']">
+                    {availablePoints >= 50 
+                      ? "Play exciting games and earn more points!" 
+                      : "Earn 50 points to unlock amazing games!"
+                    }
+                  </p>
+                  {availablePoints < 50 && (
+                    <div className="mt-2">
+                      <div className="text-sm text-muted-foreground mb-1">
+                        Progress: {availablePoints}/50 points
+                      </div>
+                      <Progress value={(availablePoints / 50) * 100} className="w-48" />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div>
+                <Button
+                  onClick={() => navigate('/games')}
+                  className={`text-lg px-6 py-4 font-['Comic_Neue'] ${
+                    availablePoints >= 50
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
+                      : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                  }`}
+                  disabled={availablePoints < 50}
+                >
+                  {availablePoints >= 50 ? (
+                    <>
+                      <Trophy className="w-5 h-5 mr-2" />
+                      Play Games!
+                    </>
+                  ) : (
+                    <>
+                      <Award className="w-5 h-5 mr-2" />
+                      {50 - availablePoints} more points needed
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Daily Challenges */}
         {(() => {
           const todaysChallenges = dailyChallenges.filter(

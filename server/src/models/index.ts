@@ -8,6 +8,7 @@ export { RewardCard } from './RewardCard';
 export { RewardItem } from './RewardItem';
 export { RewardRedemption } from './RewardRedemption';
 export { Achievement } from './Achievement';
+export { Feedback } from './Feedback';
 
 // Database connection
 export { sequelize } from '../config/database-sqlite';
@@ -22,3 +23,4 @@ export * from './RewardCard';
 export * from './RewardItem';
 export * from './RewardRedemption';
 export * from './Achievement';
+export * from './Feedback';

@@ -7,10 +7,12 @@ export interface UserAttributes {
   email: string;
   password: string;
   username: string;
-  role: 'parent' | 'child' | 'educator' | 'admin';
+  role: 'parent' | 'child' | 'educator' | 'admin' | 'guest';
   firstName: string;
   lastName: string;
   age?: number;
+  grade?: string;
+  isGuest: boolean;
   avatarUrl?: string;
   language: string;
   difficulty: 'easy' | 'medium' | 'hard';
@@ -42,10 +44,12 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public email!: string;
   public password!: string;
   public username!: string;
-  public role!: 'parent' | 'child' | 'educator' | 'admin';
+  public role!: 'parent' | 'child' | 'educator' | 'admin' | 'guest';
   public firstName!: string;
   public lastName!: string;
   public age?: number;
+  public grade?: string;
+  public isGuest!: boolean;
   public avatarUrl?: string;
   public language!: string;
   public difficulty!: 'easy' | 'medium' | 'hard';
@@ -163,7 +167,7 @@ User.init(
       },
     },
     role: {
-      type: DataTypes.ENUM('parent', 'child', 'educator', 'admin'),
+      type: DataTypes.ENUM('parent', 'child', 'educator', 'admin', 'guest'),
       allowNull: false,
       defaultValue: 'parent',
     },
@@ -188,6 +192,15 @@ User.init(
         min: 3,
         max: 12,
       },
+    },
+    grade: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    isGuest: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
     avatarUrl: {
       type: DataTypes.STRING,

@@ -28,6 +28,11 @@ const UserDashboard: React.FC = () => {
     return null;
   }
 
+  if (!user.profile) {
+    console.error('User profile is missing');
+    return <div>Loading user profile...</div>;
+  }
+
   const handleLogout = async () => {
     await logout();
   };
@@ -139,10 +144,10 @@ const UserDashboard: React.FC = () => {
                     </div>
                   )}
                   <div>
-                    <span className="font-medium">Language:</span> {user.profile.preferences.language}
+                    <span className="font-medium">Language:</span> {user.profile.preferences?.language}
                   </div>
                   <div>
-                    <span className="font-medium">Difficulty:</span> {user.profile.preferences.difficulty}
+                    <span className="font-medium">Difficulty:</span> {user.profile.preferences?.difficulty}
                   </div>
                 </div>
               </div>
@@ -242,7 +247,7 @@ const UserDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* Learning Topics */}
-          {user.profile.preferences.topics.length > 0 && (
+          {user.profile.preferences?.topics?.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Favorite Topics</CardTitle>
@@ -250,7 +255,7 @@ const UserDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {user.profile.preferences.topics.map((topic, index) => (
+                  {user.profile.preferences?.topics?.map((topic, index) => (
                     <Badge key={index} variant="secondary">
                       {topic}
                     </Badge>

@@ -265,8 +265,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       clearAuth();
       setIsLoading(false);
-      // Redirect to home page after logout
-      window.location.href = '/';
+      // Navigation will be handled by the component calling logout
     }
   }, [tokens?.accessToken, clearAuth]);
 

@@ -6,8 +6,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/contexts/ThemeContext';
 import { 
   Home, 
   BookOpen, 
@@ -18,7 +20,10 @@ import {
   User,
   MessageSquare,
   Gamepad2,
-  ChevronDown
+  ChevronDown,
+  Sun,
+  Moon,
+  Settings
 } from 'lucide-react';
 
 interface StickyTopMenuProps {
@@ -29,6 +34,7 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const isActive = (path: string) => {
@@ -39,12 +45,23 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
     setIsLoggingOut(true);
     try {
       await logout();
-      navigate('/');
+      navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {
       setIsLoggingOut(false);
     }
+  };
+
+  const handleIntegratedPlatform = () => {
+    if (!isAuthenticated) {
+      const userConfirmed = window.confirm('Only logged-in users can access this page. Please log in to continue.');
+      if (userConfirmed) {
+        navigate('/');
+      }
+      return;
+    }
+    navigate('/integratedplatform');
   };
 
   const languageOptions = [
@@ -198,7 +215,7 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
           <div className="flex items-center space-x-2">
             {/* Try Integrated Platform - always visible */}
             <Button
-              onClick={() => navigate('/integratedplatform')}
+              onClick={handleIntegratedPlatform}
               size="sm"
               className="flex items-center gap-2 bg-purple-600 text-white hover:bg-purple-700 transition-all"
               title="Try Integrated Platform"
@@ -220,7 +237,7 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
                   title="Go to Profile"
                 >
                   <User className="w-4 h-4" />
-                  <span className="hidden sm:inline">{user.profile.firstName || user.username}</span>
+                  <span className="hidden sm:inline">{user.profile?.firstName || user.username}</span>
                 </Button>
                 
                 {/* Logout Button */}

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { logger } from '../utils/logger';
 import { googleAIService } from '../services/GoogleAIService';
-import OpenAIService from '../services/OpenAIService';
+import OpenAIService, { ContentGenerationRequest, GeneratedContent } from '../services/OpenAIService';
 import HuggingFaceService from '../services/HuggingFaceService';
 import AnthropicService from '../services/AnthropicService';
 import { authenticateToken } from '../middleware/auth';
@@ -21,6 +21,107 @@ router.get('/health', (req, res) => {
       anthropic: !!process.env.ANTHROPIC_API_KEY
     }
   });
+});
+
+// Analyze homework content (public endpoint - no auth required)
+router.post('/analyze-homework', async (req, res): Promise<void> => {
+  try {
+    const { 
+      text, 
+      imageData, 
+      fileType = 'text',
+      provider = 'google'
+    } = req.body;
+
+    if (!text && !imageData) {
+      res.status(400).json({
+        success: false,
+        error: 'Either text or image data is required'
+      });
+      return;
+    }
+
+    logger.info(`AI homework analysis requested, provider: ${provider}`);
+
+    let result;
+    
+    if (provider === 'google' && process.env.GOOGLE_AI_API_KEY) {
+      try {
+        // Create a simple content generation request
+        const contentRequest: ContentGenerationRequest = {
+          topic: 'Homework Analysis',
+          ageGroup: '5-6',
+          language: 'English',
+          activityType: 'general',
+          difficulty: 'medium',
+          customPrompt: `Analyze this homework content and provide educational insights: ${text || 'Image-based content'}`
+        };
+
+        const aiResult = await googleAIService.generateContent(contentRequest);
+        
+        // Transform the result to match expected homework analysis format
+        result = {
+          summary: aiResult.description || 'Homework analysis completed',
+          keyPoints: aiResult.learningObjectives || ['Content analyzed', 'Educational value identified'],
+          suggestions: aiResult.additionalResources || ['Continue practicing', 'Review concepts'],
+          difficulty: aiResult.questions?.[0] ? 'medium' : 'easy',
+          ageRecommendation: '5-8 years',
+          educationalValue: 85,
+          activities: [{
+            id: 'activity1',
+            title: aiResult.title || 'Practice Activity',
+            description: aiResult.description || 'Educational practice activity',
+            type: 'practice',
+            difficulty: 'medium',
+            estimatedTime: aiResult.estimatedDuration || 15,
+            questions: aiResult.questions?.map((q, index) => ({
+              id: `q${index + 1}`,
+              question: q.question,
+              type: q.options ? 'multiple_choice' : 'short_answer',
+              options: q.options || [],
+              correctAnswer: q.correctAnswer,
+              explanation: q.explanation
+            })) || []
+          }]
+        };
+      } catch (error) {
+        logger.error('Error with Google AI service:', error);
+        throw error;
+      }
+    } else {
+      // Fallback response when no AI service is available
+      result = {
+        summary: 'Content analysis is temporarily unavailable. The AI service is currently not accessible.',
+        keyPoints: [
+          'AI analysis service is temporarily unavailable',
+          'Please check your internet connection',
+          'Try again later or contact support if the issue persists'
+        ],
+        suggestions: [
+          'Review content manually for now',
+          'Save your work and try again later',
+          'Contact administrator if issues continue'
+        ],
+        difficulty: 'medium',
+        ageRecommendation: 'All ages',
+        educationalValue: 50,
+        activities: []
+      };
+    }
+
+    res.json({
+      success: true,
+      data: result,
+      provider: provider,
+      analyzedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('Error analyzing homework:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to analyze homework'
+    });
+  }
 });
 
 // Apply authentication to all other AI routes

@@ -8,6 +8,7 @@ import { ContentProvider } from "@/hooks/useContent";
 import { PersonalizationProvider } from "@/hooks/usePersonalization";
 import { StudentProvider, useStudent } from "@/hooks/useStudent";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { RouteTransition } from "@/components/transitions/PageTransition";
@@ -192,13 +193,15 @@ const AppContent = () => {
 // Main App component with Student Setup flow
 const App = () => {
   return (
-    <EnhancedErrorBoundary boundary="app-root">
-      <QueryClientProvider client={queryClient}>
-        <StudentProvider>
-          <AppWithStudentCheck />
-        </StudentProvider>
-      </QueryClientProvider>
-    </EnhancedErrorBoundary>
+    <ThemeProvider>
+      <EnhancedErrorBoundary boundary="app-root">
+        <QueryClientProvider client={queryClient}>
+          <StudentProvider>
+            <AppWithStudentCheck />
+          </StudentProvider>
+        </QueryClientProvider>
+      </EnhancedErrorBoundary>
+    </ThemeProvider>
   );
 };
 

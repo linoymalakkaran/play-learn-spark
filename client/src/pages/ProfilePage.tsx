@@ -30,6 +30,9 @@ const ProfilePage: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState('');
 
   const grades = [
+    { value: 'pre-kg', label: 'Pre-KG' },
+    { value: 'kg1', label: 'KG1' },
+    { value: 'kg2', label: 'KG2' },
     { value: '1', label: 'Grade 1' },
     { value: '2', label: 'Grade 2' },
     { value: '3', label: 'Grade 3' },
@@ -46,10 +49,11 @@ const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     if (user) {
+      console.log('User data in ProfilePage:', user); // Debug log
       setProfileData({
-        firstName: user.profile.firstName || '',
-        lastName: user.profile.lastName || '',
-        grade: user.profile.grade || '',
+        firstName: user.profile?.firstName || '',
+        lastName: user.profile?.lastName || '',
+        grade: user.profile?.grade || '',
         email: user.email || '',
         currentPassword: '',
         newPassword: '',
@@ -223,6 +227,8 @@ const ProfilePage: React.FC = () => {
                       errors.firstName ? 'border-red-400' : 'border-purple-200 focus:border-purple-500'
                     }`}
                     disabled={isUpdating}
+                    autoComplete="given-name"
+                    placeholder="Enter your first name"
                   />
                   {errors.firstName && (
                     <p className="mt-1 text-sm text-red-600 font-['Comic_Neue']">
@@ -244,6 +250,8 @@ const ProfilePage: React.FC = () => {
                       errors.lastName ? 'border-red-400' : 'border-purple-200 focus:border-purple-500'
                     }`}
                     disabled={isUpdating}
+                    autoComplete="family-name"
+                    placeholder="Enter your last name"
                   />
                   {errors.lastName && (
                     <p className="mt-1 text-sm text-red-600 font-['Comic_Neue']">
@@ -266,6 +274,8 @@ const ProfilePage: React.FC = () => {
                     errors.email ? 'border-red-400' : 'border-purple-200 focus:border-purple-500'
                   }`}
                   disabled={isUpdating}
+                  autoComplete="email"
+                  placeholder="Enter your email address"
                 />
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-600 font-['Comic_Neue']">
@@ -286,6 +296,7 @@ const ProfilePage: React.FC = () => {
                     errors.grade ? 'border-red-400' : 'border-purple-200 focus:border-purple-500'
                   }`}
                   disabled={isUpdating}
+                  autoComplete="off"
                 >
                   <option value="">Choose your grade...</option>
                   {grades.map((grade) => (
@@ -333,6 +344,8 @@ const ProfilePage: React.FC = () => {
                             errors.currentPassword ? 'border-red-400' : 'border-purple-200 focus:border-purple-500'
                           }`}
                           disabled={isUpdating}
+                          autoComplete="new-password"
+                          placeholder="Enter current password"
                         />
                         <button
                           type="button"
@@ -363,6 +376,8 @@ const ProfilePage: React.FC = () => {
                             errors.newPassword ? 'border-red-400' : 'border-purple-200 focus:border-purple-500'
                           }`}
                           disabled={isUpdating}
+                          autoComplete="new-password"
+                          placeholder="Enter new password"
                         />
                         <button
                           type="button"
@@ -393,6 +408,8 @@ const ProfilePage: React.FC = () => {
                             errors.confirmNewPassword ? 'border-red-400' : 'border-purple-200 focus:border-purple-500'
                           }`}
                           disabled={isUpdating}
+                          autoComplete="new-password"
+                          placeholder="Confirm new password"
                         />
                         <button
                           type="button"

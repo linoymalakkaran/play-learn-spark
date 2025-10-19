@@ -30,10 +30,21 @@ const Index = () => {
 
       // Priority 1: Use authenticated user data (including guest)
       if (isAuthenticated && user) {
+        const getValidAge = (): 3 | 4 | 5 | 6 => {
+          if (user.profile?.age && [3, 4, 5, 6].includes(user.profile.age)) {
+            return user.profile.age as 3 | 4 | 5 | 6;
+          }
+          if (user.profile?.grade) {
+            const calculatedAge = Math.min(6, Math.max(3, parseInt(user.profile.grade) + 2));
+            return calculatedAge as 3 | 4 | 5 | 6;
+          }
+          return 5;
+        };
+
         childData = {
           id: user.id,
           name: user.profile?.firstName || user.username || 'Student',
-          age: user.profile?.age || (user.profile?.grade ? Math.min(6, Math.max(3, parseInt(user.profile.grade) + 2)) : 5) as 3 | 4 | 5 | 6,
+          age: getValidAge(),
           progress: {
             totalActivitiesCompleted: user.progress?.totalActivitiesCompleted || 0,
             badges: [],

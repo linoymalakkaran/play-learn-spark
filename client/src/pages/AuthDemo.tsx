@@ -78,7 +78,7 @@ const AuthDemo: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="w-5 h-5" />
-                Welcome, {user.profile.firstName || user.username}!
+                Welcome, {user.profile?.firstName || user.username}!
               </CardTitle>
               <CardDescription>You are successfully logged in</CardDescription>
             </CardHeader>

@@ -60,6 +60,7 @@ const Layout: React.FC<LayoutProps> = ({
     setIsLoggingOut(true);
     try {
       await logout();
+      navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {
@@ -163,7 +164,7 @@ const Layout: React.FC<LayoutProps> = ({
                           <User className="w-4 h-4 text-white" />
                         </div>
                         <span className="text-sm font-medium text-gray-700 hidden sm:block">
-                          {user.profile.firstName || user.username}
+                          {user.profile?.firstName || user.username}
                         </span>
                         <ChevronDown className="w-4 h-4 text-gray-500" />
                       </Button>
@@ -171,7 +172,7 @@ const Layout: React.FC<LayoutProps> = ({
                     <DropdownMenuContent align="end" className="w-56">
                       <div className="px-3 py-2">
                         <p className="text-sm font-medium text-gray-900">
-                          {user.profile.firstName} {user.profile.lastName}
+                          {user.profile?.firstName} {user.profile?.lastName}
                         </p>
                         <p className="text-xs text-gray-500">{user.email}</p>
                       </div>

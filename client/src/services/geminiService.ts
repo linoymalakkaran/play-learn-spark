@@ -41,7 +41,7 @@ export interface Question {
 
 class GeminiService {
   private apiKey: string;
-  private baseUrl: string = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+  private baseUrl: string = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent';
 
   constructor() {
     this.apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
@@ -51,47 +51,62 @@ class GeminiService {
   }
 
   /**
-   * Analyze homework content using Gemini AI
+   * Analyze homework content using Gemini AI (via server endpoint)
    */
   async analyzeHomework(request: GeminiAnalysisRequest): Promise<GeminiAnalysisResponse> {
     try {
-      const prompt = this.buildAnalysisPrompt(request);
+      // Use server endpoint instead of direct API call
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3002/api';
       
-      const response = await fetch(`${this.baseUrl}?key=${this.apiKey}`, {
+      const response = await fetch(`${apiBaseUrl}/ai/analyze-homework`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 2048,
-          }
+          text: request.text,
+          imageData: request.imageData,
+          fileType: request.fileType || 'text',
+          provider: 'google'
         })
       });
 
       if (!response.ok) {
-        throw new Error(`Gemini API error: ${response.status}`);
+        if (response.status === 404) {
+          throw new Error('AI homework analysis service is currently unavailable. Please try again later.');
+        } else if (response.status === 403) {
+          throw new Error('AI service access denied. Please check your permissions.');
+        } else {
+          throw new Error(`AI service error (${response.status}). Please try again later.`);
+        }
       }
 
       const data = await response.json();
-      const generatedText = data.candidates[0]?.content?.parts[0]?.text;
       
-      if (!generatedText) {
-        throw new Error('No response from Gemini AI');
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to analyze homework');
       }
 
-      return this.parseGeminiResponse(generatedText);
+      return data.data;
     } catch (error) {
       console.error('Error analyzing homework:', error);
-      throw error;
+      
+      // Check if it's a network error and the user is not authenticated
+      if (error instanceof Error && error.message.includes('Failed to fetch')) {
+        throw new Error('Unable to connect to AI service. Please check your internet connection and try again.');
+      }
+      
+      // Re-throw specific errors
+      if (error instanceof Error && (
+        error.message.includes('log in') || 
+        error.message.includes('access denied') ||
+        error.message.includes('unavailable')
+      )) {
+        throw error;
+      }
+      
+      // For other errors, provide a fallback analysis
+      return this.getFallbackAnalysis(request);
     }
   }
 
@@ -294,6 +309,29 @@ Make sure to create relevant practice activities based on what you see in the im
         activities: []
       };
     }
+  }
+
+  /**
+   * Provide fallback analysis when API is unavailable
+   */
+  private getFallbackAnalysis(request: GeminiAnalysisRequest): GeminiAnalysisResponse {
+    return {
+      summary: 'Content analysis is temporarily unavailable. The AI service is currently not accessible, but you can still review your content manually.',
+      keyPoints: [
+        'AI analysis service is temporarily unavailable',
+        'Please check your internet connection',
+        'Try again later or contact support if the issue persists'
+      ],
+      suggestions: [
+        'Review content manually for now',
+        'Save your work and try again later',
+        'Contact administrator if issues continue'
+      ],
+      difficulty: 'medium',
+      ageRecommendation: 'All ages',
+      educationalValue: 50,
+      activities: []
+    };
   }
 
   /**

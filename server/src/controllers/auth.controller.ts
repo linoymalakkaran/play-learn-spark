@@ -197,11 +197,29 @@ export const login = async (req: Request, res: Response): Promise<void> => {
           email: user.email,
           username: user.username,
           role: user.role,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          subscriptionType: user.subscriptionType,
-          currentLevel: user.currentLevel,
-          totalPoints: user.totalPoints,
+          profile: {
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            grade: user.grade || '',
+            age: user.age || null,
+            avatarUrl: user.avatarUrl || null,
+            preferences: {
+              language: user.language || 'en',
+              difficulty: user.difficulty || 'medium',
+              topics: []
+            }
+          },
+          subscription: {
+            type: user.subscriptionType || 'free',
+            features: []
+          },
+          progress: {
+            totalActivitiesCompleted: user.totalActivitiesCompleted || 0,
+            currentLevel: user.currentLevel || 1,
+            totalPoints: user.totalPoints || 0,
+            streakDays: user.streakDays || 0
+          },
+          createdAt: user.createdAt
         },
         tokens: {
           accessToken,
@@ -291,13 +309,30 @@ export const loginAsGuest = async (req: Request, res: Response): Promise<void> =
           email: guestUser.email,
           username: guestUser.username,
           role: guestUser.role,
-          firstName: guestUser.firstName,
-          lastName: guestUser.lastName,
-          grade: guestUser.grade,
           isGuest: guestUser.isGuest,
-          subscriptionType: guestUser.subscriptionType,
-          currentLevel: guestUser.currentLevel,
-          totalPoints: guestUser.totalPoints,
+          profile: {
+            firstName: guestUser.firstName || '',
+            lastName: guestUser.lastName || '',
+            grade: guestUser.grade || '',
+            age: guestUser.age || null,
+            avatarUrl: guestUser.avatarUrl || null,
+            preferences: {
+              language: guestUser.language || 'en',
+              difficulty: guestUser.difficulty || 'medium',
+              topics: []
+            }
+          },
+          subscription: {
+            type: guestUser.subscriptionType || 'free',
+            features: []
+          },
+          progress: {
+            totalActivitiesCompleted: guestUser.totalActivitiesCompleted || 0,
+            currentLevel: guestUser.currentLevel || 1,
+            totalPoints: guestUser.totalPoints || 0,
+            streakDays: guestUser.streakDays || 0
+          },
+          createdAt: guestUser.createdAt
         },
         tokens: {
           accessToken,
@@ -382,14 +417,28 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
           email: req.user.email,
           username: req.user.username,
           role: req.user.role,
-          firstName: req.user.firstName,
-          lastName: req.user.lastName,
-          age: req.user.age,
-          language: req.user.language,
-          difficulty: req.user.difficulty,
-          subscriptionType: req.user.subscriptionType,
-          currentLevel: req.user.currentLevel,
-          totalPoints: req.user.totalPoints,
+          profile: {
+            firstName: req.user.firstName || '',
+            lastName: req.user.lastName || '',
+            grade: req.user.grade || '',
+            age: req.user.age || null,
+            avatarUrl: req.user.avatarUrl || null,
+            preferences: {
+              language: req.user.language || 'en',
+              difficulty: req.user.difficulty || 'medium',
+              topics: []
+            }
+          },
+          subscription: {
+            type: req.user.subscriptionType || 'free',
+            features: []
+          },
+          progress: {
+            totalActivitiesCompleted: req.user.totalActivitiesCompleted || 0,
+            currentLevel: req.user.currentLevel || 1,
+            totalPoints: req.user.totalPoints || 0,
+            streakDays: req.user.streakDays || 0
+          },
           createdAt: req.user.createdAt,
         },
       },
@@ -427,6 +476,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
     const {
       firstName,
       lastName,
+      grade,
       age,
       avatarUrl,
       preferences,
@@ -435,6 +485,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
     // Update profile fields
     if (firstName) req.user.firstName = firstName;
     if (lastName) req.user.lastName = lastName;
+    if (grade !== undefined) req.user.grade = grade;
     if (age !== undefined) req.user.age = age;
     if (avatarUrl !== undefined) req.user.avatarUrl = avatarUrl;
     
@@ -448,6 +499,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
     await req.user.update({
       firstName: req.user.firstName,
       lastName: req.user.lastName,
+      grade: req.user.grade,
       age: req.user.age,
       avatarUrl: req.user.avatarUrl,
       language: req.user.language,
@@ -466,11 +518,29 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
           email: req.user.email,
           username: req.user.username,
           role: req.user.role,
-          firstName: req.user.firstName,
-          lastName: req.user.lastName,
-          age: req.user.age,
-          language: req.user.language,
-          difficulty: req.user.difficulty,
+          profile: {
+            firstName: req.user.firstName || '',
+            lastName: req.user.lastName || '',
+            grade: req.user.grade || '',
+            age: req.user.age || null,
+            avatarUrl: req.user.avatarUrl || null,
+            preferences: {
+              language: req.user.language || 'en',
+              difficulty: req.user.difficulty || 'medium',
+              topics: []
+            }
+          },
+          subscription: {
+            type: req.user.subscriptionType || 'free',
+            features: []
+          },
+          progress: {
+            totalActivitiesCompleted: req.user.totalActivitiesCompleted || 0,
+            currentLevel: req.user.currentLevel || 1,
+            totalPoints: req.user.totalPoints || 0,
+            streakDays: req.user.streakDays || 0
+          },
+          createdAt: req.user.createdAt,
         },
       },
     });

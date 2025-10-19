@@ -1,13 +1,17 @@
 /**
  * Google Gemini AI Service
- * Handles integration with Google's Gemini AI for homework analysis
+ * Handles integration with Google's Gemini AI for homework analysis and activity generation
  */
+
+import { InteractiveActivity, ACTIVITY_TEMPLATES } from '@/types/ActivityTemplates';
+import { activityCacheService } from './ActivityCacheService';
 
 export interface GeminiAnalysisRequest {
   text?: string;
   imageData?: string; // Base64 encoded image
   fileType?: 'text' | 'image' | 'pdf';
   prompt?: string;
+  generateActivities?: boolean; // New flag to generate interactive activities
 }
 
 export interface GeminiAnalysisResponse {
@@ -18,6 +22,7 @@ export interface GeminiAnalysisResponse {
   ageRecommendation: string;
   educationalValue: number;
   activities?: Activity[];
+  interactiveActivities?: InteractiveActivity[]; // New field for interactive activities
 }
 
 export interface Activity {
@@ -51,11 +56,28 @@ class GeminiService {
   }
 
   /**
-   * Analyze homework content using Gemini AI (via server endpoint)
+   * Analyze homework content using Gemini AI (via server endpoint) and generate interactive activities
    */
   async analyzeHomework(request: GeminiAnalysisRequest): Promise<GeminiAnalysisResponse> {
     try {
-      // Use server endpoint instead of direct API call
+      const contentKey = request.text || request.imageData || '';
+      
+      // Check cache first for interactive activities
+      if (request.generateActivities && activityCacheService.isCached(contentKey)) {
+        const cachedActivities = activityCacheService.getCachedActivities(contentKey);
+        if (cachedActivities) {
+          console.log('🚀 Using cached interactive activities');
+          
+          // Still get basic analysis but use cached activities
+          const basicAnalysis = await this.getBasicAnalysis(request);
+          return {
+            ...basicAnalysis,
+            interactiveActivities: cachedActivities
+          };
+        }
+      }
+
+      // Use server endpoint for AI analysis
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3002/api';
       
       const response = await fetch(`${apiBaseUrl}/ai/analyze-homework`, {
@@ -67,7 +89,8 @@ class GeminiService {
           text: request.text,
           imageData: request.imageData,
           fileType: request.fileType || 'text',
-          provider: 'google'
+          provider: 'google',
+          generateActivities: request.generateActivities || false
         })
       });
 
@@ -87,7 +110,18 @@ class GeminiService {
         throw new Error(data.error || 'Failed to analyze homework');
       }
 
-      return data.data;
+      const analysisResult = data.data;
+
+      // Generate interactive activities if requested
+      if (request.generateActivities && request.text) {
+        const interactiveActivities = this.generateInteractiveActivities(request.text, analysisResult);
+        analysisResult.interactiveActivities = interactiveActivities;
+        
+        // Cache the generated activities
+        activityCacheService.cacheActivities(contentKey, interactiveActivities);
+      }
+
+      return analysisResult;
     } catch (error) {
       console.error('Error analyzing homework:', error);
       
@@ -108,6 +142,60 @@ class GeminiService {
       // For other errors, provide a fallback analysis
       return this.getFallbackAnalysis(request);
     }
+  }
+
+  /**
+   * Generate interactive activities based on homework content
+   */
+  private generateInteractiveActivities(content: string, analysis: GeminiAnalysisResponse): InteractiveActivity[] {
+    const activities: InteractiveActivity[] = [];
+    const contentLower = content.toLowerCase();
+    
+    // Determine which templates to use based on content analysis
+    const applicableTemplates = ACTIVITY_TEMPLATES.filter(template => {
+      switch (template.category) {
+        case 'letter_recognition':
+          return /[a-z]/i.test(content) || contentLower.includes('letter') || contentLower.includes('alphabet');
+        case 'number_practice':
+          return /\d/.test(content) || contentLower.includes('number') || contentLower.includes('count');
+        case 'shapes':
+          return contentLower.includes('shape') || contentLower.includes('circle') || 
+                 contentLower.includes('square') || contentLower.includes('triangle');
+        case 'vocabulary':
+          return contentLower.includes('word') || contentLower.includes('reading') || 
+                 analysis.ageRecommendation.includes('elementary');
+        default:
+          return false;
+      }
+    });
+
+    // Generate activities from applicable templates
+    applicableTemplates.forEach(template => {
+      try {
+        const activity = template.generateActivity(content);
+        activities.push(activity);
+      } catch (error) {
+        console.warn(`Failed to generate activity from template ${template.id}:`, error);
+      }
+    });
+
+    // If no templates matched, generate a basic vocabulary activity
+    if (activities.length === 0) {
+      const basicTemplate = ACTIVITY_TEMPLATES.find(t => t.id === 'vocabulary_builder');
+      if (basicTemplate) {
+        activities.push(basicTemplate.generateActivity(content));
+      }
+    }
+
+    return activities.slice(0, 3); // Limit to 3 activities maximum
+  }
+
+  /**
+   * Get basic analysis without interactive activities (for caching scenarios)
+   */
+  private async getBasicAnalysis(request: GeminiAnalysisRequest): Promise<GeminiAnalysisResponse> {
+    const tempRequest = { ...request, generateActivities: false };
+    return this.analyzeHomework(tempRequest);
   }
 
   /**

@@ -225,51 +225,66 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
               <span className="hidden sm:inline md:hidden">Platform</span>
             </Button>
 
-            {/* Authentication-based buttons */}
-            {isAuthenticated && user ? (
-              <>
-                {/* User Profile Button */}
+            {/* User Menu Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button
-                  onClick={() => navigate('/profile')}
-                  size="sm"
                   variant="outline"
+                  size="sm"
                   className="flex items-center gap-2 hover:bg-blue-50 transition-all"
-                  title="Go to Profile"
                 >
                   <User className="w-4 h-4" />
-                  <span className="hidden sm:inline">{user.profile?.firstName || user.username}</span>
-                </Button>
-                
-                {/* Logout Button */}
-                <Button
-                  onClick={handleLogout}
-                  size="sm"
-                  variant="outline"
-                  className="flex items-center gap-2 text-red-600 border-red-600 hover:bg-red-50 transition-all"
-                  disabled={isLoggingOut}
-                  title="Logout"
-                >
-                  <LogOut className="w-4 h-4" />
                   <span className="hidden sm:inline">
-                    {isLoggingOut ? 'Logging out...' : 'Logout'}
+                    {isAuthenticated && user ? (user.profile?.firstName || user.username) : 'Menu'}
                   </span>
+                  <ChevronDown className="w-3 h-3" />
                 </Button>
-              </>
-            ) : (
-              <>
-                {/* Login Button */}
-                <Button
-                  onClick={() => navigate('/login')}
-                  size="sm"
-                  variant="outline"
-                  className="flex items-center gap-2 text-blue-600 border-blue-600 hover:bg-blue-50 transition-all"
-                  title="Login"
-                >
-                  <User className="w-4 h-4" />
-                  <span className="hidden sm:inline">Login</span>
-                </Button>
-              </>
-            )}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {/* Theme Toggle */}
+                <DropdownMenuItem onClick={toggleTheme} className="flex items-center gap-2">
+                  {theme === 'light' ? (
+                    <>
+                      <Moon className="w-4 h-4" />
+                      Switch to Dark
+                    </>
+                  ) : (
+                    <>
+                      <Sun className="w-4 h-4" />
+                      Switch to Light
+                    </>
+                  )}
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                
+                {/* Authentication-based menu items */}
+                {isAuthenticated && user ? (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate('/profile')} className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      Profile
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuSeparator />
+                    
+                    <DropdownMenuItem 
+                      onClick={handleLogout} 
+                      className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      disabled={isLoggingOut}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      {isLoggingOut ? 'Logging out...' : 'Logout'}
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <DropdownMenuItem onClick={() => navigate('/login')} className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Login
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>

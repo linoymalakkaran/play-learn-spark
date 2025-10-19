@@ -13,9 +13,12 @@ import { tokenBlacklist } from '../utils/tokenBlacklist';
 // Register new user
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
+    logger.info('Registration attempt started:', { email: req.body.email });
+    
     // Check for validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      logger.warn('Registration validation errors:', errors.array());
       res.status(400).json({
         success: false,
         message: 'Validation failed',
@@ -121,8 +124,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 // Login user
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
+    logger.info('Login attempt started:', { email: req.body.email });
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      logger.warn('Login validation errors:', errors.array());
       res.status(400).json({
         success: false,
         message: 'Validation failed',
@@ -132,10 +138,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     const { email, password } = req.body;
+    logger.info('Looking for user with email:', email);
 
     // Find user and include password for comparison
     const user = await User.findOne({ where: { email } });
+    logger.info('User found:', user ? 'Yes' : 'No');
+    
     if (!user) {
+      logger.warn('User not found for email:', email);
       res.status(401).json({
         success: false,
         message: 'Invalid email or password',

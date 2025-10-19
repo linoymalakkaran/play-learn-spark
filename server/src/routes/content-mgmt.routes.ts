@@ -15,6 +15,7 @@ const router = Router();
 
 // Public routes (no authentication required)
 router.get('/', getAllActivities);
+router.post('/', getAllActivities); // Allow POST requests for content listing
 router.get('/activities', getAllActivities);
 router.get('/categories', getCategories);
 

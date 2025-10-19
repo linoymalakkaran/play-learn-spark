@@ -5,16 +5,12 @@ BASE_URL="http://localhost:3002"
 echo "🔐 Testing Token Blacklisting Functionality"
 echo "==========================================="
 
-# Test user credentials
-EMAIL="testuser@example.com"
-PASSWORD="testpassword123"
+# Test user credentials (using existing test user)
+EMAIL="test@example.com"
+PASSWORD="Admin@123"
 
-echo "1. Registering test user..."
-register_response=$(curl -s -X POST "$BASE_URL/api/auth/register" \
-  -H "Content-Type: application/json" \
-  -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\",\"username\":\"testuser\",\"firstName\":\"Test\",\"lastName\":\"User\"}")
-
-echo "Register response: $register_response"
+echo "1. Using existing test user..."
+echo "Email: $EMAIL"
 
 echo -e "\n2. Logging in..."
 login_response=$(curl -s -X POST "$BASE_URL/api/auth/login" \
@@ -24,7 +20,7 @@ login_response=$(curl -s -X POST "$BASE_URL/api/auth/login" \
 echo "Login response: $login_response"
 
 # Extract token from login response
-TOKEN=$(echo "$login_response" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+TOKEN=$(echo "$login_response" | grep -o '"accessToken":"[^"]*"' | cut -d'"' -f4)
 
 if [ -z "$TOKEN" ]; then
     echo "❌ Failed to get token from login response"

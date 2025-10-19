@@ -44,6 +44,7 @@ import AuthPage from "./pages/AuthPage";
 import ProfilePage from "./pages/ProfilePage";
 import FeedbackPage from "./pages/FeedbackPage";
 import GamePage from "./pages/GamePage";
+import AdminPage from "./pages/AdminPage";
 import UserDashboard from "./components/UserDashboard";
 import AuthGuard from "./components/auth/AuthGuard";
 import EnglishReading from "./pages/activities/EnglishReading";
@@ -166,6 +167,11 @@ const AppContent = () => {
               <Route path="/dashboard" element={
                 <AuthGuard>
                   <UserDashboard />
+                </AuthGuard>
+              } />
+              <Route path="/admin" element={
+                <AuthGuard>
+                  <AdminPage />
                 </AuthGuard>
               } />
               <Route path="/forgot-password" element={<ForgotPassword />} />

@@ -387,6 +387,5 @@ export class RelationshipController {
 }
 
 export default new RelationshipController();
-}
 
 export default new RelationshipController();

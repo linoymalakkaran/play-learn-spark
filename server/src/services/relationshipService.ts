@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import { Relationship, IRelationship } from '../models/Relationship';
-import { User } from '../models/UserMongo';
+import { UserMongo as User } from '../models/UserMongo';
 import QRCode from 'qrcode';
 import logger from '../utils/logger';
 

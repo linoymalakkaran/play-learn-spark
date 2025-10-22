@@ -1,0 +1,715 @@
+/**
+ * Version Comparison Styles
+ * 
+ * Comprehensive styling for version comparison interface
+ * with diff highlighting and responsive design.
+ */
+
+.version-comparison {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+.version-comparison.fullscreen {
+  z-index: 1100;
+}
+
+.comparison-overlay {
+  background: rgba(0, 0, 0, 0.8);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.comparison-container {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 1400px;
+  height: 90vh;
+  max-height: 900px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.version-comparison.fullscreen .comparison-container {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
+}
+
+/* Header */
+.comparison-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Version Info */
+.version-info {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.version-card {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.version-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.version-title {
+  font-weight: 500;
+  color: #111827;
+}
+
+.version-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.comparison-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 24px;
+  color: #6b7280;
+}
+
+/* Controls */
+.comparison-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.controls-left {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.controls-right {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.switch-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+/* Content */
+.comparison-content {
+  flex: 1;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.no-changes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.diff-sections {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.diff-section {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Diff View */
+.diff-view {
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  background: #f8fafc;
+  border-radius: 6px;
+  overflow: auto;
+}
+
+.diff-view-side-by-side {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: #e5e7eb;
+}
+
+.diff-view-unified .diff-line {
+  display: flex;
+  align-items: center;
+}
+
+.diff-view-split {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Diff Lines */
+.diff-line {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  background: #ffffff;
+  transition: background-color 0.1s ease;
+}
+
+.diff-line:hover {
+  background: #f1f5f9;
+}
+
+.diff-line-unchanged {
+  background: #ffffff;
+}
+
+.diff-line-added {
+  background: #f0fdf4;
+  border-left: 3px solid #22c55e;
+}
+
+.diff-line-removed {
+  background: #fef2f2;
+  border-left: 3px solid #ef4444;
+}
+
+.diff-line-modified {
+  background: #fffbeb;
+  border-left: 3px solid #f59e0b;
+}
+
+.line-numbers {
+  display: flex;
+  min-width: 80px;
+  padding: 0 8px;
+  background: #f8fafc;
+  border-right: 1px solid #e5e7eb;
+  font-size: 0.75rem;
+  color: #6b7280;
+  user-select: none;
+}
+
+.old-line-number,
+.new-line-number {
+  width: 32px;
+  text-align: right;
+  padding: 0 4px;
+}
+
+.old-line-number {
+  border-right: 1px solid #e5e7eb;
+}
+
+.line-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  overflow-x: auto;
+}
+
+.diff-marker {
+  margin-right: 8px;
+  font-weight: bold;
+  color: #6b7280;
+}
+
+.diff-line-added .diff-marker {
+  color: #22c55e;
+}
+
+.diff-line-removed .diff-marker {
+  color: #ef4444;
+}
+
+.line-text {
+  white-space: pre;
+  flex: 1;
+}
+
+.merge-actions {
+  display: flex;
+  gap: 4px;
+  padding: 0 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.diff-line:hover .merge-actions {
+  opacity: 1;
+}
+
+/* Statistics */
+.comparison-stats {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  padding: 12px 24px;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stat-value {
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.stat-label {
+  color: #6b7280;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Side-by-side specific styles */
+.diff-view-side-by-side .diff-line {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: #e5e7eb;
+}
+
+.diff-view-side-by-side .diff-line-unchanged {
+  grid-column: span 2;
+}
+
+.diff-view-side-by-side .diff-line-removed {
+  grid-column: 1;
+}
+
+.diff-view-side-by-side .diff-line-added {
+  grid-column: 2;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .comparison-container {
+    width: 95%;
+    height: 95vh;
+  }
+  
+  .diff-view-side-by-side {
+    grid-template-columns: 1fr;
+  }
+  
+  .diff-view-side-by-side .diff-line {
+    grid-column: span 1;
+    display: flex;
+  }
+  
+  .line-numbers {
+    min-width: 60px;
+  }
+  
+  .old-line-number,
+  .new-line-number {
+    width: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .comparison-overlay {
+    padding: 10px;
+  }
+  
+  .comparison-container {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+  }
+  
+  .comparison-header {
+    padding: 12px 16px;
+  }
+  
+  .header-left h2 {
+    font-size: 1.125rem;
+  }
+  
+  .version-info {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+  
+  .comparison-arrow {
+    margin: 0;
+    transform: rotate(90deg);
+  }
+  
+  .comparison-controls {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+    padding: 12px 16px;
+  }
+  
+  .controls-left,
+  .controls-right {
+    justify-content: space-between;
+  }
+  
+  .controls-right {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .diff-sections {
+    padding: 12px;
+  }
+  
+  .diff-view {
+    font-size: 0.75rem;
+  }
+  
+  .line-numbers {
+    min-width: 50px;
+  }
+  
+  .line-content {
+    padding: 0 8px;
+  }
+  
+  .comparison-stats {
+    padding: 8px 16px;
+    gap: 16px;
+  }
+  
+  .stat-value {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-left,
+  .header-right {
+    gap: 4px;
+  }
+  
+  .header-right {
+    flex-wrap: wrap;
+  }
+  
+  .version-card {
+    padding: 8px 12px;
+  }
+  
+  .version-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .version-meta {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .line-numbers {
+    display: none;
+  }
+  
+  .diff-marker {
+    margin-right: 4px;
+  }
+  
+  .comparison-stats {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .comparison-container {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .comparison-header,
+  .comparison-controls,
+  .comparison-stats {
+    background: #111827;
+    border-color: #374151;
+  }
+  
+  .version-info {
+    background: #1f2937;
+    border-color: #374151;
+  }
+  
+  .version-card {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+  
+  .version-title {
+    color: #f9fafb;
+  }
+  
+  .version-meta {
+    color: #d1d5db;
+  }
+  
+  .switch-group {
+    color: #d1d5db;
+  }
+  
+  .comparison-content {
+    background: #1f2937;
+  }
+  
+  .diff-view {
+    background: #374151;
+  }
+  
+  .diff-line {
+    background: #1f2937;
+  }
+  
+  .diff-line:hover {
+    background: #374151;
+  }
+  
+  .diff-line-unchanged {
+    background: #1f2937;
+  }
+  
+  .diff-line-added {
+    background: #064e3b;
+    border-left-color: #10b981;
+  }
+  
+  .diff-line-removed {
+    background: #7f1d1d;
+    border-left-color: #f87171;
+  }
+  
+  .diff-line-modified {
+    background: #78350f;
+    border-left-color: #fbbf24;
+  }
+  
+  .line-numbers {
+    background: #374151;
+    border-color: #4b5563;
+    color: #9ca3af;
+  }
+  
+  .old-line-number {
+    border-color: #4b5563;
+  }
+  
+  .diff-marker {
+    color: #9ca3af;
+  }
+  
+  .diff-line-added .diff-marker {
+    color: #10b981;
+  }
+  
+  .diff-line-removed .diff-marker {
+    color: #f87171;
+  }
+  
+  .stat-label {
+    color: #9ca3af;
+  }
+  
+  .no-changes {
+    color: #9ca3af;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .diff-line-added {
+    background: #e6ffed;
+    border-left-color: #00a000;
+  }
+  
+  .diff-line-removed {
+    background: #ffebe9;
+    border-left-color: #d00000;
+  }
+  
+  .diff-line-modified {
+    background: #fff8e1;
+    border-left-color: #ff8f00;
+  }
+  
+  .diff-marker {
+    font-weight: 900;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .version-comparison {
+    position: static;
+    background: white;
+    color: black;
+  }
+  
+  .comparison-overlay {
+    background: white;
+    padding: 0;
+  }
+  
+  .comparison-container {
+    width: 100%;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  .header-right,
+  .comparison-controls {
+    display: none;
+  }
+  
+  .diff-line-added {
+    background: #f0f0f0;
+    border-left: 3px solid #000;
+  }
+  
+  .diff-line-removed {
+    background: #e0e0e0;
+    border-left: 3px solid #000;
+  }
+  
+  .diff-line-modified {
+    background: #f5f5f5;
+    border-left: 3px solid #000;
+  }
+  
+  .line-numbers {
+    background: #f8f8f8;
+    border-color: #ccc;
+  }
+}
+
+/* Animation */
+.comparison-container {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.diff-line {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Accessibility */
+.diff-line:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+}
+
+.merge-actions button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* High performance mode - reduced animations */
+@media (prefers-reduced-motion: reduce) {
+  .comparison-container {
+    animation: none;
+  }
+  
+  .diff-line {
+    animation: none;
+  }
+  
+  .diff-line,
+  .merge-actions {
+    transition: none;
+  }
+}

@@ -1,0 +1,371 @@
+/**
+ * Content Versioning Styles
+ * 
+ * Comprehensive styling for version management interface
+ * with modern design and responsive layout.
+ */
+
+.content-versioning {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Header Styles */
+.versioning-header {
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+}
+
+.header-info h2 {
+  margin: 0 0 4px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.header-info p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.header-filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.filter-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Content Layout */
+.versioning-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.versions-panel {
+  width: 400px;
+  border-right: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.version-details {
+  flex: 1;
+  background: #f9fafb;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Version List */
+.versions-list {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.version-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.version-card:hover {
+  border-color: #e5e7eb;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.version-card.selected {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.version-card.current {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-color: #0ea5e9;
+}
+
+.version-card.current::before {
+  content: "CURRENT";
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  background: #0ea5e9;
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 0 6px 0 6px;
+}
+
+.changes-summary {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+.changes-summary p {
+  margin: 0 0 8px 0;
+  font-size: 0.875rem;
+}
+
+.reviewers {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Timeline View */
+.versions-timeline {
+  padding: 16px;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.timeline-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.timeline-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  border: 2px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  position: relative;
+  z-index: 1;
+}
+
+.timeline-dot.current {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.timeline-line {
+  width: 2px;
+  flex: 1;
+  background: #e5e7eb;
+  margin-top: 8px;
+}
+
+.timeline-content {
+  flex: 1;
+}
+
+.timeline-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.timeline-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-card.selected {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+/* Status Colors */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .versioning-content {
+    flex-direction: column;
+  }
+  
+  .versions-panel {
+    width: 100%;
+    max-height: 300px;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .version-details {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-top {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .header-filters {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .filter-group {
+    flex-wrap: wrap;
+  }
+  
+  .versions-list {
+    padding: 12px;
+  }
+  
+  .version-card {
+    font-size: 0.875rem;
+  }
+  
+  .timeline-item {
+    gap: 12px;
+  }
+  
+  .timeline-dot {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .content-versioning {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .versioning-header {
+    background: #111827;
+    border-color: #374151;
+  }
+  
+  .header-info h2 {
+    color: #f9fafb;
+  }
+  
+  .header-info p {
+    color: #d1d5db;
+  }
+  
+  .versions-panel {
+    background: #1f2937;
+    border-color: #374151;
+  }
+  
+  .version-details {
+    background: #111827;
+  }
+  
+  .version-card {
+    background: #1f2937;
+    border-color: #374151;
+  }
+  
+  .version-card:hover {
+    border-color: #4b5563;
+  }
+  
+  .version-card.selected {
+    border-color: #60a5fa;
+  }
+  
+  .version-card.current {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    border-color: #3b82f6;
+  }
+  
+  .changes-summary {
+    background: #374151;
+    border-color: #4b5563;
+  }
+  
+  .reviewers {
+    border-color: #4b5563;
+  }
+  
+  .timeline-dot {
+    background: #374151;
+    border-color: #4b5563;
+    color: #d1d5db;
+  }
+  
+  .timeline-dot.current {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+  }
+  
+  .timeline-line {
+    background: #4b5563;
+  }
+  
+  .timeline-card {
+    background: #1f2937;
+    border-color: #374151;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .header-actions,
+  .view-toggle,
+  .filter-group {
+    display: none;
+  }
+  
+  .versioning-content {
+    flex-direction: column;
+  }
+  
+  .versions-panel {
+    width: 100%;
+    border-right: none;
+  }
+}

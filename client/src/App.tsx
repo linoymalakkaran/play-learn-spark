@@ -48,6 +48,13 @@ import GamePage from "./pages/GamePage";
 import AdminPage from "./pages/AdminPage";
 import UserDashboard from "./components/UserDashboard";
 import AuthGuard from "./components/auth/AuthGuard";
+import RoleBasedDashboard from "./components/dashboards/RoleBasedDashboard";
+import TeacherDashboard from "./components/dashboards/TeacherDashboard";
+import ParentDashboard from "./components/dashboards/ParentDashboard";
+import StudentDashboard from "./components/dashboards/StudentDashboard";
+import RoleSelector from "./components/RoleSelector";
+import ImplementationStatus from "./components/ImplementationStatus";
+import TestRoute from "./pages/TestRoute";
 import EnglishReading from "./pages/activities/EnglishReading";
 import MathNumbers from "./pages/activities/MathNumbers";
 import ScienceExploration from "./pages/activities/ScienceExploration";
@@ -120,7 +127,11 @@ const AppContent = () => {
         <RouteTransition type="fade">
           <main id="main-content" role="main" aria-label="Main content" tabIndex={-1} className="flex-1">
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={
+                <AuthGuard requireAuth={false}>
+                  <RoleBasedDashboard />
+                </AuthGuard>
+              } />
               <Route path="/activities" element={<Activities />} />
               <Route path="/activities/englishreading" element={<EnglishReading />} />
               <Route path="/activities/mathnumbers" element={<MathNumbers />} />
@@ -147,7 +158,7 @@ const AppContent = () => {
               } />
               <Route path="/register" element={
                 <AuthGuard requireAuth={false}>
-                  <AuthPage mode="register" />
+                  <AuthPage mode="enhanced-register" />
                 </AuthGuard>
               } />
               <Route path="/auth" element={
@@ -167,12 +178,34 @@ const AppContent = () => {
               } />
               <Route path="/dashboard" element={
                 <AuthGuard>
-                  <UserDashboard />
+                  <RoleBasedDashboard />
+                </AuthGuard>
+              } />
+              <Route path="/teacher/*" element={
+                <AuthGuard>
+                  <TeacherDashboard />
+                </AuthGuard>
+              } />
+              <Route path="/parent/*" element={
+                <AuthGuard>
+                  <ParentDashboard />
+                </AuthGuard>
+              } />
+              <Route path="/student/*" element={
+                <AuthGuard>
+                  <StudentDashboard />
                 </AuthGuard>
               } />
               <Route path="/admin" element={
                 <AuthGuard>
                   <AdminPage />
+                </AuthGuard>
+              } />
+              <Route path="/implementation-status" element={<ImplementationStatus />} />
+              <Route path="/test-route" element={<TestRoute />} />
+              <Route path="/role-info" element={
+                <AuthGuard>
+                  <RoleSelector />
                 </AuthGuard>
               } />
               <Route path="/forgot-password" element={<ForgotPassword />} />

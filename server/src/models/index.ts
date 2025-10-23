@@ -1,5 +1,7 @@
 // MongoDB models for Play-Learn-Spark application
-// Currently using simple MongoDB connection without schemas
-// Models can be added here as needed for the educational platform
-
 export { connectMongoDB } from '../config/database-mongo';
+
+// Export MongoDB models
+export { User, IUser } from './User';
+export { Session, ISession } from './Session';
+export { PasswordReset, IPasswordReset } from './PasswordReset';

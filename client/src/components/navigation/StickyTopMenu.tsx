@@ -23,7 +23,12 @@ import {
   ChevronDown,
   Sun,
   Moon,
-  Settings
+  Settings,
+  Users,
+  FileText,
+  BarChart3,
+  Baby,
+  Shield
 } from 'lucide-react';
 
 interface StickyTopMenuProps {
@@ -100,44 +105,133 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
   const isLanguagePage = languageOptions.some(lang => isActive(lang.path));
   const currentLanguage = languageOptions.find(lang => isActive(lang.path));
 
-  const menuItems = [
-    { 
-      path: '/', 
-      label: 'Home', 
-      icon: Home,
-      description: 'Go to main dashboard'
-    },
-    { 
-      path: '/activities', 
-      label: 'Learning Activities', 
-      icon: GraduationCap,
-      description: 'Browse all learning activities'
-    },
-    { 
-      path: '/rewards', 
-      label: 'Rewards', 
-      icon: Brain,
-      description: 'View your rewards and achievements'
-    },
-    { 
-      path: '/ai-homework', 
-      label: 'AI Homework', 
-      icon: BookOpen,
-      description: 'Get AI-powered homework help and practice'
-    },
-    { 
-      path: '/games', 
-      label: 'Games', 
-      icon: Gamepad2,
-      description: 'Play fun games and earn points!'
-    },
-    { 
-      path: '/feedback', 
-      label: 'Feedback', 
-      icon: MessageSquare,
-      description: 'Share your feedback and read reviews'
+  // Get role-specific menu items
+  const getRoleBasedMenuItems = () => {
+    const baseItems = [
+      { 
+        path: '/', 
+        label: 'Home', 
+        icon: Home,
+        description: 'Go to main dashboard'
+      }
+    ];
+
+    if (!isAuthenticated || !user) {
+      return [
+        ...baseItems,
+        { 
+          path: '/activities', 
+          label: 'Learning Activities', 
+          icon: GraduationCap,
+          description: 'Browse all learning activities'
+        },
+        { 
+          path: '/games', 
+          label: 'Games', 
+          icon: Gamepad2,
+          description: 'Play fun games and earn points!'
+        }
+      ];
     }
-  ];
+
+    // Role-based menu items
+    switch (user.role) {
+      case 'educator':
+        return [
+          ...baseItems,
+          { 
+            path: '/teacher/classes', 
+            label: 'My Classes', 
+            icon: Users,
+            description: 'Manage your classes and students'
+          },
+          { 
+            path: '/teacher/activities', 
+            label: 'Create Activities', 
+            icon: BookOpen,
+            description: 'Create and manage learning activities'
+          },
+          { 
+            path: '/teacher/assignments', 
+            label: 'Assignments', 
+            icon: FileText,
+            description: 'Create and manage assignments'
+          },
+          { 
+            path: '/teacher/analytics', 
+            label: 'Analytics', 
+            icon: BarChart3,
+            description: 'View student progress and analytics'
+          },
+          { 
+            path: '/teacher/messages', 
+            label: 'Messages', 
+            icon: MessageSquare,
+            description: 'Communicate with students and parents'
+          }
+        ];
+      
+      case 'parent':
+        return [
+          ...baseItems,
+          { 
+            path: '/parent/children', 
+            label: 'My Children', 
+            icon: Baby,
+            description: 'View and manage your children'
+          },
+          { 
+            path: '/parent/progress', 
+            label: 'Progress', 
+            icon: BarChart3,
+            description: 'Track your children\'s learning progress'
+          },
+          { 
+            path: '/parent/messages', 
+            label: 'Messages', 
+            icon: MessageSquare,
+            description: 'Communicate with teachers'
+          },
+          { 
+            path: '/parent/safety', 
+            label: 'Safety', 
+            icon: Shield,
+            description: 'Manage safety and privacy settings'
+          }
+        ];
+      
+      default: // child, student, guest
+        return [
+          ...baseItems,
+          { 
+            path: '/activities', 
+            label: 'Learning Activities', 
+            icon: GraduationCap,
+            description: 'Browse all learning activities'
+          },
+          { 
+            path: '/student/assignments', 
+            label: 'My Assignments', 
+            icon: FileText,
+            description: 'View your homework and assignments'
+          },
+          { 
+            path: '/rewards', 
+            label: 'Rewards', 
+            icon: Brain,
+            description: 'View your rewards and achievements'
+          },
+          { 
+            path: '/games', 
+            label: 'Games', 
+            icon: Gamepad2,
+            description: 'Play fun games and earn points!'
+          }
+        ];
+    }
+  };
+
+  const menuItems = getRoleBasedMenuItems();
 
   return (
     <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b shadow-sm">
@@ -264,6 +358,16 @@ const StickyTopMenu: React.FC<StickyTopMenuProps> = () => {
                     <DropdownMenuItem onClick={() => navigate('/profile')} className="flex items-center gap-2">
                       <User className="w-4 h-4" />
                       Profile
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem onClick={() => navigate('/role-info')} className="flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      Role Info
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem onClick={() => navigate('/implementation-status')} className="flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      Implementation Status
                     </DropdownMenuItem>
                     
                     <DropdownMenuSeparator />

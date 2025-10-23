@@ -5,13 +5,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import LoginForm from '@/components/auth/LoginForm';
 import RegisterForm from '@/components/auth/RegisterForm';
 import GuestForm from '@/components/auth/GuestForm';
+import EnhancedRegistrationForm from '@/components/auth/EnhancedRegistrationForm';
 
 interface AuthPageProps {
-  mode?: 'login' | 'register' | 'guest';
+  mode?: 'login' | 'register' | 'guest' | 'enhanced-register';
 }
 
 const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
-  const [currentMode, setCurrentMode] = useState<'login' | 'register' | 'guest'>(mode);
+  const [currentMode, setCurrentMode] = useState<'login' | 'register' | 'guest' | 'enhanced-register'>(mode);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   
@@ -251,7 +252,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode = 'login' }) => {
             </p>
           </div>
 
-          {currentMode === 'login' ? (
+          {currentMode === 'enhanced-register' ? (
+            <EnhancedRegistrationForm />
+          ) : currentMode === 'login' ? (
             <LoginForm
               email={email}
               password={password}

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { User } from '../models/UserSQLite';
+import { User, IUser } from '../models/User';
 import { Session } from '../models/Session';
 import { PasswordReset } from '../models/PasswordReset';
 import { generateToken, generateRefreshToken } from '../middleware/auth';
@@ -72,24 +72,24 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       isGuest: false,
       language,
       difficulty: age && age <= 4 ? 'easy' : 'medium',
-      topics: '[]', // Empty array as string
+      topics: [], // Empty array
       totalActivitiesCompleted: 0,
       currentLevel: 1,
       totalPoints: 0,
-      badges: '[]', // Empty array as string
+      badges: [], // Empty array
       streakDays: 0,
       lastActiveDate: new Date(),
       subscriptionType: 'free',
-      features: '["basic_activities", "progress_tracking"]', // Array as string
+      features: ['basic_activities', 'progress_tracking'], // Array
       emailVerified: false,
       lastLogin: new Date(),
       loginAttempts: 0,
-      childrenIds: '[]', // Empty array as string
+      childrenIds: [], // Empty array
     });
 
     // Generate tokens
-    const accessToken = generateToken(user);
-    const refreshToken = generateRefreshToken(user);
+    const accessToken = generateToken(user as IUser);
+    const refreshToken = generateRefreshToken(user as IUser);
 
     logger.info(`New user registered: ${email}`);
 
@@ -98,7 +98,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       message: 'User registered successfully',
       data: {
         user: {
-          id: user.id,
+          id: user._id,
           email: user.email,
           username: user.username,
           role: user.role,
@@ -141,7 +141,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     logger.info('Looking for user with email:', email);
 
     // Find user and include password for comparison
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ email });
     logger.info('User found:', user ? 'Yes' : 'No');
     
     if (!user) {
@@ -180,11 +180,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Update last login
-    await user.update({ lastLogin: new Date() });
+    await User.findByIdAndUpdate(user._id, { lastLogin: new Date() });
 
     // Generate tokens
-    const accessToken = generateToken(user);
-    const refreshToken = generateRefreshToken(user);
+    const accessToken = generateToken(user as IUser);
+    const refreshToken = generateRefreshToken(user as IUser);
 
     logger.info(`User logged in: ${email}`);
 
@@ -193,7 +193,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       message: 'Login successful',
       data: {
         user: {
-          id: user.id,
+          id: user._id,
           email: user.email,
           username: user.username,
           role: user.role,
@@ -206,12 +206,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             preferences: {
               language: user.language || 'en',
               difficulty: user.difficulty || 'medium',
-              topics: []
+              topics: user.topics || []
             }
           },
           subscription: {
             type: user.subscriptionType || 'free',
-            features: []
+            features: user.features || []
           },
           progress: {
             totalActivitiesCompleted: user.totalActivitiesCompleted || 0,
@@ -239,6 +239,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 // Guest login - login with the default guest user and update name/grade
 export const loginAsGuest = async (req: Request, res: Response): Promise<void> => {
   try {
+    logger.info('Guest login attempt started:', req.body);
     const { name, grade } = req.body;
 
     if (!name || !name.trim()) {
@@ -249,54 +250,92 @@ export const loginAsGuest = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
+    logger.info('Looking for existing guest user...');
     // Find the default guest user
-    let guestUser = await User.findOne({ 
-      where: { 
-        email: 'guest@playlearnspark.com',
-        isGuest: true 
-      } 
+    let guestUser: any = await User.findOne({ 
+      email: 'guest@playlearnspark.com',
+      isGuest: true 
     });
+
+    logger.info('Guest user found:', guestUser ? 'Yes' : 'No');
 
     if (!guestUser) {
       // If no guest user exists, create one
-      guestUser = await User.createUser({
-        email: 'guest@playlearnspark.com',
-        password: 'guest123',
-        username: 'guest_user',
-        role: 'guest',
-        firstName: name.trim(),
-        lastName: 'Guest',
-        isGuest: true,
-        grade: grade || '',
-        language: 'en',
-        difficulty: 'easy',
-        topics: '["all"]',
-        emailVerified: false,
-        subscriptionType: 'free',
-        features: '["basic_activities"]',
-        totalActivitiesCompleted: 0,
-        currentLevel: 1,
-        totalPoints: 0,
-        badges: '[]',
-        streakDays: 0,
-        lastActiveDate: new Date(),
-        lastLogin: new Date(),
-        loginAttempts: 0,
-        childrenIds: '[]',
-      });
+      try {
+        guestUser = new User({
+          email: 'guest@playlearnspark.com',
+          password: 'guest123',
+          username: 'guest_user',
+          role: 'guest',
+          firstName: name.trim(),
+          lastName: 'Guest',
+          isGuest: true,
+          grade: grade || '',
+          language: 'en',
+          difficulty: 'easy',
+          topics: ['all'],
+          emailVerified: false,
+          subscriptionType: 'free',
+          features: ['basic_activities'],
+          totalActivitiesCompleted: 0,
+          currentLevel: 1,
+          totalPoints: 0,
+          badges: [],
+          streakDays: 0,
+          lastActiveDate: new Date(),
+          lastLogin: new Date(),
+          loginAttempts: 0,
+          childrenIds: [],
+        });
+        await guestUser.save();
+      } catch (createError) {
+        logger.error('Failed to create guest user:', createError);
+        res.status(500).json({
+          success: false,
+          message: 'Failed to create guest user',
+        });
+        return;
+      }
     } else {
       // Update the guest user with new name and grade
-      await guestUser.update({
-        firstName: name.trim(),
-        grade: grade || '',
-        lastActiveDate: new Date(),
-        lastLogin: new Date(),
+      try {
+        const updatedUser = await User.findByIdAndUpdate(guestUser._id, {
+          firstName: name.trim(),
+          grade: grade || '',
+          lastActiveDate: new Date(),
+          lastLogin: new Date(),
+        }, { new: true });
+
+        if (!updatedUser) {
+          res.status(500).json({
+            success: false,
+            message: 'Failed to update guest user',
+          });
+          return;
+        }
+        guestUser = updatedUser;
+      } catch (updateError) {
+        logger.error('Failed to update guest user:', updateError);
+        res.status(500).json({
+          success: false,
+          message: 'Failed to update guest user',
+        });
+        return;
+      }
+    }
+
+    // Ensure guestUser is not null at this point
+    if (!guestUser) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to initialize guest user',
       });
+      return;
     }
 
     // Generate tokens for the guest user
-    const accessToken = generateToken(guestUser);
-    const refreshToken = generateRefreshToken(guestUser);
+    const accessToken = generateToken(guestUser as IUser);
+    const refreshToken = generateRefreshToken(guestUser as IUser);
 
     logger.info(`Guest user logged in: ${name} (Grade: ${grade || 'not specified'})`);
 
@@ -305,7 +344,7 @@ export const loginAsGuest = async (req: Request, res: Response): Promise<void> =
       message: 'Guest login successful',
       data: {
         user: {
-          id: guestUser.id,
+          id: guestUser._id,
           email: guestUser.email,
           username: guestUser.username,
           role: guestUser.role,
@@ -319,12 +358,12 @@ export const loginAsGuest = async (req: Request, res: Response): Promise<void> =
             preferences: {
               language: guestUser.language || 'en',
               difficulty: guestUser.difficulty || 'medium',
-              topics: []
+              topics: guestUser.topics || []
             }
           },
           subscription: {
             type: guestUser.subscriptionType || 'free',
-            features: []
+            features: guestUser.features || []
           },
           progress: {
             totalActivitiesCompleted: guestUser.totalActivitiesCompleted || 0,
@@ -369,7 +408,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     ) as any;
 
     // Find user
-    const user = await User.findByPk(parseInt(decoded.userId));
+    const user = await User.findById(decoded.userId);
     if (!user) {
       res.status(401).json({
         success: false,
@@ -379,7 +418,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     }
 
     // Generate new access token
-    const newAccessToken = generateToken(user);
+    const newAccessToken = generateToken(user as IUser);
 
     res.status(200).json({
       success: true,
@@ -413,7 +452,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
       message: 'Profile retrieved successfully',
       data: {
         user: {
-          id: req.user.id,
+          id: req.user._id,
           email: req.user.email,
           username: req.user.username,
           role: req.user.role,
@@ -426,12 +465,12 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
             preferences: {
               language: req.user.language || 'en',
               difficulty: req.user.difficulty || 'medium',
-              topics: []
+              topics: req.user.topics || []
             }
           },
           subscription: {
             type: req.user.subscriptionType || 'free',
-            features: []
+            features: req.user.features || []
           },
           progress: {
             totalActivitiesCompleted: req.user.totalActivitiesCompleted || 0,
@@ -482,30 +521,29 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
       preferences,
     } = req.body;
 
-    // Update profile fields
-    if (firstName) req.user.firstName = firstName;
-    if (lastName) req.user.lastName = lastName;
-    if (grade !== undefined) req.user.grade = grade;
-    if (age !== undefined) req.user.age = age;
-    if (avatarUrl !== undefined) req.user.avatarUrl = avatarUrl;
+    // Update the user in the database
+    const updateData: any = {};
+    if (firstName) updateData.firstName = firstName;
+    if (lastName) updateData.lastName = lastName;
+    if (grade !== undefined) updateData.grade = grade;
+    if (age !== undefined) updateData.age = age;
+    if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
     
     if (preferences) {
-      if (preferences.language) req.user.language = preferences.language;
-      if (preferences.difficulty) req.user.difficulty = preferences.difficulty;
-      if (preferences.topics) req.user.topics = JSON.stringify(preferences.topics);
+      if (preferences.language) updateData.language = preferences.language;
+      if (preferences.difficulty) updateData.difficulty = preferences.difficulty;
+      if (preferences.topics) updateData.topics = preferences.topics;
     }
 
-    // Update the user in the store
-    await req.user.update({
-      firstName: req.user.firstName,
-      lastName: req.user.lastName,
-      grade: req.user.grade,
-      age: req.user.age,
-      avatarUrl: req.user.avatarUrl,
-      language: req.user.language,
-      difficulty: req.user.difficulty,
-      topics: req.user.topics
-    });
+    const updatedUser = await User.findByIdAndUpdate(req.user._id, updateData, { new: true });
+
+    if (!updatedUser) {
+      res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+      return;
+    }
 
     logger.info(`Profile updated for user: ${req.user.email}`);
 
@@ -514,33 +552,33 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
       message: 'Profile updated successfully',
       data: {
         user: {
-          id: req.user.id,
-          email: req.user.email,
-          username: req.user.username,
-          role: req.user.role,
+          id: updatedUser._id,
+          email: updatedUser.email,
+          username: updatedUser.username,
+          role: updatedUser.role,
           profile: {
-            firstName: req.user.firstName || '',
-            lastName: req.user.lastName || '',
-            grade: req.user.grade || '',
-            age: req.user.age || null,
-            avatarUrl: req.user.avatarUrl || null,
+            firstName: updatedUser.firstName || '',
+            lastName: updatedUser.lastName || '',
+            grade: updatedUser.grade || '',
+            age: updatedUser.age || null,
+            avatarUrl: updatedUser.avatarUrl || null,
             preferences: {
-              language: req.user.language || 'en',
-              difficulty: req.user.difficulty || 'medium',
-              topics: []
+              language: updatedUser.language || 'en',
+              difficulty: updatedUser.difficulty || 'medium',
+              topics: updatedUser.topics || []
             }
           },
           subscription: {
-            type: req.user.subscriptionType || 'free',
-            features: []
+            type: updatedUser.subscriptionType || 'free',
+            features: updatedUser.features || []
           },
           progress: {
-            totalActivitiesCompleted: req.user.totalActivitiesCompleted || 0,
-            currentLevel: req.user.currentLevel || 1,
-            totalPoints: req.user.totalPoints || 0,
-            streakDays: req.user.streakDays || 0
+            totalActivitiesCompleted: updatedUser.totalActivitiesCompleted || 0,
+            currentLevel: updatedUser.currentLevel || 1,
+            totalPoints: updatedUser.totalPoints || 0,
+            streakDays: updatedUser.streakDays || 0
           },
-          createdAt: req.user.createdAt,
+          createdAt: updatedUser.createdAt,
         },
       },
     });
@@ -577,7 +615,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     const { currentPassword, newPassword } = req.body;
 
     // Get user with password
-    const user = await User.findByPk(req.user.id);
+    const user = await User.findById(req.user._id);
     if (!user) {
       res.status(404).json({
         success: false,
@@ -599,7 +637,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     // Update password - hash it first
     const bcrypt = require('bcryptjs');
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await user.update({ password: hashedPassword });
+    await User.findByIdAndUpdate(user._id, { password: hashedPassword });
 
     logger.info(`Password changed for user: ${user.email}`);
 
@@ -663,16 +701,14 @@ export const getChildren = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    const childrenIds = JSON.parse(req.user.childrenIds || '[]');
-    const children = await User.findAll();
-    // Filter children by IDs manually since we don't have Op.in
-    const filteredChildren = children.filter((child: User) => childrenIds.includes(child.id));
+    const childrenIds = req.user.childrenIds || [];
+    const children = await User.find({ _id: { $in: childrenIds } });
 
     res.status(200).json({
       success: true,
       message: 'Children retrieved successfully',
       data: {
-        children: filteredChildren,
+        children: children,
       },
     });
   } catch (error) {
@@ -698,7 +734,7 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
 
   try {
     // Find user by email
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ email });
     
     if (!user) {
       // Don't reveal if email exists or not for security
@@ -708,10 +744,10 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
     }
 
     // Generate reset token
-    const resetToken = await PasswordReset.createPasswordResetToken(user.id);
+    const resetToken = await PasswordReset.createPasswordResetToken(String(user._id));
     
     if (!resetToken) {
-      logger.error('Failed to generate reset token for user', { userId: user.id });
+      logger.error('Failed to generate reset token for user', { userId: user._id });
       return res.status(500).json({ 
         error: 'Failed to generate reset token. Please try again.' 
       });
@@ -722,7 +758,7 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
     await emailService.sendPasswordResetEmail(user.email, resetToken, user.firstName || user.username);
 
     logger.info('Password reset requested', { 
-      userId: user.id, 
+      userId: user._id, 
       email: user.email 
     });
 

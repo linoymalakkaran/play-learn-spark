@@ -4,7 +4,7 @@ import { logger } from '../utils/logger';
 // MongoDB connection configuration
 export const mongoConfig = {
   development: {
-    uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/playlearnspark-dev',
+    uri: process.env.MONGODB_URI || 'mongodb://admin:password@localhost:27017/playlearnspark?authSource=admin',
     options: {
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 5000,

@@ -181,6 +181,10 @@ const Layout: React.FC<LayoutProps> = ({
                         <User className="w-4 h-4 mr-2" />
                         Profile
                       </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/dashboard')} className="cursor-pointer">
+                        <User className="w-4 h-4 mr-2" />
+                        Dashboard
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={handleSettings} className="cursor-pointer">
                         <Settings className="w-4 h-4 mr-2" />
                         Settings

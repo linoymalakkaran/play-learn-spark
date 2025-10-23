@@ -48,6 +48,16 @@ uploadDirs.forEach(dir => {
 // Serve static files from uploads directory
 app.use('/uploads', express.static('uploads'));
 
+// Load auth routes (bypass TypeScript compilation issues)
+try {
+  console.log('🔄 Loading auth routes...');
+  const authRoutes = require('./routes/auth.routes');
+  app.use('/api/auth', authRoutes.default || authRoutes);
+  console.log('✅ Auth routes loaded successfully');
+} catch (error) {
+  console.log('❌ Failed to load auth routes:', error instanceof Error ? error.message : error);
+}
+
 // Basic API Routes (working routes only)
 // Note: Only include routes that compile without errors
 
@@ -98,7 +108,8 @@ app.get('/api/health', (req, res) => {
     },
     endpoints: {
       health: '/health',
-      database_status: '/api/database-status'
+      database_status: '/api/database-status',
+      auth: '/api/auth/*'
     }
   });
 });
@@ -113,6 +124,7 @@ app.get('/', (req, res) => {
     status: 'Running',
     features: [
       'MongoDB Database Connection',
+      'Authentication System',
       'Health Check Endpoints',
       'File Upload Support',
       'CORS Enabled',
@@ -122,7 +134,8 @@ app.get('/', (req, res) => {
       root: '/',
       health: '/health',
       api_health: '/api/health',
-      database_status: '/api/database-status'
+      database_status: '/api/database-status',
+      auth: '/api/auth/*'
     },
     uploadDirs: uploadDirs,
     mongodb: {
@@ -130,6 +143,40 @@ app.get('/', (req, res) => {
       configured: !!process.env.MONGODB_URI
     }
   });
+});
+
+// Debug endpoint to test user creation
+app.post('/debug/test-user', async (req: express.Request, res: express.Response) => {
+  try {
+    const { User } = require('./models/User');
+    const testUser = new User({
+      email: 'debug@test.com',
+      password: 'test123',
+      username: 'debuguser',
+      firstName: 'Debug',
+      lastName: 'User',
+      role: 'student',
+      isGuest: false,
+      language: 'en',
+      difficulty: 'easy',
+      topics: [],
+      totalActivitiesCompleted: 0,
+      currentLevel: 1,
+      totalPoints: 0,
+      badges: [],
+      streakDays: 0,
+      subscriptionType: 'free',
+      features: [],
+      emailVerified: false,
+      loginAttempts: 0,
+      childrenIds: [],
+    });
+    
+    const savedUser = await testUser.save();
+    res.json({ success: true, user: savedUser });
+  } catch (error: any) {
+    res.json({ success: false, error: error.message, stack: error.stack });
+  }
 });
 
 // Error handling middleware
@@ -153,7 +200,12 @@ app.use('*', (req, res) => {
       '/',
       '/health',
       '/api/health',
-      '/api/database-status'
+      '/api/database-status',
+      '/api/auth/register',
+      '/api/auth/login',
+      '/api/auth/guest-login',
+      '/api/auth/profile',
+      '/api/auth/logout'
     ]
   });
 });

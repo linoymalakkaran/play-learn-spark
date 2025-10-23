@@ -32,7 +32,7 @@ const SessionSchema = new Schema<ISession>({
 
 // Index for efficient queries
 SessionSchema.index({ userId: 1 });
-SessionSchema.index({ refreshToken: 1 });
+// Note: refreshToken already has unique: true, so no need for explicit index
 
 // Static methods
 SessionSchema.statics.createSession = function(userId: string, refreshToken: string, expiresAt: Date) {

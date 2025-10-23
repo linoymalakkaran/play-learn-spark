@@ -40,8 +40,8 @@ const PasswordResetSchema = new Schema<IPasswordReset>({
 
 // Index for efficient queries
 PasswordResetSchema.index({ userId: 1 });
-PasswordResetSchema.index({ token: 1 });
-PasswordResetSchema.index({ expiresAt: 1 });
+// Note: token already has unique: true, so no need for explicit index
+// Note: expiresAt already has expires: 0 (TTL), so no need for explicit index
 
 // Static method to create password reset token
 PasswordResetSchema.statics.createPasswordResetToken = async function(userId: string): Promise<string | null> {

@@ -88,8 +88,9 @@ jobs:
             --registry-password ${{ secrets.GITHUB_TOKEN }} \
             --dns-name-label playlearnspark-${{ github.event.inputs.environment }}-api \
             --ports 3000 \
-            --environment-variables NODE_ENV=${{ github.event.inputs.environment }} PORT=3000 MONGO_URI=${{ secrets.MONGODB_ATLAS_URI }}/playlearnspark?retryWrites=true&w=majority GOOGLE_AI_KEY=${{ secrets.GOOGLE_AI_API_KEY }} \
-            --secure-environment-variables JWT_SECRET=${{ secrets.JWT_SECRET }}
+            --os-type Linux \
+            --environment-variables NODE_ENV=${{ github.event.inputs.environment }} PORT=3000 MONGO_URI="${{ secrets.MONGODB_ATLAS_URI }}/playlearnspark?retryWrites=true&w=majority" GOOGLE_AI_KEY="${{ secrets.GOOGLE_AI_API_KEY }}" \
+            --secure-environment-variables JWT_SECRET="${{ secrets.JWT_SECRET }}"
 
       - name: Output URLs
         run: |

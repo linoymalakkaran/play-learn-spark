@@ -1,0 +1,155 @@
+name: Deploy Application
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - prod
+          - dev
+      container_tag:
+        description: 'Container tag to deploy (default: latest)'
+        required: false
+        default: 'latest'
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_FRONTEND: playlearnspark-frontend
+  IMAGE_NAME_BACKEND: playlearnspark-backend
+
+jobs:
+  deploy-containers:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.branch }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+      
+      - name: Setup Azure CLI
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Set deployment variables
+        id: vars
+        run: |
+          if [[ "${{ github.event.inputs.branch }}" == "prod" ]]; then
+            echo "resource_group=playlearnspark-prod-rg" >> $GITHUB_OUTPUT
+            echo "app_name=playlearnspark-prod-app" >> $GITHUB_OUTPUT
+            echo "domain=playlearnspark.dpdns.org" >> $GITHUB_OUTPUT
+          else
+            echo "resource_group=playlearnspark-dev-rg" >> $GITHUB_OUTPUT
+            echo "app_name=playlearnspark-dev-app" >> $GITHUB_OUTPUT
+            echo "domain=dev.playlearnspark.dpdns.org" >> $GITHUB_OUTPUT
+          fi
+          
+          TAG="${{ github.event.inputs.container_tag }}"
+          if [[ -z "$TAG" || "$TAG" == "latest" ]]; then
+            TAG="latest"
+          fi
+          echo "container_tag=$TAG" >> $GITHUB_OUTPUT
+          echo "frontend_image=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_FRONTEND }}:$TAG" >> $GITHUB_OUTPUT
+          echo "backend_image=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_BACKEND }}:$TAG" >> $GITHUB_OUTPUT
+      
+      - name: Check if containers exist
+        run: |
+          echo "## 🔍 Checking Container Images" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check frontend image
+          if docker manifest inspect ${{ steps.vars.outputs.frontend_image }} > /dev/null 2>&1; then
+            echo "✅ Frontend image exists: \`${{ steps.vars.outputs.frontend_image }}\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Frontend image not found: \`${{ steps.vars.outputs.frontend_image }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "::error::Frontend container image not found. Please run 'Build and Push Containers' workflow first."
+            exit 1
+          fi
+          
+          # Check backend image  
+          if docker manifest inspect ${{ steps.vars.outputs.backend_image }} > /dev/null 2>&1; then
+            echo "✅ Backend image exists: \`${{ steps.vars.outputs.backend_image }}\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Backend image not found: \`${{ steps.vars.outputs.backend_image }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "::error::Backend container image not found. Please run 'Build and Push Containers' workflow first."
+            exit 1
+          fi
+      
+      - name: Deploy to Azure Container Apps
+        run: |
+          echo "## 🚀 Deploying to Azure Container Apps" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment**: ${{ github.event.inputs.branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Resource Group**: ${{ steps.vars.outputs.resource_group }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Container Tag**: ${{ steps.vars.outputs.container_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Update backend container app
+          echo "Updating backend container app..."
+          az containerapp update \
+            --name "${{ steps.vars.outputs.app_name }}-backend" \
+            --resource-group "${{ steps.vars.outputs.resource_group }}" \
+            --image "${{ steps.vars.outputs.backend_image }}" \
+            --set-env-vars \
+              NODE_ENV=production \
+              MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+              JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+              PORT=3000
+          
+          # Update frontend container app
+          echo "Updating frontend container app..."
+          az containerapp update \
+            --name "${{ steps.vars.outputs.app_name }}-frontend" \
+            --resource-group "${{ steps.vars.outputs.resource_group }}" \
+            --image "${{ steps.vars.outputs.frontend_image }}" \
+            --set-env-vars \
+              NODE_ENV=production \
+              VITE_API_URL="https://${{ steps.vars.outputs.domain }}/api"
+          
+          echo "✅ **Backend**: Updated to \`${{ steps.vars.outputs.backend_image }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Frontend**: Updated to \`${{ steps.vars.outputs.frontend_image }}\`" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Verify deployment
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔍 Deployment Verification" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Wait for deployment to stabilize
+          echo "Waiting for deployment to stabilize..."
+          sleep 30
+          
+          # Check backend health
+          BACKEND_URL="https://${{ steps.vars.outputs.domain }}/api/health"
+          if curl -f -s "$BACKEND_URL" > /dev/null; then
+            echo "✅ **Backend Health**: OK - $BACKEND_URL" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Backend Health**: Not responding - $BACKEND_URL" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check frontend
+          FRONTEND_URL="https://${{ steps.vars.outputs.domain }}"
+          if curl -f -s "$FRONTEND_URL" > /dev/null; then
+            echo "✅ **Frontend**: OK - $FRONTEND_URL" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Frontend**: Not responding - $FRONTEND_URL" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🌐 Application URL**: https://${{ steps.vars.outputs.domain }}" >> $GITHUB_STEP_SUMMARY
+          
+      - name: Cleanup
+        if: always()
+        run: |
+          # Logout from Azure
+          az logout || true
+          
+          # Clean up Docker credentials
+          docker logout ${{ env.REGISTRY }} || true

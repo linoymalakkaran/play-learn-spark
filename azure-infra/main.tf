@@ -13,13 +13,14 @@ terraform {
     }
   }
 
-  # Uncomment and configure for remote state storage
-  # backend "azurerm" {
-  #   resource_group_name  = "tfstate-rg"
-  #   storage_account_name = "tfstatestorage"
-  #   container_name       = "tfstate"
-  #   key                  = "play-learn-spark.terraform.tfstate"
-  # }
+  # Remote state storage in Azure Storage
+  backend "azurerm" {
+    # These values will be provided via workflow environment variables
+    # resource_group_name  = var.terraform_state_resource_group
+    # storage_account_name = var.terraform_state_storage_account
+    container_name = "tfstate"
+    key           = "play-learn-spark.terraform.tfstate"
+  }
 }
 
 # Configure the Microsoft Azure Provider

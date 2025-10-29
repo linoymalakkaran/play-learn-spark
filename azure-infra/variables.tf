@@ -136,6 +136,19 @@ variable "anthropic_api_key" {
   default     = ""
 }
 
+# GitHub Container Registry Authentication
+variable "github_username" {
+  description = "GitHub username for GHCR authentication"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_token" {
+  description = "GitHub Personal Access Token for GHCR authentication"
+  type        = string
+  sensitive   = true
+}
+
 # Resource Tags
 variable "tags" {
   description = "Tags to be applied to all resources"

@@ -1,0 +1,59 @@
+name: Build and Push Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to build from (dev/prod)"
+        required: true
+        default: "feature/dev"
+      image_tag:
+        description: "Image tag (default latest)"
+        required: false
+        default: "latest"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Set up Node (frontend)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install and build frontend
+        working-directory: client
+        run: |
+          npm ci
+          npm run build
+
+      - name: Set up Node (backend)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install backend deps
+        working-directory: server
+        run: npm ci
+
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build frontend image
+        run: |
+          docker build -t ghcr.io/linoymalakkaran/play-learn-spark-frontend:${{ github.event.inputs.image_tag }} -f client/Dockerfile client
+      - name: Build backend image
+        run: |
+          docker build -t ghcr.io/linoymalakkaran/play-learn-spark-backend:${{ github.event.inputs.image_tag }} -f server/Dockerfile server
+
+      - name: Push images
+        run: |
+          docker push ghcr.io/linoymalakkaran/play-learn-spark-frontend:${{ github.event.inputs.image_tag }}
+          docker push ghcr.io/linoymalakkaran/play-learn-spark-backend:${{ github.event.inputs.image_tag }}

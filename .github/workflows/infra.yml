@@ -1,0 +1,86 @@
+name: Terraform Infra
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment (dev or prod)"
+        required: true
+        default: "dev"
+      action:
+        description: "Terraform action (plan/apply/destroy)"
+        required: true
+        default: "plan"
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+      branch:
+        description: "Git branch to checkout"
+        required: true
+        default: "feature/dev"
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Terraform Init
+        working-directory: azure-infra
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.TF_STATE_RG }}" \
+            -backend-config="storage_account_name=${{ secrets.TF_STATE_SA }}" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=play-learn-spark-${{ github.event.inputs.environment }}.tfstate"
+
+      - name: Terraform Validate
+        working-directory: azure-infra
+        run: terraform validate
+
+      - name: Terraform Plan
+        if: ${{ github.event.inputs.action == 'plan' }}
+        working-directory: azure-infra
+        run: |
+          terraform plan -var environment=${{ github.event.inputs.environment }} \
+            -var mongodb_atlas_connection_string=${{ secrets.MONGODB_ATLAS_URI }} \
+            -var jwt_secret=${{ secrets.JWT_SECRET }} \
+            -var google_ai_api_key=${{ secrets.GOOGLE_AI_API_KEY }}
+
+      - name: Terraform Apply
+        if: ${{ github.event.inputs.action == 'apply' }}
+        working-directory: azure-infra
+        run: |
+          terraform apply -auto-approve \
+            -var environment=${{ github.event.inputs.environment }} \
+            -var mongodb_atlas_connection_string=${{ secrets.MONGODB_ATLAS_URI }} \
+            -var jwt_secret=${{ secrets.JWT_SECRET }} \
+            -var google_ai_api_key=${{ secrets.GOOGLE_AI_API_KEY }}
+
+      - name: Terraform Destroy
+        if: ${{ github.event.inputs.action == 'destroy' }}
+        working-directory: azure-infra
+        run: |
+          terraform destroy -auto-approve \
+            -var environment=${{ github.event.inputs.environment }} \
+            -var mongodb_atlas_connection_string=${{ secrets.MONGODB_ATLAS_URI }} \
+            -var jwt_secret=${{ secrets.JWT_SECRET }} \
+            -var google_ai_api_key=${{ secrets.GOOGLE_AI_API_KEY }}

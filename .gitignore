@@ -26,8 +26,12 @@ build/
 *.db
 *.sqlite
 *.sqlite3
+# Ignore data directories but allow TypeScript data files
 data/
 */data/
+!client/src/data/
+!**/src/data/*.ts
+!**/src/data/*.js
 *.db-journal
 
 # Logs

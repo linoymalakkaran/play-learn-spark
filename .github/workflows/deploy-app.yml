@@ -10,7 +10,7 @@ on:
       branch:
         description: "Branch to deploy from"
         required: true
-        default: "feature/dev"
+        default: "dev"
       image_tag:
         description: "Image tag to deploy (default latest)"
         required: false

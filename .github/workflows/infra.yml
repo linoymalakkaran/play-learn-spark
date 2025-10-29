@@ -19,7 +19,7 @@ on:
       branch:
         description: "Git branch to checkout"
         required: true
-        default: "feature/dev"
+        default: "dev"
 
 permissions:
   contents: read

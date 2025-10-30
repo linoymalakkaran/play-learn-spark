@@ -11,13 +11,6 @@ on:
         description: "Image tag (default latest)"
         required: false
         default: "latest"
-  push:
-    branches: [ dev ]
-    paths:
-      - 'client/**'
-      - 'server/**'
-      - 'Dockerfile*'
-      - 'docker-compose*.yml'
 
 permissions:
   contents: read

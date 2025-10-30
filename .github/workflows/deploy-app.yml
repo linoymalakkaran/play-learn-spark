@@ -6,7 +6,7 @@ on:
       environment:
         description: "Environment (dev or prod)"
         required: true
-        default: "dev"
+        default: "prod"
       branch:
         description: "Branch to deploy from"
         required: true
@@ -15,11 +15,6 @@ on:
         description: "Image tag to deploy (default latest)"
         required: false
         default: "latest"
-  push:
-    branches: [ dev ]
-    paths:
-      - 'client/**'
-      - 'server/**'
 
 permissions:
   contents: read
@@ -50,8 +45,8 @@ jobs:
       - name: Get resource information
         id: azure_resources
         run: |
-          # Set environment (default to dev for push triggers)
-          ENVIRONMENT=${{ github.event.inputs.environment || 'dev' }}
+          # Set environment (default to prod for manual triggers)
+          ENVIRONMENT=${{ github.event.inputs.environment || 'prod' }}
           
           # Get storage account name from the resource group
           STORAGE_ACCOUNT=$(az storage account list \

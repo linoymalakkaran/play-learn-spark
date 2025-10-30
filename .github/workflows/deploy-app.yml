@@ -3,10 +3,6 @@ name: Deploy Application
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: "Environment (dev or prod)"
-        required: true
-        default: "prod"
       branch:
         description: "Branch to deploy from"
         required: true
@@ -45,8 +41,8 @@ jobs:
       - name: Get resource information
         id: azure_resources
         run: |
-          # Set environment (default to dev since that's where our resources exist)
-          ENVIRONMENT=${{ github.event.inputs.environment || 'dev' }}
+          # Always use dev environment since that's where our resources exist
+          ENVIRONMENT=dev
           
           # Get storage account name from the resource group
           STORAGE_ACCOUNT=$(az storage account list \

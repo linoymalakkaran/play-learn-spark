@@ -6,11 +6,18 @@ on:
       branch:
         description: "Branch to build from (dev/prod)"
         required: true
-        default: "feature/dev"
+        default: "dev"
       image_tag:
         description: "Image tag (default latest)"
         required: false
         default: "latest"
+  push:
+    branches: [ dev ]
+    paths:
+      - 'client/**'
+      - 'server/**'
+      - 'Dockerfile*'
+      - 'docker-compose*.yml'
 
 permissions:
   contents: read
@@ -23,7 +30,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch }}
+          ref: ${{ github.event.inputs.branch || 'dev' }}
 
       - name: Set up Node (frontend)
         uses: actions/setup-node@v4
@@ -48,12 +55,15 @@ jobs:
 
       - name: Build frontend image
         run: |
-          docker build -t ghcr.io/linoymalakkaran/play-learn-spark-frontend:${{ github.event.inputs.image_tag }} -f client/Dockerfile client
+          IMAGE_TAG=${{ github.event.inputs.image_tag || 'latest' }}
+          docker build -t ghcr.io/linoymalakkaran/play-learn-spark-frontend:${IMAGE_TAG} -f client/Dockerfile client
       - name: Build backend image
         run: |
-          docker build -t ghcr.io/linoymalakkaran/play-learn-spark-backend:${{ github.event.inputs.image_tag }} -f server/Dockerfile server
+          IMAGE_TAG=${{ github.event.inputs.image_tag || 'latest' }}
+          docker build -t ghcr.io/linoymalakkaran/play-learn-spark-backend:${IMAGE_TAG} -f server/Dockerfile server
 
       - name: Push images
         run: |
-          docker push ghcr.io/linoymalakkaran/play-learn-spark-frontend:${{ github.event.inputs.image_tag }}
-          docker push ghcr.io/linoymalakkaran/play-learn-spark-backend:${{ github.event.inputs.image_tag }}
+          IMAGE_TAG=${{ github.event.inputs.image_tag || 'latest' }}
+          docker push ghcr.io/linoymalakkaran/play-learn-spark-frontend:${IMAGE_TAG}
+          docker push ghcr.io/linoymalakkaran/play-learn-spark-backend:${IMAGE_TAG}

@@ -1,105 +1,54 @@
-# Terraform variables for PlayLearnSpark infra (prod + dev)# Variables for the Play Learn Spark infrastructure
-
-
-
-variable "environment" {variable "project_name" {
-
-  description = "Deployment environment (dev or prod)"  description = "The name of the project"
-
-  type        = string  type        = string
-
-  default     = "dev"  default     = "play-learn-spark"
-
-  validation {}
-
-    condition     = contains(["dev", "prod"], var.environment)
-
-    error_message = "environment must be one of: dev, prod"variable "environment" {
-
-  }  description = "The deployment environment (dev, staging, prod)"
-
-}  type        = string
-
-  default     = "dev"
-
-variable "location" {  
-
-  description = "Azure region"  validation {
-
-  type        = string    condition     = contains(["dev", "staging", "prod"], var.environment)
-
-  default     = "UAE North"    error_message = "Environment must be one of: dev, staging, prod."
-
-}  }
-
-}
+# Variables for the Play Learn Spark infrastructure
 
 variable "project_name" {
-
-  description = "Base project name"variable "location" {
-
-  type        = string  description = "The Azure region where resources will be created"
-
-  default     = "play-learn-spark"  type        = string
-
-}  default     = "East US"
-
+  description = "The name of the project"
+  type        = string
+  default     = "play-learn-spark"
 }
 
-variable "mongodb_atlas_connection_string" {
-
-  description = "MongoDB Atlas connection string (without database name)"variable "resource_group_name" {
-
-  type        = string  description = "The name of the resource group"
-
-  sensitive   = true  type        = string
-
-}  default     = ""
-
-}
-
-variable "jwt_secret" {
-
-  description = "JWT secret for backend"variable "app_service_plan_sku" {
-
-  type        = string  description = "The SKU for the App Service Plan"
-
-  sensitive   = true  type        = string
-
-}  default     = "B1"
-
+variable "environment" {
+  description = "The deployment environment (dev, staging, prod)"
+  type        = string
+  default     = "dev"
   
+  validation {
+    condition     = contains(["dev", "staging", "prod"], var.environment)
+    error_message = "Environment must be one of: dev, staging, prod."
+  }
+}
 
-variable "google_ai_api_key" {  validation {
+variable "location" {
+  description = "The Azure region where resources will be created"
+  type        = string
+  default     = "UAE North"
+}
 
-  description = "Google AI Studio API key"    condition = contains([
+variable "resource_group_name" {
+  description = "The name of the resource group"
+  type        = string
+  default     = ""
+}
 
-  type        = string      "F1", "D1", "B1", "B2", "B3", 
-
-  sensitive   = true      "S1", "S2", "S3", 
-
-  default     = ""      "P1v2", "P2v2", "P3v2", 
-
-}      "P1v3", "P2v3", "P3v3"
-
+variable "app_service_plan_sku" {
+  description = "The SKU for the App Service Plan"
+  type        = string
+  default     = "B1"
+  
+  validation {
+    condition = contains([
+      "F1", "D1", "B1", "B2", "B3", 
+      "S1", "S2", "S3", 
+      "P1v2", "P2v2", "P3v2", 
+      "P1v3", "P2v3", "P3v3"
     ], var.app_service_plan_sku)
+    error_message = "App Service Plan SKU must be a valid Azure App Service SKU."
+  }
+}
 
-variable "tags" {    error_message = "App Service Plan SKU must be a valid Azure App Service SKU."
-
-  description = "Azure resource tags"  }
-
-  type        = map(string)}
-
-  default = {
-
-    ManagedBy = "Terraform"variable "frontend_docker_image" {
-
-    Project   = "PlayLearnSpark"  description = "Docker image for the frontend application"
-
-  }  type        = string
-
-}  default     = "nginx:latest"
-
+variable "frontend_docker_image" {
+  description = "Docker image for the frontend application"
+  type        = string
+  default     = "nginx:latest"
 }
 
 variable "backend_docker_image" {
@@ -144,14 +93,18 @@ variable "custom_domain_name" {
   default     = ""
 }
 
-variable "tags" {
-  description = "Tags to be applied to all resources"
-  type        = map(string)
-  default = {
-    Project     = "Play Learn Spark"
-    Environment = "dev"
-    ManagedBy   = "Terraform"
-  }
+# Database Configuration
+variable "mongodb_atlas_connection_string" {
+  description = "MongoDB Atlas connection string (without database name)"
+  type        = string
+  sensitive   = true
+}
+
+# Security Configuration
+variable "jwt_secret" {
+  description = "JWT secret for backend authentication"
+  type        = string
+  sensitive   = true
 }
 
 # AI Service Configuration
@@ -181,4 +134,28 @@ variable "anthropic_api_key" {
   type        = string
   sensitive   = true
   default     = ""
+}
+
+# GitHub Container Registry Authentication
+variable "github_username" {
+  description = "GitHub username for GHCR authentication"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_token" {
+  description = "GitHub Personal Access Token for GHCR authentication"
+  type        = string
+  sensitive   = true
+}
+
+# Resource Tags
+variable "tags" {
+  description = "Tags to be applied to all resources"
+  type        = map(string)
+  default = {
+    Project     = "Play Learn Spark"
+    Environment = "dev"
+    ManagedBy   = "Terraform"
+  }
 }

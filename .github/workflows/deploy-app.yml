@@ -98,7 +98,7 @@ jobs:
             --os-type Linux \
             --cpu 0.5 \
             --memory 1.0 \
-            --environment-variables NODE_ENV=${ENVIRONMENT} PORT=3000 MONGO_URI="${{ secrets.MONGODB_ATLAS_URI }}" GOOGLE_AI_KEY="${{ secrets.GOOGLE_AI_API_KEY }}" JWT_SECRET="${{ secrets.JWT_SECRET }}"
+            --environment-variables NODE_ENV=${ENVIRONMENT} PORT=3000 MONGODB_URI="${{ secrets.MONGODB_ATLAS_URI }}" GOOGLE_AI_KEY="${{ secrets.GOOGLE_AI_API_KEY }}" JWT_SECRET="${{ secrets.JWT_SECRET }}"
 
       - name: Output URLs
         run: |

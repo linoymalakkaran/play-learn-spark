@@ -15,6 +15,11 @@ on:
         description: "Image tag to deploy (default latest)"
         required: false
         default: "latest"
+  push:
+    branches: [ dev ]
+    paths:
+      - 'client/**'
+      - 'server/**'
 
 permissions:
   contents: read
@@ -32,7 +37,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch }}
+          ref: ${{ github.event.inputs.branch || 'dev' }}
 
       - name: Azure CLI Login
         run: |
@@ -45,19 +50,23 @@ jobs:
       - name: Get resource information
         id: azure_resources
         run: |
+          # Set environment (default to dev for push triggers)
+          ENVIRONMENT=${{ github.event.inputs.environment || 'dev' }}
+          
           # Get storage account name from the resource group
           STORAGE_ACCOUNT=$(az storage account list \
-            --resource-group play-learn-spark-${{ github.event.inputs.environment }}-rg \
+            --resource-group play-learn-spark-${ENVIRONMENT}-rg \
             --query "[0].name" \
             --output tsv)
           
           # Get container group FQDN
           BACKEND_FQDN=$(az container show \
-            --name play-learn-spark-${{ github.event.inputs.environment }}-backend \
-            --resource-group play-learn-spark-${{ github.event.inputs.environment }}-rg \
+            --name play-learn-spark-${ENVIRONMENT}-backend \
+            --resource-group play-learn-spark-${ENVIRONMENT}-rg \
             --query "ipAddress.fqdn" \
             --output tsv 2>/dev/null || echo "")
           
+          echo "ENVIRONMENT=${ENVIRONMENT}" >> $GITHUB_OUTPUT
           echo "STORAGE=$STORAGE_ACCOUNT" >> $GITHUB_OUTPUT
           echo "BACKEND=$BACKEND_FQDN" >> $GITHUB_OUTPUT
 
@@ -81,20 +90,23 @@ jobs:
 
       - name: Update backend container image (recreate)
         run: |
-          az container delete --name play-learn-spark-${{ github.event.inputs.environment }}-backend --resource-group play-learn-spark-${{ github.event.inputs.environment }}-rg --yes || true
+          ENVIRONMENT=${{ steps.azure_resources.outputs.ENVIRONMENT }}
+          IMAGE_TAG=${{ github.event.inputs.image_tag || 'latest' }}
+          
+          az container delete --name play-learn-spark-${ENVIRONMENT}-backend --resource-group play-learn-spark-${ENVIRONMENT}-rg --yes || true
           az container create \
-            --name play-learn-spark-${{ github.event.inputs.environment }}-backend \
-            --resource-group play-learn-spark-${{ github.event.inputs.environment }}-rg \
-            --image ghcr.io/linoymalakkaran/play-learn-spark-backend:${{ github.event.inputs.image_tag }} \
+            --name play-learn-spark-${ENVIRONMENT}-backend \
+            --resource-group play-learn-spark-${ENVIRONMENT}-rg \
+            --image ghcr.io/linoymalakkaran/play-learn-spark-backend:${IMAGE_TAG} \
             --registry-login-server ghcr.io \
             --registry-username ${{ github.actor }} \
             --registry-password ${{ secrets.GITHUB_TOKEN }} \
-            --dns-name-label play-learn-spark-${{ github.event.inputs.environment }}-backend \
+            --dns-name-label play-learn-spark-${ENVIRONMENT}-backend \
             --ports 3000 \
             --os-type Linux \
-            --environment-variables NODE_ENV=${{ github.event.inputs.environment }} PORT=3000 MONGO_URI="${{ secrets.MONGODB_ATLAS_URI }}/playlearnspark?retryWrites=true&w=majority" GOOGLE_AI_KEY="${{ secrets.GOOGLE_AI_API_KEY }}" JWT_SECRET="${{ secrets.JWT_SECRET }}"
+            --environment-variables NODE_ENV=${ENVIRONMENT} PORT=3000 MONGO_URI="${{ secrets.MONGODB_ATLAS_URI }}/playlearnspark?retryWrites=true&w=majority" GOOGLE_AI_KEY="${{ secrets.GOOGLE_AI_API_KEY }}" JWT_SECRET="${{ secrets.JWT_SECRET }}"
 
       - name: Output URLs
         run: |
           echo "Frontend: https://${{ steps.azure_resources.outputs.STORAGE }}.z1.web.core.windows.net"
-          echo "Backend: http://play-learn-spark-${{ github.event.inputs.environment }}-backend.eastus.azurecontainer.io:3000"
+          echo "Backend: http://play-learn-spark-${{ steps.azure_resources.outputs.ENVIRONMENT }}-backend.eastus.azurecontainer.io:3000"

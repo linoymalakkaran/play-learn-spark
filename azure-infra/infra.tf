@@ -43,6 +43,13 @@ resource "azurerm_container_group" "backend" {
   dns_name_label      = substr(replace("${local.name_prefix}${random_id.suffix.hex}","_",""),0,60)
   os_type             = "Linux"
 
+  # GitHub Container Registry authentication
+  image_registry_credential {
+    server   = "ghcr.io"
+    username = var.github_username
+    password = var.github_token
+  }
+
   container {
     name   = "api"
     image  = "ghcr.io/linoymalakkaran/play-learn-spark-backend:latest"

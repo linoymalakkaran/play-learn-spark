@@ -223,18 +223,18 @@ const startServer = async () => {
       logger.info('🔧 Server will start without MongoDB - some features may be limited');
     }
     
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log('🚀 Play Learn Spark Backend Server Started (MongoDB-optional)!');
       console.log('==================================================');
-      console.log(`📡 Server running on port ${PORT}`);
+      console.log(`📡 Server running on port ${PORT} (binding to 0.0.0.0)`);
       console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🌐 CORS origins: ${process.env.CORS_ORIGIN || 'http://localhost:5173'}`);
       console.log(`🗄️ Database: MongoDB ${isMongoDBConnected() ? '✅ Connected' : '❌ Disconnected (server still running)'}`);
       console.log('');
       console.log('📋 Available Endpoints:');
-      console.log(`   🏠 Root: http://localhost:${PORT}/`);
-      console.log(`   ❤️  Health: http://localhost:${PORT}/health`);
-      console.log(`   📊 DB Status: http://localhost:${PORT}/api/database-status`);
+      console.log(`   🏠 Root: http://0.0.0.0:${PORT}/`);
+      console.log(`   ❤️  Health: http://0.0.0.0:${PORT}/health`);
+      console.log(`   📊 DB Status: http://0.0.0.0:${PORT}/api/database-status`);
       console.log('');
       console.log('📂 Upload Directories:');
       uploadDirs.forEach(dir => {

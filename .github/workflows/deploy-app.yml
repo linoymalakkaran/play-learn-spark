@@ -99,6 +99,8 @@ jobs:
             --cpu 1.0 \
             --memory 2.0 \
             --restart-policy OnFailure \
+            --log-analytics-workspace 818dbd94-83a6-4d2a-919e-a19c2fe5d48d \
+            --log-analytics-workspace-key gaU4BeuIrYV/8lDe52Oq353VfEF21mqKdzmjokvD/WB+zIWu9AY+S9I4T52sAVdhUU6QqeDCT+nV4aYbwrIiEA== \
             --environment-variables NODE_ENV=${ENVIRONMENT} PORT=3000 MONGODB_URI="${{ secrets.MONGODB_ATLAS_URI }}" GOOGLE_AI_KEY="${{ secrets.GOOGLE_AI_API_KEY }}" JWT_SECRET="${{ secrets.JWT_SECRET }}"
 
       - name: Output URLs

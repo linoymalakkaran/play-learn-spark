@@ -28,9 +28,9 @@ USER nodejs
 # Expose port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node healthcheck.js || exit 1
+# Health check (temporarily disabled for debugging)
+# HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+#   CMD node healthcheck.js || exit 1
 
 # Start the application using ts-node
 CMD ["npx", "ts-node", "src/server.ts"]

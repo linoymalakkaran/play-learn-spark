@@ -96,8 +96,9 @@ jobs:
             --dns-name-label play-learn-spark-${ENVIRONMENT}-backend \
             --ports 3000 \
             --os-type Linux \
-            --cpu 0.5 \
-            --memory 1.0 \
+            --cpu 1.0 \
+            --memory 2.0 \
+            --restart-policy OnFailure \
             --environment-variables NODE_ENV=${ENVIRONMENT} PORT=3000 MONGODB_URI="${{ secrets.MONGODB_ATLAS_URI }}" GOOGLE_AI_KEY="${{ secrets.GOOGLE_AI_API_KEY }}" JWT_SECRET="${{ secrets.JWT_SECRET }}"
 
       - name: Output URLs

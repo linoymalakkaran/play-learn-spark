@@ -136,6 +136,13 @@ variable "anthropic_api_key" {
   default     = ""
 }
 
+# Container Image Configuration
+variable "image_tag" {
+  description = "Docker image tag for the backend container"
+  type        = string
+  default     = "latest"
+}
+
 # GitHub Container Registry Authentication
 variable "github_username" {
   description = "GitHub username for GHCR authentication"

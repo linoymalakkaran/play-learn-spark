@@ -66,10 +66,17 @@ jobs:
         with:
           node-version: 20
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
       - name: Build frontend
         working-directory: client
         run: |
           npm ci
+          # Set production backend URL for Azure deployment
+          echo "VITE_API_BASE_URL=http://play-learn-spark-dev-backend.eastus.azurecontainer.io:3000/api" > .env.production
           npm run build
 
       - name: Upload frontend dist to static site
@@ -80,30 +87,32 @@ jobs:
             --source client/dist \
             --overwrite
 
-      - name: Update backend container image (recreate)
+      - name: Update backend container image using Terraform
+        working-directory: azure-infra
         run: |
-          ENVIRONMENT=${{ steps.azure_resources.outputs.ENVIRONMENT }}
           IMAGE_TAG=${{ github.event.inputs.image_tag || 'latest' }}
           
-          az container delete --name play-learn-spark-${ENVIRONMENT}-backend --resource-group play-learn-spark-${ENVIRONMENT}-rg --yes || true
-          az container create \
-            --name play-learn-spark-${ENVIRONMENT}-backend \
-            --resource-group play-learn-spark-${ENVIRONMENT}-rg \
-            --image ghcr.io/linoymalakkaran/play-learn-spark-backend:${IMAGE_TAG} \
-            --registry-login-server ghcr.io \
-            --registry-username ${{ github.actor }} \
-            --registry-password ${{ secrets.GITHUB_TOKEN }} \
-            --dns-name-label play-learn-spark-${ENVIRONMENT}-backend \
-            --ports 3000 \
-            --os-type Linux \
-            --cpu 1.0 \
-            --memory 2.0 \
-            --restart-policy OnFailure \
-            --log-analytics-workspace 818dbd94-83a6-4d2a-919e-a19c2fe5d48d \
-            --log-analytics-workspace-key gaU4BeuIrYV/8lDe52Oq353VfEF21mqKdzmjokvD/WB+zIWu9AY+S9I4T52sAVdhUU6QqeDCT+nV4aYbwrIiEA== \
-            --environment-variables NODE_ENV=${ENVIRONMENT} PORT=3000 MONGODB_URI="${{ secrets.MONGODB_ATLAS_URI }}" GOOGLE_AI_KEY="${{ secrets.GOOGLE_AI_API_KEY }}" JWT_SECRET="${{ secrets.JWT_SECRET }}"
+          # Initialize Terraform
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.TF_STATE_RG }}" \
+            -backend-config="storage_account_name=${{ secrets.TF_STATE_SA }}" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=play-learn-spark-dev.tfstate"
+          
+          # Apply Terraform with the new image tag
+          terraform apply -auto-approve \
+            -var environment=dev \
+            -var image_tag=${IMAGE_TAG} \
+            -var mongodb_atlas_connection_string="${{ secrets.MONGODB_ATLAS_URI }}" \
+            -var jwt_secret="${{ secrets.JWT_SECRET }}" \
+            -var google_ai_api_key="${{ secrets.GOOGLE_AI_API_KEY }}" \
+            -var github_username=${{ github.actor }} \
+            -var github_token="${{ secrets.GITHUB_TOKEN }}"
 
       - name: Output URLs
+        working-directory: azure-infra
         run: |
           echo "Frontend: https://${{ steps.azure_resources.outputs.STORAGE }}.z13.web.core.windows.net"
-          echo "Backend: http://play-learn-spark-${{ steps.azure_resources.outputs.ENVIRONMENT }}-backend.eastus.azurecontainer.io:3000"
+          echo "Backend: http://$(terraform output -raw backend_fqdn):3000"
+          echo "Backend IP: $(terraform output -raw backend_ip):3000"
+          echo "Log Analytics: $(terraform output -raw log_analytics_workspace_name)"

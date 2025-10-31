@@ -20,7 +20,7 @@ variable "environment" {
 variable "location" {
   description = "The Azure region where resources will be created"
   type        = string
-  default     = "UAE North"
+  default     = "East US"
 }
 
 variable "resource_group_name" {

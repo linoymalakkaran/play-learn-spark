@@ -1,12 +1,9 @@
 name: Deploy Application
 
 on:
+  # Manual deployment trigger only - always deploys from dev branch
   workflow_dispatch:
     inputs:
-      branch:
-        description: "Branch to deploy from"
-        required: true
-        default: "dev"
       image_tag:
         description: "Image tag to deploy (default latest)"
         required: false
@@ -28,7 +25,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch || 'dev' }}
+          # Always checkout dev branch
+          ref: dev
 
       - name: Azure CLI Login
         run: |
@@ -87,11 +85,20 @@ jobs:
             --source client/dist \
             --overwrite
 
+      - name: Set deployment variables
+        id: deploy_vars
+        run: |
+          # Always deploy from dev branch with specified image tag
+          BRANCH="dev"
+          IMAGE_TAG="${{ github.event.inputs.image_tag || 'latest' }}"
+          
+          echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "Deploying from dev branch with image tag: ${IMAGE_TAG}"
+
       - name: Update backend container image using Terraform
         working-directory: azure-infra
         run: |
-          IMAGE_TAG=${{ github.event.inputs.image_tag || 'latest' }}
-          
           # Initialize Terraform
           terraform init \
             -backend-config="resource_group_name=${{ secrets.TF_STATE_RG }}" \
@@ -99,10 +106,10 @@ jobs:
             -backend-config="container_name=tfstate" \
             -backend-config="key=play-learn-spark-dev.tfstate"
           
-          # Apply Terraform with the new image tag
+          # Apply Terraform with the determined image tag
           terraform apply -auto-approve \
             -var environment=dev \
-            -var image_tag=${IMAGE_TAG} \
+            -var image_tag=${{ steps.deploy_vars.outputs.IMAGE_TAG }} \
             -var mongodb_atlas_connection_string="${{ secrets.MONGODB_ATLAS_URI }}" \
             -var jwt_secret="${{ secrets.JWT_SECRET }}" \
             -var google_ai_api_key="${{ secrets.GOOGLE_AI_API_KEY }}" \

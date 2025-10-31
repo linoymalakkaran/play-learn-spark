@@ -54,9 +54,13 @@ resource "azurerm_container_group" "backend" {
   os_type             = "Linux"
   restart_policy      = "OnFailure"
 
-  # Log Analytics Integration (configured via container parameters)
-  log_analytics_workspace_id  = azurerm_log_analytics_workspace.container_logs.workspace_id
-  log_analytics_workspace_key = azurerm_log_analytics_workspace.container_logs.primary_shared_key
+  # Log Analytics Integration
+  diagnostics {
+    log_analytics {
+      workspace_id  = azurerm_log_analytics_workspace.container_logs.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.container_logs.primary_shared_key
+    }
+  }
 
   # GitHub Container Registry authentication
   image_registry_credential {

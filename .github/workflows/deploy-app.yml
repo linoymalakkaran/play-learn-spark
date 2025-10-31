@@ -1,12 +1,9 @@
 name: Deploy Application
 
 on:
+  # Manual deployment trigger only - always deploys from dev branch
   workflow_dispatch:
     inputs:
-      branch:
-        description: "Branch to deploy from"
-        required: true
-        default: "dev"
       image_tag:
         description: "Image tag to deploy (default latest)"
         required: false
@@ -28,7 +25,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch || 'dev' }}
+          # Always checkout dev branch
+          ref: dev
 
       - name: Azure CLI Login
         run: |
@@ -66,10 +64,17 @@ jobs:
         with:
           node-version: 20
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
       - name: Build frontend
         working-directory: client
         run: |
           npm ci
+          # Set production backend URL for Azure deployment
+          echo "VITE_API_BASE_URL=http://play-learn-spark-dev-backend.eastus.azurecontainer.io:3000/api" > .env.production
           npm run build
 
       - name: Upload frontend dist to static site
@@ -80,27 +85,41 @@ jobs:
             --source client/dist \
             --overwrite
 
-      - name: Update backend container image (recreate)
+      - name: Set deployment variables
+        id: deploy_vars
         run: |
-          ENVIRONMENT=${{ steps.azure_resources.outputs.ENVIRONMENT }}
-          IMAGE_TAG=${{ github.event.inputs.image_tag || 'latest' }}
+          # Always deploy from dev branch with specified image tag
+          BRANCH="dev"
+          IMAGE_TAG="${{ github.event.inputs.image_tag || 'latest' }}"
           
-          az container delete --name play-learn-spark-${ENVIRONMENT}-backend --resource-group play-learn-spark-${ENVIRONMENT}-rg --yes || true
-          az container create \
-            --name play-learn-spark-${ENVIRONMENT}-backend \
-            --resource-group play-learn-spark-${ENVIRONMENT}-rg \
-            --image ghcr.io/linoymalakkaran/play-learn-spark-backend:${IMAGE_TAG} \
-            --registry-login-server ghcr.io \
-            --registry-username ${{ github.actor }} \
-            --registry-password ${{ secrets.GITHUB_TOKEN }} \
-            --dns-name-label play-learn-spark-${ENVIRONMENT}-backend \
-            --ports 3000 \
-            --os-type Linux \
-            --cpu 0.5 \
-            --memory 1.0 \
-            --environment-variables NODE_ENV=${ENVIRONMENT} PORT=3000 MONGO_URI="${{ secrets.MONGODB_ATLAS_URI }}/playlearnspark?retryWrites=true&w=majority" GOOGLE_AI_KEY="${{ secrets.GOOGLE_AI_API_KEY }}" JWT_SECRET="${{ secrets.JWT_SECRET }}"
+          echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "Deploying from dev branch with image tag: ${IMAGE_TAG}"
+
+      - name: Update backend container image using Terraform
+        working-directory: azure-infra
+        run: |
+          # Initialize Terraform
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.TF_STATE_RG }}" \
+            -backend-config="storage_account_name=${{ secrets.TF_STATE_SA }}" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=play-learn-spark-dev.tfstate"
+          
+          # Apply Terraform with the determined image tag
+          terraform apply -auto-approve \
+            -var environment=dev \
+            -var image_tag=${{ steps.deploy_vars.outputs.IMAGE_TAG }} \
+            -var mongodb_atlas_connection_string="${{ secrets.MONGODB_ATLAS_URI }}" \
+            -var jwt_secret="${{ secrets.JWT_SECRET }}" \
+            -var google_ai_api_key="${{ secrets.GOOGLE_AI_API_KEY }}" \
+            -var github_username=${{ github.actor }} \
+            -var github_token="${{ secrets.GITHUB_TOKEN }}"
 
       - name: Output URLs
+        working-directory: azure-infra
         run: |
           echo "Frontend: https://${{ steps.azure_resources.outputs.STORAGE }}.z13.web.core.windows.net"
-          echo "Backend: http://play-learn-spark-${{ steps.azure_resources.outputs.ENVIRONMENT }}-backend.eastus.azurecontainer.io:3000"
+          echo "Backend: http://$(terraform output -raw backend_fqdn):3000"
+          echo "Backend IP: $(terraform output -raw backend_ip):3000"
+          echo "Log Analytics: $(terraform output -raw log_analytics_workspace_name)"

@@ -81,15 +81,11 @@ resource "azurerm_container_group" "backend" {
     }
 
     environment_variables = {
-      NODE_ENV = var.environment
-      PORT     = 3000
-    }
-
-    # Secure environment variables
-    secure_environment_variables = {
-      MONGODB_URI     = var.mongodb_atlas_connection_string
-      GOOGLE_AI_KEY   = var.google_ai_api_key
-      JWT_SECRET      = var.jwt_secret
+      NODE_ENV      = var.environment
+      PORT          = 3000
+      MONGODB_URI   = var.mongodb_atlas_connection_string
+      GOOGLE_AI_KEY = var.google_ai_api_key
+      JWT_SECRET    = var.jwt_secret
     }
   }
 

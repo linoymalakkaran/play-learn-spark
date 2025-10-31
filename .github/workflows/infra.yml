@@ -8,7 +8,7 @@ on:
         required: true
         default: "dev"
       action:
-        description: "Terraform action (plan/apply/destroy)"
+        description: "Terraform action (plan/apply/destroy/force-unlock)"
         required: true
         default: "plan"
         type: choice
@@ -16,10 +16,10 @@ on:
           - plan
           - apply
           - destroy
-      branch:
-        description: "Git branch to checkout"
-        required: true
-        default: "dev"
+          - force-unlock
+      lock_id:
+        description: "Lock ID for force unlock (optional)"
+        required: false
 
 permissions:
   contents: read
@@ -37,7 +37,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch }}
+          # Always checkout dev branch
+          ref: dev
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -65,34 +66,32 @@ jobs:
       - name: Terraform Plan
         if: ${{ github.event.inputs.action == 'plan' }}
         working-directory: azure-infra
-        run: |
-          terraform plan -var environment=${{ github.event.inputs.environment }} \
-            -var mongodb_atlas_connection_string=${{ secrets.MONGODB_ATLAS_URI }} \
-            -var jwt_secret=${{ secrets.JWT_SECRET }} \
-            -var google_ai_api_key=${{ secrets.GOOGLE_AI_API_KEY }} \
-            -var github_username=${{ github.actor }} \
-            -var github_token=${{ secrets.GITHUB_TOKEN }}
+        run: terraform plan -var environment=${{ github.event.inputs.environment }} -var image_tag=latest -var mongodb_atlas_connection_string="${{ secrets.MONGODB_ATLAS_URI }}" -var jwt_secret="${{ secrets.JWT_SECRET }}" -var google_ai_api_key="${{ secrets.GOOGLE_AI_API_KEY }}" -var github_username=${{ github.actor }} -var github_token="${{ secrets.GITHUB_TOKEN }}"
 
       - name: Terraform Apply
         if: ${{ github.event.inputs.action == 'apply' }}
         working-directory: azure-infra
+        run: terraform apply -auto-approve -var environment=${{ github.event.inputs.environment }} -var image_tag=latest -var mongodb_atlas_connection_string="${{ secrets.MONGODB_ATLAS_URI }}" -var jwt_secret="${{ secrets.JWT_SECRET }}" -var google_ai_api_key="${{ secrets.GOOGLE_AI_API_KEY }}" -var github_username=${{ github.actor }} -var github_token="${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Terraform Force Unlock
+        if: ${{ github.event.inputs.action == 'force-unlock' }}
+        working-directory: azure-infra
         run: |
-          terraform apply -auto-approve \
-            -var environment=${{ github.event.inputs.environment }} \
-            -var mongodb_atlas_connection_string=${{ secrets.MONGODB_ATLAS_URI }} \
-            -var jwt_secret=${{ secrets.JWT_SECRET }} \
-            -var google_ai_api_key=${{ secrets.GOOGLE_AI_API_KEY }} \
-            -var github_username=${{ github.actor }} \
-            -var github_token=${{ secrets.GITHUB_TOKEN }}
+          if [ -n "${{ github.event.inputs.lock_id }}" ]; then
+            echo "Force unlocking with ID: ${{ github.event.inputs.lock_id }}"
+            terraform force-unlock -force ${{ github.event.inputs.lock_id }}
+          else
+            echo "Force unlocking with ID: 3e237b6d-8175-5bd6-4c57-17438cd6a81c"
+            terraform force-unlock -force 3e237b6d-8175-5bd6-4c57-17438cd6a81c
+          fi
 
       - name: Terraform Destroy
         if: ${{ github.event.inputs.action == 'destroy' }}
         working-directory: azure-infra
         run: |
-          terraform destroy -auto-approve \
-            -var environment=${{ github.event.inputs.environment }} \
-            -var mongodb_atlas_connection_string=${{ secrets.MONGODB_ATLAS_URI }} \
-            -var jwt_secret=${{ secrets.JWT_SECRET }} \
-            -var google_ai_api_key=${{ secrets.GOOGLE_AI_API_KEY }} \
-            -var github_username=${{ github.actor }} \
-            -var github_token=${{ secrets.GITHUB_TOKEN }}
+          echo "⚠️ WARNING: About to destroy infrastructure for environment: ${{ github.event.inputs.environment }}"
+          echo "Branch: dev"
+          echo "Proceeding in 10 seconds..."
+          sleep 10
+          
+          terraform destroy -auto-approve -var environment=${{ github.event.inputs.environment }} -var image_tag=latest -var mongodb_atlas_connection_string="${{ secrets.MONGODB_ATLAS_URI }}" -var jwt_secret="${{ secrets.JWT_SECRET }}" -var google_ai_api_key="${{ secrets.GOOGLE_AI_API_KEY }}" -var github_username=${{ github.actor }} -var github_token="${{ secrets.GITHUB_TOKEN }}"

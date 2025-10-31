@@ -213,18 +213,23 @@ app.use('*', (req, res) => {
 // Start server
 const startServer = async () => {
   try {
-    // Initialize MongoDB
+    // Initialize MongoDB (non-blocking)
     logger.info('🔄 Initializing MongoDB connection...');
-    await connectMongoDB();
-    logger.info('✅ MongoDB connection established');
+    try {
+      await connectMongoDB();
+      logger.info('✅ MongoDB connection established');
+    } catch (mongoError) {
+      logger.error('❌ MongoDB connection failed, but starting server anyway:', mongoError);
+      logger.info('🔧 Server will start without MongoDB - some features may be limited');
+    }
     
     app.listen(PORT, () => {
-      console.log('🚀 Play Learn Spark Backend Server Started (MongoDB-only)!');
+      console.log('🚀 Play Learn Spark Backend Server Started (MongoDB-optional)!');
       console.log('==================================================');
       console.log(`📡 Server running on port ${PORT}`);
       console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🌐 CORS origins: ${process.env.CORS_ORIGIN || 'http://localhost:5173'}`);
-      console.log(`🗄️ Database: MongoDB ${isMongoDBConnected() ? '✅ Connected' : '❌ Disconnected'}`);
+      console.log(`🗄️ Database: MongoDB ${isMongoDBConnected() ? '✅ Connected' : '❌ Disconnected (server still running)'}`);
       console.log('');
       console.log('📋 Available Endpoints:');
       console.log(`   🏠 Root: http://localhost:${PORT}/`);
@@ -236,7 +241,7 @@ const startServer = async () => {
         console.log(`   ${fs.existsSync(dir) ? '✅' : '❌'} ${dir}`);
       });
       console.log('');
-      console.log('🎉 MongoDB-only server ready to handle requests!');
+      console.log('🎉 Server ready to handle requests (MongoDB connection will retry in background)!');
     });
   } catch (error) {
     logger.error('❌ Failed to start server:', error);

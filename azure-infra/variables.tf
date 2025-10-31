@@ -20,7 +20,7 @@ variable "environment" {
 variable "location" {
   description = "The Azure region where resources will be created"
   type        = string
-  default     = "UAE North"
+  default     = "East US"
 }
 
 variable "resource_group_name" {
@@ -134,6 +134,13 @@ variable "anthropic_api_key" {
   type        = string
   sensitive   = true
   default     = ""
+}
+
+# Container Image Configuration
+variable "image_tag" {
+  description = "Docker image tag for the backend container"
+  type        = string
+  default     = "latest"
 }
 
 # GitHub Container Registry Authentication

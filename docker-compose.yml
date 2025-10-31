@@ -26,10 +26,10 @@ services:
       context: ./server
       dockerfile: Dockerfile
     ports:
-      - "3002:3002"
+      - "3000:3000"
     environment:
       - NODE_ENV=production
-      - PORT=3002
+      - PORT=3000
       - MONGODB_URI=mongodb://admin:password@mongo:27017/playlearnspark?authSource=admin
       - CORS_ORIGIN=http://localhost:5173
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
@@ -57,7 +57,7 @@ services:
       - "5173:80"
     environment:
       - NODE_ENV=production
-      - VITE_API_URL=http://localhost:3002
+      - VITE_API_URL=http://localhost:3000
     depends_on:
       - backend
     networks:

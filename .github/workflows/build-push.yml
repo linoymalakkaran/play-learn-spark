@@ -1,12 +1,9 @@
 name: Build and Push Images
 
 on:
+  # Manual trigger only - always builds from dev branch
   workflow_dispatch:
     inputs:
-      branch:
-        description: "Branch to build from (dev/prod)"
-        required: true
-        default: "dev"
       image_tag:
         description: "Image tag (default latest)"
         required: false
@@ -23,7 +20,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch || 'dev' }}
+          # Always checkout dev branch
+          ref: dev
 
       - name: Set up Node (frontend)
         uses: actions/setup-node@v4
@@ -46,17 +44,23 @@ jobs:
       - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
+      - name: Set image tag
+        id: vars
+        run: |
+          # Use input tag or default to 'latest'
+          IMAGE_TAG="${{ github.event.inputs.image_tag || 'latest' }}"
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "Building images from dev branch with tag: ${IMAGE_TAG}"
+
       - name: Build frontend image
         run: |
-          IMAGE_TAG=${{ github.event.inputs.image_tag || 'latest' }}
-          docker build -t ghcr.io/linoymalakkaran/play-learn-spark-frontend:${IMAGE_TAG} -f client/Dockerfile client
+          docker build -t ghcr.io/linoymalakkaran/play-learn-spark-frontend:${{ steps.vars.outputs.IMAGE_TAG }} -f client/Dockerfile client
+          
       - name: Build backend image
         run: |
-          IMAGE_TAG=${{ github.event.inputs.image_tag || 'latest' }}
-          docker build -t ghcr.io/linoymalakkaran/play-learn-spark-backend:${IMAGE_TAG} -f server/Dockerfile server
+          docker build -t ghcr.io/linoymalakkaran/play-learn-spark-backend:${{ steps.vars.outputs.IMAGE_TAG }} -f server/Dockerfile server
 
       - name: Push images
         run: |
-          IMAGE_TAG=${{ github.event.inputs.image_tag || 'latest' }}
-          docker push ghcr.io/linoymalakkaran/play-learn-spark-frontend:${IMAGE_TAG}
-          docker push ghcr.io/linoymalakkaran/play-learn-spark-backend:${IMAGE_TAG}
+          docker push ghcr.io/linoymalakkaran/play-learn-spark-frontend:${{ steps.vars.outputs.IMAGE_TAG }}
+          docker push ghcr.io/linoymalakkaran/play-learn-spark-backend:${{ steps.vars.outputs.IMAGE_TAG }}

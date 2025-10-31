@@ -34,14 +34,33 @@ resource "azurerm_storage_container" "tfstate" {
   container_access_type = "private"
 }
 
-# Backend Container Instance (pull image from GHCR)
+# Log Analytics Workspace for Container Logging
+resource "azurerm_log_analytics_workspace" "container_logs" {
+  name                = "${local.name_prefix}-logs"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+  tags                = var.tags
+}
+
+# Backend Container Instance with proper configuration
 resource "azurerm_container_group" "backend" {
   name                = "${local.name_prefix}-backend"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   ip_address_type     = "Public"
-  dns_name_label      = substr(replace("${local.name_prefix}${random_id.suffix.hex}","_",""),0,60)
+  dns_name_label      = "${local.name_prefix}-backend"
   os_type             = "Linux"
+  restart_policy      = "OnFailure"
+
+  # Log Analytics Integration
+  diagnostics {
+    log_analytics {
+      workspace_id  = azurerm_log_analytics_workspace.container_logs.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.container_logs.primary_shared_key
+    }
+  }
 
   # GitHub Container Registry authentication
   image_registry_credential {
@@ -52,21 +71,25 @@ resource "azurerm_container_group" "backend" {
 
   container {
     name   = "api"
-    image  = "ghcr.io/linoymalakkaran/play-learn-spark-backend:latest"
-    cpu    = 0.5
-    memory = 1.0
+    image  = "ghcr.io/linoymalakkaran/play-learn-spark-backend:${var.image_tag}"
+    cpu    = 1.0    # Increased resources based on our findings
+    memory = 2.0
 
-    ports { port = 3000 }
-
-    environment_variables = {
-      NODE_ENV     = var.environment
-      PORT         = 3000
-      MONGO_URI    = "${var.mongodb_atlas_connection_string}/playlearnspark?retryWrites=true&w=majority"
-      GOOGLE_AI_KEY = var.google_ai_api_key
+    ports {
+      port     = 3000
+      protocol = "TCP"
     }
 
+    environment_variables = {
+      NODE_ENV = var.environment
+      PORT     = 3000
+    }
+
+    # Secure environment variables
     secure_environment_variables = {
-      JWT_SECRET = var.jwt_secret
+      MONGODB_URI     = var.mongodb_atlas_connection_string
+      GOOGLE_AI_KEY   = var.google_ai_api_key
+      JWT_SECRET      = var.jwt_secret
     }
   }
 

@@ -51,9 +51,10 @@ app.use('/uploads', express.static('uploads'));
 // Load auth routes (bypass TypeScript compilation issues)
 try {
   console.log('🔄 Loading auth routes...');
-  const authRoutes = require('./routes/auth.routes');
-  app.use('/api/auth', authRoutes.default || authRoutes);
-  console.log('✅ Auth routes loaded successfully');
+  console.log('⚠️ Auth routes temporarily disabled for debugging');
+  // const authRoutes = require('./routes/auth.routes');
+  // app.use('/api/auth', authRoutes.default || authRoutes);
+  console.log('✅ Auth routes loading skipped (debugging mode)');
 } catch (error) {
   console.log('❌ Failed to load auth routes:', error instanceof Error ? error.message : error);
 }

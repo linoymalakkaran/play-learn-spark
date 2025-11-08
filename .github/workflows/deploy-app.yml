@@ -24,9 +24,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          # Always checkout dev branch
-          ref: dev
+        # Always use dev branch as default
+        # No ref specified = uses current branch (dev)
 
       - name: Azure CLI Login
         run: |
@@ -88,13 +87,13 @@ jobs:
       - name: Set deployment variables
         id: deploy_vars
         run: |
-          # Always deploy from dev branch with specified image tag
+          # Always deploy from dev branch (default) with specified image tag
           BRANCH="dev"
           IMAGE_TAG="${{ github.event.inputs.image_tag || 'latest' }}"
           
           echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
           echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_OUTPUT
-          echo "Deploying from dev branch with image tag: ${IMAGE_TAG}"
+          echo "Deploying from dev branch (default) with image tag: ${IMAGE_TAG}"
 
       - name: Update backend container image using Terraform
         working-directory: azure-infra

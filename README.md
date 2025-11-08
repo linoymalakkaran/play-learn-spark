@@ -4,6 +4,11 @@
 
 Play Learn Spark is a comprehensive learning application that makes education fun and engaging for young children. Our platform combines English, Mathematics, Science, and multilingual learning (Malayalam & Arabic) with AI-powered content generation.
 
+## 🌐 Live Application URLs
+
+- **Frontend**: https://playlearnsparkb517590f.z13.web.core.windows.net/
+- **Backend API**: http://play-learn-spark-dev-backend.eastus.azurecontainer.io:3000
+
 ## � **Deploy for FREE on Azure!**
 
 **🚀 [Deploy to Azure at $0.00/month cost!](FREE_AZURE_DEPLOYMENT_GUIDE.md)**

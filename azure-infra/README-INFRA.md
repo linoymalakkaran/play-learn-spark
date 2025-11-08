@@ -17,7 +17,7 @@ This Terraform configuration deploys a **minimal-cost, near-FREE** Azure infrast
 - **Examples**: 
   - `play-learn-spark-dev-rg`
   - `play-learn-spark-prod-rg`
-- **Location**: UAE North
+- **Location**: East US
 - **Cost**: **FREE**
 
 ### 2. **Storage Account** (Multi-purpose)
@@ -26,15 +26,15 @@ This Terraform configuration deploys a **minimal-cost, near-FREE** Azure infrast
 - **Features**:
   - ✅ **Static Website Hosting** (React frontend)
   - ✅ **Terraform State Container** (`tfstate`)
-- **Frontend URL**: `https://{storage-name}.z1.web.core.windows.net/`
+- **Frontend URL**: `https://{storage-name}.z13.web.core.windows.net/`
 - **Cost**: **~$0-2/month** (5GB free tier)
 
 ### 3. **Container Instance** (Backend API)
 - **Name**: `play-learn-spark-{environment}-backend`
-- **Public DNS**: `{project-env-suffix}.uaenorth.azurecontainer.io`
+- **Public DNS**: `{project-env-suffix}.eastus.azurecontainer.io`
 - **Specifications**:
-  - 0.5 CPU cores
-  - 1.0 GB RAM  
+  - 1.0 CPU cores
+  - 2.0 GB RAM  
   - Linux OS
   - Public IP with custom DNS
 - **Container Image**: `ghcr.io/linoymalakkaran/play-learn-spark-backend:latest`
@@ -163,7 +163,7 @@ This Terraform configuration deploys a **minimal-cost, near-FREE** Azure infrast
 2. **Set up GitHub Secrets** (all secrets listed above)
 3. **Create MongoDB Atlas FREE cluster**:
    - Sign up at [mongodb.com/atlas](https://mongodb.com/atlas)
-   - Create M0 cluster in region close to UAE North
+   - Create M0 cluster in region close to East US (e.g., Virginia/Ohio)
    - Create database user and get connection string
    - Add `0.0.0.0/0` to IP allowlist (restrict later)
 4. **Get Google AI API key** from [aistudio.google.com](https://aistudio.google.com)
@@ -227,7 +227,7 @@ git push
 ### **MongoDB Atlas Setup**
 1. Create account at [mongodb.com/atlas](https://mongodb.com/atlas)
 2. Create new M0 (FREE) cluster
-   - Choose region closest to UAE North (e.g., Mumbai/Singapore)
+   - Choose region closest to East US (e.g., Virginia/Ohio)
    - Cluster name: `playlearnspark-cluster`
 3. Create database user:
    - Username: `playlearnspark-user`
@@ -336,10 +336,10 @@ docker-compose up
 ### **Health Checks**
 ```bash
 # Check frontend
-curl -I https://your-storage-account.z1.web.core.windows.net/
+curl -I https://your-storage-account.z13.web.core.windows.net/
 
 # Check backend API
-curl https://your-backend.uaenorth.azurecontainer.io:3000/health
+curl https://your-backend.eastus.azurecontainer.io:3000/health
 
 # Check MongoDB Atlas connectivity (from backend logs)
 az container logs --resource-group play-learn-spark-dev-rg --name play-learn-spark-dev-backend

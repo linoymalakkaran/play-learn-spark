@@ -21,9 +21,13 @@ app.use(cors({
     'http://localhost:5173',
     'http://localhost:3000',
     'http://localhost:4173',
+    // Production: Azure Static Website
+    'https://playlearnsparkb517590f.z13.web.core.windows.net',
     // Development: Allow any localhost port for flexibility
     /^http:\/\/localhost:\d+$/,
-    /^http:\/\/127\.0\.0\.1:\d+$/
+    /^http:\/\/127\.0\.0\.1:\d+$/,
+    // Production: Allow any Azure static website domain
+    /^https:\/\/[a-z0-9]+\.z\d+\.web\.core\.windows\.net$/
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],

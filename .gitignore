@@ -99,8 +99,19 @@ temp/
 
 # Testing
 test-results/
+*/test-results/
 playwright-report/
+*/playwright-report/
 playwright/.cache/
+*/playwright/.cache/
+reports/
+*/reports/
+html-report/
+*/html-report/
+coverage/
+*/coverage/
+.nyc_output
+*/.nyc_output
 
 # Build tools
 .vite/

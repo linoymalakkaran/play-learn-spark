@@ -89,6 +89,31 @@ resource "azurerm_container_group" "backend" {
       GOOGLE_AI_API_KEY = var.google_ai_api_key
       JWT_SECRET        = var.jwt_secret
     }
+
+    # Health check configuration
+    liveness_probe {
+      http_get {
+        path   = "/api/health"
+        port   = var.container_port
+        scheme = "Http"
+      }
+      initial_delay_seconds = 60
+      period_seconds       = 30
+      timeout_seconds      = 10
+      failure_threshold    = 3
+    }
+
+    readiness_probe {
+      http_get {
+        path   = "/api/health"
+        port   = var.container_port
+        scheme = "Http"
+      }
+      initial_delay_seconds = 30
+      period_seconds       = 10
+      timeout_seconds      = 5
+      failure_threshold    = 3
+    }
   }
 
   tags = var.tags

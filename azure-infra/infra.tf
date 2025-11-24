@@ -78,7 +78,7 @@ resource "azurerm_container_app" "backend" {
 
   secret {
     name  = "mongodb-uri"
-    value = var.mongodb_atlas_connection_string
+    value = "${replace(var.mongodb_atlas_connection_string, "/test", "")}/${var.database_name}?retryWrites=true&w=majority"
   }
 
   secret {

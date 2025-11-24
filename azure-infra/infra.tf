@@ -78,7 +78,7 @@ resource "azurerm_container_app" "backend" {
 
   secret {
     name  = "mongodb-uri"
-    value = "${var.mongodb_atlas_connection_string}/${var.database_name}"
+    value = var.mongodb_atlas_connection_string
   }
 
   secret {
@@ -114,7 +114,7 @@ resource "azurerm_container_app" "backend" {
       # Environment variables using secrets
       env {
         name  = "NODE_ENV"
-        value = var.environment
+        value = var.environment == "dev" ? "development" : var.environment
       }
 
       env {

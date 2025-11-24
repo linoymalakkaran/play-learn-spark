@@ -1,0 +1,49 @@
+{
+  "name": "play-learn-spark-e2e-tests",
+  "version": "1.0.0",
+  "description": "End-to-end tests for Play Learn Spark educational platform",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report ./reports/html-report",
+    "test:codegen": "playwright codegen",
+    "test:auth": "playwright test --grep auth",
+    "test:activities": "playwright test --grep activities",
+    "test:dashboard": "playwright test --grep dashboard",
+    "test:mobile": "playwright test --project=chromium-mobile",
+    "test:tablet": "playwright test --project=chromium-tablet", 
+    "test:desktop": "playwright test --project=chromium-desktop",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "test:critical": "playwright test --grep @critical",
+    "install": "playwright install chromium",
+    "install:deps": "playwright install-deps",
+    "lint": "eslint **/*.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.44.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "@typescript-eslint/parser": "^7.8.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "playwright",
+    "e2e",
+    "testing",
+    "automation",
+    "education",
+    "children"
+  ]
+}

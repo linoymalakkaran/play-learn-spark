@@ -47,16 +47,8 @@ jobs:
             --query "[0].name" \
             --output tsv)
           
-          # Get container group FQDN
-          BACKEND_FQDN=$(az container show \
-            --name play-learn-spark-${ENVIRONMENT}-backend \
-            --resource-group play-learn-spark-${ENVIRONMENT}-rg \
-            --query "ipAddress.fqdn" \
-            --output tsv 2>/dev/null || echo "")
-          
           echo "ENVIRONMENT=${ENVIRONMENT}" >> $GITHUB_OUTPUT
           echo "STORAGE=$STORAGE_ACCOUNT" >> $GITHUB_OUTPUT
-          echo "BACKEND=$BACKEND_FQDN" >> $GITHUB_OUTPUT
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -72,17 +64,10 @@ jobs:
         working-directory: client
         run: |
           npm ci
-          # Set production backend URL for Azure deployment
-          echo "VITE_API_BASE_URL=http://play-learn-spark-dev-backend.eastus.azurecontainer.io:3000/api" > .env.production
+          # Container Apps will provide HTTPS by default, but we need to get the FQDN after Terraform apply
+          # For now, we'll use a placeholder and update it after Terraform runs
+          echo "VITE_API_BASE_URL=PLACEHOLDER_BACKEND_URL" > .env.production
           npm run build
-
-      - name: Upload frontend dist to static site
-        run: |
-          az storage blob upload-batch \
-            --destination '$web' \
-            --account-name ${{ steps.azure_resources.outputs.STORAGE }} \
-            --source client/dist \
-            --overwrite
 
       - name: Set deployment variables
         id: deploy_vars
@@ -95,7 +80,7 @@ jobs:
           echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_OUTPUT
           echo "Deploying from dev branch (default) with image tag: ${IMAGE_TAG}"
 
-      - name: Update backend container image using Terraform
+      - name: Deploy backend container app using Terraform
         working-directory: azure-infra
         run: |
           # Initialize Terraform
@@ -115,10 +100,31 @@ jobs:
             -var github_username=${{ github.actor }} \
             -var github_token="${{ secrets.GITHUB_TOKEN }}"
 
+      - name: Rebuild frontend with correct backend URL
+        working-directory: client
+        run: |
+          # Get the actual backend URL from Terraform output
+          cd ../azure-infra
+          BACKEND_URL=$(terraform output -raw backend_url)
+          cd ../client
+          
+          # Update frontend with correct backend URL
+          echo "VITE_API_BASE_URL=${BACKEND_URL}/api" > .env.production
+          npm run build
+
+      - name: Re-upload frontend with correct backend URL
+        run: |
+          az storage blob upload-batch \
+            --destination '$web' \
+            --account-name ${{ steps.azure_resources.outputs.STORAGE }} \
+            --source client/dist \
+            --overwrite
+
       - name: Output URLs
         working-directory: azure-infra
         run: |
           echo "Frontend: https://${{ steps.azure_resources.outputs.STORAGE }}.z13.web.core.windows.net"
-          echo "Backend: http://$(terraform output -raw backend_fqdn):3000"
-          echo "Backend IP: $(terraform output -raw backend_ip):3000"
+          echo "Backend: $(terraform output -raw backend_url)"
+          echo "Backend FQDN: $(terraform output -raw backend_fqdn)"
+          echo "Container App Environment: $(terraform output -raw container_app_environment_name)"
           echo "Log Analytics: $(terraform output -raw log_analytics_workspace_name)"

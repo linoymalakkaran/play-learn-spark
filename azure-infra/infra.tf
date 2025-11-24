@@ -46,75 +46,116 @@ resource "azurerm_log_analytics_workspace" "container_logs" {
   tags                = var.tags
 }
 
-# Backend Container Instance with proper configuration
-resource "azurerm_container_group" "backend" {
-  name                = "${local.name_prefix}-backend"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  ip_address_type     = var.container_ip_address_type
-  dns_name_label      = "${local.name_prefix}-backend"
-  os_type             = var.container_os_type
-  restart_policy      = var.container_restart_policy
+# Azure Container Apps Environment
+resource "azurerm_container_app_environment" "backend" {
+  name                       = "${local.name_prefix}-env"
+  location                   = azurerm_resource_group.rg.location
+  resource_group_name        = azurerm_resource_group.rg.name
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.container_logs.id
+  tags                       = var.tags
+}
 
-  # Log Analytics Integration
-  diagnostics {
-    log_analytics {
-      workspace_id  = azurerm_log_analytics_workspace.container_logs.workspace_id
-      workspace_key = azurerm_log_analytics_workspace.container_logs.primary_shared_key
+# Backend Container App - Improved reliability over Container Instance
+resource "azurerm_container_app" "backend" {
+  name                         = "${local.name_prefix}-backend"
+  container_app_environment_id = azurerm_container_app_environment.backend.id
+  resource_group_name          = azurerm_resource_group.rg.name
+  revision_mode               = "Single"
+  tags                        = var.tags
+
+  # Registry configuration for GitHub Container Registry
+  registry {
+    server               = var.container_registry_server
+    username             = var.github_username
+    password_secret_name = "github-token"
+  }
+
+  # Secret for GitHub registry authentication
+  secret {
+    name  = "github-token"
+    value = var.github_token
+  }
+
+  secret {
+    name  = "mongodb-uri"
+    value = "${var.mongodb_atlas_connection_string}/${var.database_name}"
+  }
+
+  secret {
+    name  = "jwt-secret"
+    value = var.jwt_secret
+  }
+
+  secret {
+    name  = "google-ai-key"
+    value = var.google_ai_api_key
+  }
+
+  # Ingress configuration for external access
+  ingress {
+    external_enabled = true
+    target_port      = var.container_port
+    traffic_weight {
+      percentage      = 100
+      latest_revision = true
     }
   }
 
-  # GitHub Container Registry authentication
-  image_registry_credential {
-    server   = var.container_registry_server
-    username = var.github_username
-    password = var.github_token
-  }
+  template {
+    min_replicas = 1
+    max_replicas = 3
 
-  container {
-    name   = var.container_name
-    image  = "${var.container_image_name}:${var.image_tag}"
-    cpu    = var.container_cpu
-    memory = var.container_memory
+    container {
+      name   = var.container_name
+      image  = "${var.container_image_name}:${var.image_tag}"
+      cpu    = var.container_cpu
+      memory = "${var.container_memory}Gi"
 
-    ports {
-      port     = var.container_port
-      protocol = var.container_protocol
-    }
-
-    environment_variables = {
-      NODE_ENV          = var.environment
-      PORT              = var.container_port
-      MONGODB_URI       = "${var.mongodb_atlas_connection_string}/${var.database_name}"
-      GOOGLE_AI_API_KEY = var.google_ai_api_key
-      JWT_SECRET        = var.jwt_secret
-    }
-
-    # Health check configuration
-    liveness_probe {
-      http_get {
-        path   = "/api/health"
-        port   = var.container_port
-        scheme = "Http"
+      # Environment variables using secrets
+      env {
+        name  = "NODE_ENV"
+        value = var.environment
       }
-      initial_delay_seconds = 60
-      period_seconds       = 30
-      timeout_seconds      = 10
-      failure_threshold    = 3
-    }
 
-    readiness_probe {
-      http_get {
-        path   = "/api/health"
-        port   = var.container_port
-        scheme = "Http"
+      env {
+        name  = "PORT"
+        value = tostring(var.container_port)
       }
-      initial_delay_seconds = 30
-      period_seconds       = 10
-      timeout_seconds      = 5
-      failure_threshold    = 3
+
+      env {
+        name        = "MONGODB_URI"
+        secret_name = "mongodb-uri"
+      }
+
+      env {
+        name        = "JWT_SECRET"
+        secret_name = "jwt-secret"
+      }
+
+      env {
+        name        = "GOOGLE_AI_API_KEY"
+        secret_name = "google-ai-key"
+      }
+
+      # Health probes
+      liveness_probe {
+        transport = "HTTP"
+        port      = var.container_port
+        path      = "/api/health"
+        initial_delay = 30
+        interval_seconds = 30
+        timeout = 10
+        failure_count_threshold = 3
+      }
+
+      readiness_probe {
+        transport = "HTTP"
+        port      = var.container_port
+        path      = "/api/health"
+        interval_seconds = 10
+        timeout = 5
+        failure_count_threshold = 3
+      }
     }
   }
-
-  tags = var.tags
 }

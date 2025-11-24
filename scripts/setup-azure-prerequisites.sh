@@ -65,7 +65,8 @@ fi
 
 # Step 2: Create Storage Account for Terraform State
 echo -e "${BLUE}💾 Step 2: Creating Terraform State Storage Account...${NC}"
-TF_STATE_SA="${PROJECT_NAME}tfstate$(openssl rand -hex 4)"
+# Use shorter name to avoid 24 character limit
+TF_STATE_SA="plstfstate$(openssl rand -hex 4)"
 
 if az storage account show --name $TF_STATE_SA --resource-group $TF_STATE_RG &> /dev/null; then
     echo -e "${YELLOW}⚠️  Storage account $TF_STATE_SA already exists${NC}"

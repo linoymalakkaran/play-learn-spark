@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/activity_provider.dart';
 import '../../core/constants/colors.dart';
-import '../../core/constants/app_constants.dart';
 
 class ActivitiesTab extends StatefulWidget {
   const ActivitiesTab({super.key});
@@ -30,13 +29,11 @@ class _ActivitiesTabState extends State<ActivitiesTab> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
                 _buildCategoryChip('all', 'All', Icons.apps),
-                ...AppConstants.activityCategories.entries.map((entry) {
-                  return _buildCategoryChip(
-                    entry.key,
-                    entry.value['display'],
-                    entry.value['icon'],
-                  );
-                }),
+                _buildCategoryChip('language', 'Language', Icons.book),
+                _buildCategoryChip('math', 'Math', Icons.calculate),
+                _buildCategoryChip('cognitive', 'Cognitive', Icons.psychology),
+                _buildCategoryChip('creative', 'Creative', Icons.brush),
+                _buildCategoryChip('social', 'Social', Icons.people),
               ],
             ),
           ),

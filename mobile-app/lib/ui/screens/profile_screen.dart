@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/student_provider.dart';
 import '../../core/constants/colors.dart';
+import 'student_setup_screen.dart';
+import 'manage_students_screen.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -82,16 +84,28 @@ class ProfileTab extends StatelessWidget {
                   icon: Icons.person_outline,
                   title: 'Edit Profile',
                   subtitle: 'Update your information',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => StudentSetupScreen(
+                          existingStudent: student,
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 _buildProfileOption(
-                  icon: Icons.swap_horiz,
-                  title: 'Switch Student',
+                  icon: Icons.people,
+                  title: 'Manage Students',
                   subtitle: provider.students.length > 1 
                       ? '${provider.students.length} profiles available'
                       : 'Add another profile',
                   onTap: () {
-                    _showStudentSwitcher(context, provider);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const ManageStudentsScreen(),
+                      ),
+                    );
                   },
                 ),
                 _buildProfileOption(
@@ -171,76 +185,6 @@ class ProfileTab extends StatelessWidget {
         trailing: const Icon(Icons.chevron_right),
         onTap: onTap,
       ),
-    );
-  }
-
-  void _showStudentSwitcher(BuildContext context, StudentProvider provider) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Switch Student',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 16),
-              ...provider.students.map((student) {
-                final isCurrent = student.id == provider.currentStudent?.id;
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: isCurrent 
-                        ? AppColors.primary 
-                        : Colors.grey[300],
-                    child: Text(
-                      student.avatar ?? student.name[0].toUpperCase(),
-                      style: TextStyle(
-                        color: isCurrent ? Colors.white : AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                  title: Text(
-                    student.name,
-                    style: TextStyle(
-                      fontWeight: isCurrent ? FontWeight.w600 : FontWeight.w400,
-                    ),
-                  ),
-                  subtitle: Text('${student.age} years old'),
-                  trailing: isCurrent 
-                      ? const Icon(Icons.check, color: AppColors.success)
-                      : null,
-                  onTap: () {
-                    provider.setCurrentStudent(student);
-                    Navigator.pop(context);
-                  },
-                );
-              }).toList(),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add New Student'),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    // Navigate to student creation
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 

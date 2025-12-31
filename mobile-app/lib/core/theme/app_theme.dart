@@ -193,19 +193,19 @@ class AppTheme {
     ),
     
     // Dialog Theme
-    dialogTheme: DialogTheme(
+    dialogTheme: const DialogThemeData(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
+        borderRadius: BorderRadius.all(Radius.circular(AppDimensions.radiusLarge)),
       ),
       elevation: 8,
       backgroundColor: Colors.white,
-      titleTextStyle: const TextStyle(
+      titleTextStyle: TextStyle(
         color: AppColors.textPrimary,
         fontSize: 20,
         fontWeight: FontWeight.w600,
         fontFamily: 'Poppins',
       ),
-      contentTextStyle: const TextStyle(
+      contentTextStyle: TextStyle(
         color: AppColors.textSecondary,
         fontSize: 14,
         fontFamily: 'Poppins',

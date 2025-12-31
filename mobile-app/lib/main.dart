@@ -6,6 +6,7 @@ import 'providers/activity_provider.dart';
 import 'providers/progress_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'ui/screens/home_screen.dart';
+import 'ui/screens/onboarding_screen.dart';
 import 'core/constants/colors.dart';
 
 void main() async {
@@ -86,14 +87,14 @@ class _SplashScreenState extends State<SplashScreen> {
         final progressProvider = Provider.of<ProgressProvider>(context, listen: false);
         await progressProvider.loadProgressForStudent(studentProvider.currentStudent!.id);
         
-        // Navigate to home screen (will be implemented in Phase 2)
+        // Navigate to home screen
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const PlaceholderHomeScreen()),
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
         );
       } else {
-        // Navigate to student setup (will be implemented in Phase 3)
+        // First time user - show onboarding
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const PlaceholderStudentSetup()),
+          MaterialPageRoute(builder: (_) => const OnboardingScreen()),
         );
       }
     } catch (e) {
@@ -109,7 +110,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -125,8 +126,8 @@ class _SplashScreenState extends State<SplashScreen> {
             children: [
               // App logo/icon
               Container(
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const 
+                width: 120,
+                height: 120,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(30),

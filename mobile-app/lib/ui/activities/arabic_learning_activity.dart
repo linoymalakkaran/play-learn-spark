@@ -78,12 +78,19 @@ class _ArabicLearningActivityState extends BaseActivityState<ArabicLearningActiv
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentLesson = _lessons[random.nextInt(_lessons.length)];
+    }); // setState
   }
 
   void _handleAnswer(int selectedIndex) {

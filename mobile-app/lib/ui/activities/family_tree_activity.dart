@@ -33,10 +33,16 @@ class _FamilyTreeActivityState extends BaseActivityState<FamilyTreeActivity> {
   @override
   void initializeActivity() {
     totalQuestions = 6;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentMember = _members[random.nextInt(_members.length)];
     
@@ -46,6 +52,7 @@ class _FamilyTreeActivityState extends BaseActivityState<FamilyTreeActivity> {
       wrongMembers[0].name,
       wrongMembers[1].name,
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedName) {

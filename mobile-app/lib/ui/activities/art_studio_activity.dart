@@ -60,12 +60,19 @@ class _ArtStudioActivityState extends BaseActivityState<ArtStudioActivity> {
   @override
   void initializeActivity() {
     totalQuestions = 6;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentQuestion = _questions[random.nextInt(_questions.length)];
+    }); // setState
   }
 
   void _handleAnswer(String selected) {

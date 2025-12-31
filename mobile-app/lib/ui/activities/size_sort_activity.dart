@@ -24,10 +24,16 @@ class _SizeSortActivityState extends BaseActivityState<SizeSortActivity> {
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentObject = _objects[random.nextInt(_objects.length)];
     
@@ -39,6 +45,7 @@ class _SizeSortActivityState extends BaseActivityState<SizeSortActivity> {
 
     final correctIndex = random.nextInt(3);
     _correctSize = _options[correctIndex].label;
+    }); // setState
   }
 
   void _handleAnswer(String selectedSize) {

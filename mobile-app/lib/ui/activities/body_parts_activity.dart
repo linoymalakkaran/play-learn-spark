@@ -31,10 +31,16 @@ class _BodyPartsActivityState extends BaseActivityState<BodyPartsActivity> {
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentPart = _bodyParts[random.nextInt(_bodyParts.length)];
     
@@ -44,6 +50,7 @@ class _BodyPartsActivityState extends BaseActivityState<BodyPartsActivity> {
       wrongParts[0].name,
       wrongParts[1].name,
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedName) {

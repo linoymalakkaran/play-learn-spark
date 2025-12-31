@@ -23,10 +23,16 @@ class _NumberGardenActivityState extends BaseActivityState<NumberGardenActivity>
   @override
   void initializeActivity() {
     totalQuestions = 8;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _targetNumber = random.nextInt(10) + 1;
     _flowerEmoji = ['🌻', '🌹', '🌷', '🌺', '🌸'][random.nextInt(5)];
@@ -36,6 +42,7 @@ class _NumberGardenActivityState extends BaseActivityState<NumberGardenActivity>
       (_targetNumber - 1).clamp(1, 10),
       (_targetNumber + 1).clamp(1, 10),
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(int selected) {

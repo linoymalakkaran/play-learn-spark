@@ -33,10 +33,16 @@ class _PetParadeActivityState extends BaseActivityState<PetParadeActivity> {
   @override
   void initializeActivity() {
     totalQuestions = 6;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentPet = _pets[random.nextInt(_pets.length)];
     
@@ -46,6 +52,7 @@ class _PetParadeActivityState extends BaseActivityState<PetParadeActivity> {
       wrongPets[0].name,
       wrongPets[1].name,
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedName) {

@@ -33,10 +33,16 @@ class _ToyBoxActivityState extends BaseActivityState<ToyBoxActivity> {
   @override
   void initializeActivity() {
     totalQuestions = 6;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentToy = _toys[random.nextInt(_toys.length)];
     
@@ -46,6 +52,7 @@ class _ToyBoxActivityState extends BaseActivityState<ToyBoxActivity> {
       wrongToys[0].name,
       wrongToys[1].name,
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedName) {

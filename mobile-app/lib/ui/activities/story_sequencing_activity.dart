@@ -51,15 +51,22 @@ class _StorySequencingActivityState extends BaseActivityState<StorySequencingAct
   @override
   void initializeActivity() {
     totalQuestions = 2; // 2 stories to sequence
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentStory = _stories[random.nextInt(_stories.length)];
     _shuffledSteps = List.from(_currentStory.steps)..shuffle();
     _orderedSteps = List.filled(_currentStory.steps.length, null);
     _currentPosition = 0;
+    }); // setState
   }
 
   void _handleStepSelection(StoryStep step) {

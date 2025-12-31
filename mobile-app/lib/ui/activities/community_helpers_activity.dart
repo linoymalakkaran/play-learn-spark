@@ -30,10 +30,16 @@ class _CommunityHelpersActivityState extends BaseActivityState<CommunityHelpersA
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentHelper = _helpers[random.nextInt(_helpers.length)];
     
@@ -43,6 +49,7 @@ class _CommunityHelpersActivityState extends BaseActivityState<CommunityHelpersA
       wrongHelpers[0].job,
       wrongHelpers[1].job,
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedJob) {

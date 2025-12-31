@@ -54,12 +54,19 @@ class _LogicPuzzlesActivityState extends BaseActivityState<LogicPuzzlesActivity>
   @override
   void initializeActivity() {
     totalQuestions = 6;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentPuzzle = _puzzles[random.nextInt(_puzzles.length)];
+    }); // setState
   }
 
   void _handleAnswer(String selected) {

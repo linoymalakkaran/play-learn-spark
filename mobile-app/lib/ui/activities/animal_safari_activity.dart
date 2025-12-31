@@ -33,10 +33,16 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentAnimal = _animals[random.nextInt(_animals.length)];
 
@@ -48,6 +54,7 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
       wrongAnimals[0].name,
       wrongAnimals[1].name,
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedName) {

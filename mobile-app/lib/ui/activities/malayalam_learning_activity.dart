@@ -61,10 +61,16 @@ class _MalayalamLearningActivityState extends BaseActivityState<MalayalamLearnin
   @override
   void initializeActivity() {
     totalQuestions = 6;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentLesson = _lessons[random.nextInt(_lessons.length)];
     
@@ -74,6 +80,7 @@ class _MalayalamLearningActivityState extends BaseActivityState<MalayalamLearnin
       wrongLessons[0].english,
       wrongLessons[1].english,
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedEnglish) {

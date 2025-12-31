@@ -33,10 +33,16 @@ class _VegetableGardenActivityState extends BaseActivityState<VegetableGardenAct
   @override
   void initializeActivity() {
     totalQuestions = 6;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentVeggie = _vegetables[random.nextInt(_vegetables.length)];
     
@@ -46,6 +52,7 @@ class _VegetableGardenActivityState extends BaseActivityState<VegetableGardenAct
       wrongVeggies[0].name,
       wrongVeggies[1].name,
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedName) {

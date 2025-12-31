@@ -25,10 +25,16 @@ class _PatternBuilderActivityState extends BaseActivityState<PatternBuilderActiv
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     final patternLength = 4;
     final baseShape = _shapes[random.nextInt(_shapes.length)];
@@ -44,6 +50,7 @@ class _PatternBuilderActivityState extends BaseActivityState<PatternBuilderActiv
     // Generate options
     final wrongShapes = _shapes.where((s) => s != _missingShape).toList()..shuffle();
     _options = [_missingShape, wrongShapes[0], wrongShapes[1]]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedShape) {

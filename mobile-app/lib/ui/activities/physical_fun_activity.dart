@@ -64,6 +64,12 @@ class _PhysicalFunActivityState extends BaseActivityState<PhysicalFunActivity> {
     _generateExercise();
   }
 
+  @override
+  void generateNewQuestion() {
+    // Physical fun uses its own exercise generation
+    _generateExercise();
+  }
+
   void _generateExercise() {
     final random = Random();
     _currentExercise = _exercises[random.nextInt(_exercises.length)];

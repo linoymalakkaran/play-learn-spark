@@ -76,13 +76,16 @@ class _EnglishLearningActivityState extends BaseActivityState<EnglishLearningAct
   @override
   void initializeActivity() {
     totalQuestions = 6;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
-    final random = Random();
-    _currentQuestion = _questions[random.nextInt(_questions.length)];
-    _options = List.from(_currentQuestion.options)..shuffle();
+  @override
+  void generateNewQuestion() {
+    setState(() {
+      final random = Random();
+      _currentQuestion = _questions[random.nextInt(_questions.length)];
+      _options = List.from(_currentQuestion.options)..shuffle();
+    });
   }
 
   void _handleAnswer(String selected) {

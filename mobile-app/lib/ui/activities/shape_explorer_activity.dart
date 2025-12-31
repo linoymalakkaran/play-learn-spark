@@ -30,10 +30,16 @@ class _ShapeExplorerActivityState extends BaseActivityState<ShapeExplorerActivit
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentShape = _shapes[random.nextInt(_shapes.length)];
 
@@ -45,6 +51,7 @@ class _ShapeExplorerActivityState extends BaseActivityState<ShapeExplorerActivit
       wrongShapes[0].name,
       wrongShapes[1].name,
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedName) {

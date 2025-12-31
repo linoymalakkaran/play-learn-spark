@@ -36,10 +36,16 @@ class _NatureWalkActivityState extends BaseActivityState<NatureWalkActivity> {
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     final categoryKeys = _categories.keys.toList();
     _correctCategory = categoryKeys[random.nextInt(categoryKeys.length)];
@@ -48,6 +54,7 @@ class _NatureWalkActivityState extends BaseActivityState<NatureWalkActivity> {
     _currentItem = items[random.nextInt(items.length)];
     
     _options = categoryKeys..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedCategory) {

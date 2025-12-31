@@ -31,10 +31,16 @@ class _DailyRoutineActivityState extends BaseActivityState<DailyRoutineActivity>
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentRoutine = _routines[random.nextInt(_routines.length)];
     
@@ -47,6 +53,7 @@ class _DailyRoutineActivityState extends BaseActivityState<DailyRoutineActivity>
       wrongTimes[0],
       wrongTimes[1],
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedTime) {

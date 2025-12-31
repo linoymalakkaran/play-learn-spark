@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/models/activity_model.dart';
 import '../../providers/reward_provider.dart';
-import '../../providers/progress_provider.dart';
 
 /// Base class for all learning activities
 abstract class BaseActivity extends StatefulWidget {
@@ -35,6 +34,9 @@ abstract class BaseActivityState<T extends BaseActivity> extends State<T> {
   /// Initialize activity-specific data
   void initializeActivity();
 
+  /// Generate new question (to be implemented by subclasses)
+  void generateNewQuestion();
+
   /// Handle correct answer
   void onCorrectAnswer() {
     setState(() {
@@ -57,6 +59,7 @@ abstract class BaseActivityState<T extends BaseActivity> extends State<T> {
       setState(() {
         _currentQuestion++;
       });
+      generateNewQuestion(); // Generate new question for next round
     } else {
       completeActivity();
     }
@@ -237,7 +240,6 @@ class _ActivityResultScreenState extends State<ActivityResultScreen> {
 
   void _awardPointsAndUpdateChallenges() {
     final rewardProvider = context.read<RewardProvider>();
-    final progressProvider = context.read<ProgressProvider>();
     
     final percentage = (widget.correctAnswers / widget.totalQuestions * 100).round();
     
@@ -258,13 +260,6 @@ class _ActivityResultScreenState extends State<ActivityResultScreen> {
     if (percentage >= 80) {
       rewardProvider.updateChallengeProgress('daily_score', percentage); // High score
     }
-    
-    // Update progress
-    progressProvider.recordActivityCompletion(
-      widget.activity.id,
-      widget.correctAnswers,
-      widget.totalQuestions,
-    );
   }
 
   @override
@@ -287,7 +282,7 @@ class _ActivityResultScreenState extends State<ActivityResultScreen> {
           ),
         ),
         child: SafeArea(
-          child: Center(
+          child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(

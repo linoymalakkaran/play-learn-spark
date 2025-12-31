@@ -60,12 +60,19 @@ class _SocialSkillsActivityState extends BaseActivityState<SocialSkillsActivity>
   @override
   void initializeActivity() {
     totalQuestions = 6;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentScenario = _scenarios[random.nextInt(_scenarios.length)];
+    }); // setState
   }
 
   void _handleAnswer(String selected) {

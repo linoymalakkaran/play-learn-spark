@@ -72,12 +72,19 @@ class _ScienceLabActivityState extends BaseActivityState<ScienceLabActivity> {
   @override
   void initializeActivity() {
     totalQuestions = 8;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentQuestion = _questions[random.nextInt(_questions.length)];
+    }); // setState
   }
 
   void _handleAnswer(String selected) {

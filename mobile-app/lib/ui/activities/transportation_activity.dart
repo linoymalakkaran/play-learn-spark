@@ -33,10 +33,16 @@ class _TransportationActivityState extends BaseActivityState<TransportationActiv
   @override
   void initializeActivity() {
     totalQuestions = 6;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentVehicle = _vehicles[random.nextInt(_vehicles.length)];
     
@@ -46,6 +52,7 @@ class _TransportationActivityState extends BaseActivityState<TransportationActiv
       wrongVehicles[0].name,
       wrongVehicles[1].name,
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedName) {

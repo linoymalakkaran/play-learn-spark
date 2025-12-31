@@ -31,10 +31,16 @@ class _RhymeTimeActivityState extends BaseActivityState<RhymeTimeActivity> {
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     final keys = _rhymes.keys.toList();
     _baseWord = keys[random.nextInt(keys.length)];
@@ -52,6 +58,7 @@ class _RhymeTimeActivityState extends BaseActivityState<RhymeTimeActivity> {
     wrongWords.shuffle();
     
     _options = [_correctRhyme, wrongWords[0], wrongWords[1]]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedWord) {

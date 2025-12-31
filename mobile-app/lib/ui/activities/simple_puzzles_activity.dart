@@ -27,6 +27,12 @@ class _SimplePuzzlesActivityState extends BaseActivityState<SimplePuzzlesActivit
     _generatePuzzle();
   }
 
+  @override
+  void generateNewQuestion() {
+    // Simple puzzles uses its own puzzle generation
+    _generatePuzzle();
+  }
+
   void _generatePuzzle() {
     final colors = [Colors.red, Colors.blue, Colors.green, Colors.yellow];
     _pieces = List.generate(4, (index) {

@@ -31,10 +31,16 @@ class _MusicMakerActivityState extends BaseActivityState<MusicMakerActivity> {
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentInstrument = _instruments[random.nextInt(_instruments.length)];
     
@@ -44,6 +50,7 @@ class _MusicMakerActivityState extends BaseActivityState<MusicMakerActivity> {
       wrongInstruments[0].name,
       wrongInstruments[1].name,
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedName) {

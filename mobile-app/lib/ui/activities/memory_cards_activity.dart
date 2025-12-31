@@ -29,6 +29,12 @@ class _MemoryCardsActivityState extends BaseActivityState<MemoryCardsActivity> {
     _generateCards();
   }
 
+  @override
+  void generateNewQuestion() {
+    // Memory cards doesn't use this - it has its own card generation
+    _generateCards();
+  }
+
   void _generateCards() {
     final selectedEmojis = _emojis.sublist(0, 3); // 3 pairs
     final cardEmojis = [...selectedEmojis, ...selectedEmojis]..shuffle();

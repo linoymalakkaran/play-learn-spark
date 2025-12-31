@@ -55,10 +55,16 @@ class _PizzaFractionsActivityState extends BaseActivityState<PizzaFractionsActiv
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentQuestion = _questions[random.nextInt(_questions.length)];
     
@@ -67,6 +73,7 @@ class _PizzaFractionsActivityState extends BaseActivityState<PizzaFractionsActiv
       ..shuffle();
     _options = _options.take(2).toList()..add(_currentQuestion.fraction);
     _options.shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedFraction) {

@@ -22,10 +22,16 @@ class _CountingTrainActivityState extends BaseActivityState<CountingTrainActivit
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _targetNumber = random.nextInt(10) + 1; // 1-10
 
@@ -39,6 +45,7 @@ class _CountingTrainActivityState extends BaseActivityState<CountingTrainActivit
     }
 
     _options = [_targetNumber, ...wrongNumbers]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(int selectedNumber) {

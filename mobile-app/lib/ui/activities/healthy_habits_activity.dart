@@ -55,10 +55,16 @@ class _HealthyHabitsActivityState extends BaseActivityState<HealthyHabitsActivit
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentQuestion = _habits[random.nextInt(_habits.length)];
     
@@ -66,6 +72,7 @@ class _HealthyHabitsActivityState extends BaseActivityState<HealthyHabitsActivit
       _currentQuestion.correctAnswer,
       ..._currentQuestion.wrongAnswers,
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedAnswer) {

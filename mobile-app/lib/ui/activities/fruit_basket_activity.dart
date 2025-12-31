@@ -33,19 +33,22 @@ class _FruitBasketActivityState extends BaseActivityState<FruitBasketActivity> {
   @override
   void initializeActivity() {
     totalQuestions = 6;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
-    final random = Random();
-    _currentFruit = _fruits[random.nextInt(_fruits.length)];
-    
-    final wrongFruits = _fruits.where((f) => f != _currentFruit).toList()..shuffle();
-    _options = [
-      _currentFruit.name,
-      wrongFruits[0].name,
-      wrongFruits[1].name,
-    ]..shuffle();
+  @override
+  void generateNewQuestion() {
+    setState(() {
+      final random = Random();
+      _currentFruit = _fruits[random.nextInt(_fruits.length)];
+      
+      final wrongFruits = _fruits.where((f) => f != _currentFruit).toList()..shuffle();
+      _options = [
+        _currentFruit.name,
+        wrongFruits[0].name,
+        wrongFruits[1].name,
+      ]..shuffle();
+    });
   }
 
   void _handleAnswer(String selectedName) {

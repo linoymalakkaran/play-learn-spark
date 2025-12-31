@@ -24,10 +24,16 @@ class _AlphabetAdventureActivityState
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _targetLetter = _letters[random.nextInt(_letters.length)];
 
@@ -39,6 +45,7 @@ class _AlphabetAdventureActivityState
       wrongLetters[0],
       wrongLetters[1],
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedLetter) {

@@ -31,10 +31,16 @@ class _EmotionExplorerActivityState extends BaseActivityState<EmotionExplorerAct
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentEmotion = _emotions[random.nextInt(_emotions.length)];
     
@@ -44,6 +50,7 @@ class _EmotionExplorerActivityState extends BaseActivityState<EmotionExplorerAct
       wrongEmotions[0].name,
       wrongEmotions[1].name,
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedName) {

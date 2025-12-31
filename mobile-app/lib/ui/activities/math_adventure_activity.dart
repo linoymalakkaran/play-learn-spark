@@ -22,10 +22,16 @@ class _MathAdventureActivityState extends BaseActivityState<MathAdventureActivit
   @override
   void initializeActivity() {
     totalQuestions = 8;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     final a = random.nextInt(10) + 1;
     final b = random.nextInt(10) + 1;
@@ -54,6 +60,7 @@ class _MathAdventureActivityState extends BaseActivityState<MathAdventureActivit
       (answer - 1).clamp(0, 20),
       (answer + 1).clamp(0, 20),
     ].toSet().toList()..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(int selected) {

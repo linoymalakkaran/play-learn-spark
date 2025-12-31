@@ -30,10 +30,16 @@ class _WeatherWatcherActivityState extends BaseActivityState<WeatherWatcherActiv
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentWeather = _weatherTypes[random.nextInt(_weatherTypes.length)];
     
@@ -43,6 +49,7 @@ class _WeatherWatcherActivityState extends BaseActivityState<WeatherWatcherActiv
       wrongWeathers[0].name,
       wrongWeathers[1].name,
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedName) {

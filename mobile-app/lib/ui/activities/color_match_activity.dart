@@ -33,10 +33,16 @@ class _ColorMatchActivityState extends BaseActivityState<ColorMatchActivity> {
   @override
   void initializeActivity() {
     totalQuestions = 5;
-    _generateQuestion();
+    generateNewQuestion();
   }
 
-  void _generateQuestion() {
+  @override
+
+
+  void generateNewQuestion() {
+
+
+    setState(() {
     final random = Random();
     _currentColor = _colors[random.nextInt(_colors.length)];
 
@@ -48,6 +54,7 @@ class _ColorMatchActivityState extends BaseActivityState<ColorMatchActivity> {
       wrongColors[0].name,
       wrongColors[1].name,
     ]..shuffle();
+    }); // setState
   }
 
   void _handleAnswer(String selectedName) {

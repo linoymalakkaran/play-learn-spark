@@ -4,54 +4,52 @@ import '../../data/models/activity_model.dart';
 import '../../core/constants/colors.dart';
 import 'base_activity.dart';
 
-class AnimalSafariActivity extends BaseActivity {
-  const AnimalSafariActivity({
+class VegetableGardenActivity extends BaseActivity {
+  const VegetableGardenActivity({
     super.key,
     required super.activity,
     required super.onComplete,
   });
 
   @override
-  State<AnimalSafariActivity> createState() => _AnimalSafariActivityState();
+  State<VegetableGardenActivity> createState() => _VegetableGardenActivityState();
 }
 
-class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity> {
-  final List<AnimalCard> _animals = [
-    AnimalCard(name: 'Dog', emoji: '🐶', sound: 'Woof!'),
-    AnimalCard(name: 'Cat', emoji: '🐱', sound: 'Meow!'),
-    AnimalCard(name: 'Cow', emoji: '🐮', sound: 'Moo!'),
-    AnimalCard(name: 'Lion', emoji: '🦁', sound: 'Roar!'),
-    AnimalCard(name: 'Elephant', emoji: '🐘', sound: 'Trumpet!'),
-    AnimalCard(name: 'Monkey', emoji: '🐵', sound: 'Ooh-ooh!'),
-    AnimalCard(name: 'Pig', emoji: '🐷', sound: 'Oink!'),
-    AnimalCard(name: 'Sheep', emoji: '🐑', sound: 'Baa!'),
+class _VegetableGardenActivityState extends BaseActivityState<VegetableGardenActivity> {
+  final List<Vegetable> _vegetables = [
+    Vegetable(name: 'Carrot', emoji: '🥕', color: 'Orange'),
+    Vegetable(name: 'Broccoli', emoji: '🥦', color: 'Green'),
+    Vegetable(name: 'Tomato', emoji: '🍅', color: 'Red'),
+    Vegetable(name: 'Corn', emoji: '🌽', color: 'Yellow'),
+    Vegetable(name: 'Potato', emoji: '🥔', color: 'Brown'),
+    Vegetable(name: 'Cucumber', emoji: '🥒', color: 'Green'),
+    Vegetable(name: 'Pepper', emoji: '🌶️', color: 'Red'),
+    Vegetable(name: 'Lettuce', emoji: '🥬', color: 'Green'),
   ];
 
-  late AnimalCard _currentAnimal;
+  late Vegetable _currentVeggie;
   late List<String> _options;
 
   @override
   void initializeActivity() {
-    totalQuestions = 5;
+    totalQuestions = 6;
     _generateQuestion();
   }
 
   void _generateQuestion() {
     final random = Random();
-    _currentAnimal = _animals[random.nextInt(_animals.length)];
-
-    // Generate options
-    final wrongAnimals = _animals.where((a) => a != _currentAnimal).toList()
-      ..shuffle();
+    _currentVeggie = _vegetables[random.nextInt(_vegetables.length)];
+    
+    final wrongVeggies = _vegetables.where((v) => v != _currentVeggie).toList()..shuffle();
     _options = [
-      _currentAnimal.name,
-      wrongAnimals[0].name,
-      wrongAnimals[1].name,
+      _currentVeggie.name,
+      wrongVeggies[0].name,
+      wrongVeggies[1].name,
     ]..shuffle();
   }
 
   void _handleAnswer(String selectedName) {
-    if (selectedName == _currentAnimal.name) {
+    if (selectedName == _currentVeggie.name) {
       onCorrectAnswer();
     } else {
       onIncorrectAnswer();
@@ -63,7 +61,7 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.activity.title),
-        backgroundColor: AppColors.primary,
+        backgroundColor: Colors.green.shade700,
         foregroundColor: Colors.white,
         actions: [
           Center(
@@ -71,10 +69,7 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 '${currentQuestion + 1}/$totalQuestions',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -85,31 +80,24 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.green.shade100, Colors.blue.shade100],
+            colors: [Colors.green.shade100, Colors.lime.shade100],
           ),
         ),
         child: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(20.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(height: 20),
-                  // Instructions
                   const Text(
-                    'Which animal makes this sound?',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'What vegetable is this?',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
-
-                  // Animal sound
                   Container(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(32),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
@@ -121,27 +109,12 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
                         ),
                       ],
                     ),
-                    child: Column(
-                      children: [
-                        Text(
-                          _currentAnimal.emoji,
-                          style: const TextStyle(fontSize: 64),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          '"${_currentAnimal.sound}"',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      _currentVeggie.emoji,
+                      style: const TextStyle(fontSize: 80),
                     ),
                   ),
                   const SizedBox(height: 32),
-
-                  // Answer options
                   ..._options.map((name) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: SizedBox(
@@ -150,7 +123,7 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
                             onPressed: () => _handleAnswer(name),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
-                              foregroundColor: AppColors.primary,
+                              foregroundColor: Colors.green.shade700,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -159,10 +132,7 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
                             ),
                             child: Text(
                               name,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -178,14 +148,10 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
   }
 }
 
-class AnimalCard {
+class Vegetable {
   final String name;
   final String emoji;
-  final String sound;
+  final String color;
 
-  AnimalCard({
-    required this.name,
-    required this.emoji,
-    required this.sound,
-  });
+  Vegetable({required this.name, required this.emoji, required this.color});
 }

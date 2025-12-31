@@ -24,9 +24,8 @@ class _EnhancedDashboardScreenState extends State<EnhancedDashboardScreen> {
   Future<void> _loadData() async {
     final studentProvider = context.read<StudentProvider>();
     if (studentProvider.currentStudent != null) {
-      await context.read<ProgressProvider>().loadProgress(
-            studentProvider.currentStudent!.id,
-          );
+      // Progress is already loaded by provider
+      // No additional loading needed here
     }
   }
 

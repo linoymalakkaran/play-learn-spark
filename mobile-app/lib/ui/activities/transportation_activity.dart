@@ -4,54 +4,52 @@ import '../../data/models/activity_model.dart';
 import '../../core/constants/colors.dart';
 import 'base_activity.dart';
 
-class AnimalSafariActivity extends BaseActivity {
-  const AnimalSafariActivity({
+class TransportationActivity extends BaseActivity {
+  const TransportationActivity({
     super.key,
     required super.activity,
     required super.onComplete,
   });
 
   @override
-  State<AnimalSafariActivity> createState() => _AnimalSafariActivityState();
+  State<TransportationActivity> createState() => _TransportationActivityState();
 }
 
-class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity> {
-  final List<AnimalCard> _animals = [
-    AnimalCard(name: 'Dog', emoji: '🐶', sound: 'Woof!'),
-    AnimalCard(name: 'Cat', emoji: '🐱', sound: 'Meow!'),
-    AnimalCard(name: 'Cow', emoji: '🐮', sound: 'Moo!'),
-    AnimalCard(name: 'Lion', emoji: '🦁', sound: 'Roar!'),
-    AnimalCard(name: 'Elephant', emoji: '🐘', sound: 'Trumpet!'),
-    AnimalCard(name: 'Monkey', emoji: '🐵', sound: 'Ooh-ooh!'),
-    AnimalCard(name: 'Pig', emoji: '🐷', sound: 'Oink!'),
-    AnimalCard(name: 'Sheep', emoji: '🐑', sound: 'Baa!'),
+class _TransportationActivityState extends BaseActivityState<TransportationActivity> {
+  final List<Vehicle> _vehicles = [
+    Vehicle(name: 'Car', emoji: '🚗', sound: 'Vroom!', type: 'Land'),
+    Vehicle(name: 'Airplane', emoji: '✈️', sound: 'Whoosh!', type: 'Air'),
+    Vehicle(name: 'Boat', emoji: '🚢', sound: 'Horn!', type: 'Water'),
+    Vehicle(name: 'Train', emoji: '🚂', sound: 'Choo-choo!', type: 'Land'),
+    Vehicle(name: 'Bicycle', emoji: '🚲', sound: 'Ring!', type: 'Land'),
+    Vehicle(name: 'Bus', emoji: '🚌', sound: 'Beep-beep!', type: 'Land'),
+    Vehicle(name: 'Helicopter', emoji: '🚁', sound: 'Chop-chop!', type: 'Air'),
+    Vehicle(name: 'Motorcycle', emoji: '🏍️', sound: 'Vroom!', type: 'Land'),
   ];
 
-  late AnimalCard _currentAnimal;
+  late Vehicle _currentVehicle;
   late List<String> _options;
 
   @override
   void initializeActivity() {
-    totalQuestions = 5;
+    totalQuestions = 6;
     _generateQuestion();
   }
 
   void _generateQuestion() {
     final random = Random();
-    _currentAnimal = _animals[random.nextInt(_animals.length)];
-
-    // Generate options
-    final wrongAnimals = _animals.where((a) => a != _currentAnimal).toList()
-      ..shuffle();
+    _currentVehicle = _vehicles[random.nextInt(_vehicles.length)];
+    
+    final wrongVehicles = _vehicles.where((v) => v != _currentVehicle).toList()..shuffle();
     _options = [
-      _currentAnimal.name,
-      wrongAnimals[0].name,
-      wrongAnimals[1].name,
+      _currentVehicle.name,
+      wrongVehicles[0].name,
+      wrongVehicles[1].name,
     ]..shuffle();
   }
 
   void _handleAnswer(String selectedName) {
-    if (selectedName == _currentAnimal.name) {
+    if (selectedName == _currentVehicle.name) {
       onCorrectAnswer();
     } else {
       onIncorrectAnswer();
@@ -63,7 +61,7 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.activity.title),
-        backgroundColor: AppColors.primary,
+        backgroundColor: Colors.blue.shade700,
         foregroundColor: Colors.white,
         actions: [
           Center(
@@ -71,10 +69,7 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 '${currentQuestion + 1}/$totalQuestions',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -85,29 +80,22 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.green.shade100, Colors.blue.shade100],
+            colors: [Colors.blue.shade100, Colors.lightBlue.shade100],
           ),
         ),
         child: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(20.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(height: 20),
-                  // Instructions
                   const Text(
-                    'Which animal makes this sound?',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'What vehicle is this?',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
-
-                  // Animal sound
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
@@ -124,24 +112,22 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
                     child: Column(
                       children: [
                         Text(
-                          _currentAnimal.emoji,
-                          style: const TextStyle(fontSize: 64),
+                          _currentVehicle.emoji,
+                          style: const TextStyle(fontSize: 80),
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          '"${_currentAnimal.sound}"',
+                          '"${_currentVehicle.sound}"',
                           style: const TextStyle(
                             fontSize: 24,
-                            fontWeight: FontWeight.w600,
                             fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 32),
-
-                  // Answer options
                   ..._options.map((name) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: SizedBox(
@@ -150,7 +136,7 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
                             onPressed: () => _handleAnswer(name),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
-                              foregroundColor: AppColors.primary,
+                              foregroundColor: Colors.blue.shade700,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -159,10 +145,7 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
                             ),
                             child: Text(
                               name,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -178,14 +161,16 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
   }
 }
 
-class AnimalCard {
+class Vehicle {
   final String name;
   final String emoji;
   final String sound;
+  final String type;
 
-  AnimalCard({
+  Vehicle({
     required this.name,
     required this.emoji,
     required this.sound,
+    required this.type,
   });
 }

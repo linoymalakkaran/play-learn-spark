@@ -4,54 +4,52 @@ import '../../data/models/activity_model.dart';
 import '../../core/constants/colors.dart';
 import 'base_activity.dart';
 
-class AnimalSafariActivity extends BaseActivity {
-  const AnimalSafariActivity({
+class PetParadeActivity extends BaseActivity {
+  const PetParadeActivity({
     super.key,
     required super.activity,
     required super.onComplete,
   });
 
   @override
-  State<AnimalSafariActivity> createState() => _AnimalSafariActivityState();
+  State<PetParadeActivity> createState() => _PetParadeActivityState();
 }
 
-class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity> {
-  final List<AnimalCard> _animals = [
-    AnimalCard(name: 'Dog', emoji: '🐶', sound: 'Woof!'),
-    AnimalCard(name: 'Cat', emoji: '🐱', sound: 'Meow!'),
-    AnimalCard(name: 'Cow', emoji: '🐮', sound: 'Moo!'),
-    AnimalCard(name: 'Lion', emoji: '🦁', sound: 'Roar!'),
-    AnimalCard(name: 'Elephant', emoji: '🐘', sound: 'Trumpet!'),
-    AnimalCard(name: 'Monkey', emoji: '🐵', sound: 'Ooh-ooh!'),
-    AnimalCard(name: 'Pig', emoji: '🐷', sound: 'Oink!'),
-    AnimalCard(name: 'Sheep', emoji: '🐑', sound: 'Baa!'),
+class _PetParadeActivityState extends BaseActivityState<PetParadeActivity> {
+  final List<Pet> _pets = [
+    Pet(name: 'Dog', emoji: '🐕', sound: 'Woof!'),
+    Pet(name: 'Cat', emoji: '🐈', sound: 'Meow!'),
+    Pet(name: 'Fish', emoji: '🐠', sound: 'Blub!'),
+    Pet(name: 'Bird', emoji: '🐦', sound: 'Tweet!'),
+    Pet(name: 'Rabbit', emoji: '🐰', sound: 'Sniff!'),
+    Pet(name: 'Hamster', emoji: '🐹', sound: 'Squeak!'),
+    Pet(name: 'Turtle', emoji: '🐢', sound: 'Silent!'),
+    Pet(name: 'Goldfish', emoji: '🐟', sound: 'Blub!'),
   ];
 
-  late AnimalCard _currentAnimal;
+  late Pet _currentPet;
   late List<String> _options;
 
   @override
   void initializeActivity() {
-    totalQuestions = 5;
+    totalQuestions = 6;
     _generateQuestion();
   }
 
   void _generateQuestion() {
     final random = Random();
-    _currentAnimal = _animals[random.nextInt(_animals.length)];
-
-    // Generate options
-    final wrongAnimals = _animals.where((a) => a != _currentAnimal).toList()
-      ..shuffle();
+    _currentPet = _pets[random.nextInt(_pets.length)];
+    
+    final wrongPets = _pets.where((p) => p != _currentPet).toList()..shuffle();
     _options = [
-      _currentAnimal.name,
-      wrongAnimals[0].name,
-      wrongAnimals[1].name,
+      _currentPet.name,
+      wrongPets[0].name,
+      wrongPets[1].name,
     ]..shuffle();
   }
 
   void _handleAnswer(String selectedName) {
-    if (selectedName == _currentAnimal.name) {
+    if (selectedName == _currentPet.name) {
       onCorrectAnswer();
     } else {
       onIncorrectAnswer();
@@ -63,7 +61,7 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.activity.title),
-        backgroundColor: AppColors.primary,
+        backgroundColor: Colors.amber.shade700,
         foregroundColor: Colors.white,
         actions: [
           Center(
@@ -71,10 +69,7 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 '${currentQuestion + 1}/$totalQuestions',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -85,29 +80,22 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.green.shade100, Colors.blue.shade100],
+            colors: [Colors.amber.shade100, Colors.yellow.shade50],
           ),
         ),
         child: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(20.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(height: 20),
-                  // Instructions
                   const Text(
-                    'Which animal makes this sound?',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'What pet is this?',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
-
-                  // Animal sound
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
@@ -124,24 +112,22 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
                     child: Column(
                       children: [
                         Text(
-                          _currentAnimal.emoji,
-                          style: const TextStyle(fontSize: 64),
+                          _currentPet.emoji,
+                          style: const TextStyle(fontSize: 80),
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          '"${_currentAnimal.sound}"',
+                          '"${_currentPet.sound}"',
                           style: const TextStyle(
                             fontSize: 24,
-                            fontWeight: FontWeight.w600,
                             fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 32),
-
-                  // Answer options
                   ..._options.map((name) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: SizedBox(
@@ -150,7 +136,7 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
                             onPressed: () => _handleAnswer(name),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
-                              foregroundColor: AppColors.primary,
+                              foregroundColor: Colors.amber.shade700,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -159,10 +145,7 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
                             ),
                             child: Text(
                               name,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -178,14 +161,10 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
   }
 }
 
-class AnimalCard {
+class Pet {
   final String name;
   final String emoji;
   final String sound;
 
-  AnimalCard({
-    required this.name,
-    required this.emoji,
-    required this.sound,
-  });
+  Pet({required this.name, required this.emoji, required this.sound});
 }

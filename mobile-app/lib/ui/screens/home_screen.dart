@@ -9,6 +9,7 @@ import 'progress_screen.dart';
 import 'profile_screen.dart';
 import 'enhanced_dashboard_screen.dart';
 import 'badges_screen.dart';
+import 'rewards_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     const DashboardTab(),
     const ActivitiesTab(),
+    const RewardsScreen(),
     const ProgressTab(),
     const ProfileTab(),
   ];
@@ -54,6 +56,11 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.apps_outlined),
             activeIcon: Icon(Icons.apps),
             label: 'Activities',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.card_giftcard_outlined),
+            activeIcon: Icon(Icons.card_giftcard),
+            label: 'Rewards',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.trending_up_outlined),

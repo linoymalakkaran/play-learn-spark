@@ -65,7 +65,7 @@ class _ActivitiesTabState extends State<ActivitiesTab> {
                     crossAxisCount: 2,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    childAspectRatio: 0.75,
+                    childAspectRatio: 0.8,
                   ),
                   itemCount: activities.length,
                   itemBuilder: (context, index) {
@@ -93,96 +93,92 @@ class _ActivitiesTabState extends State<ActivitiesTab> {
                             ),
                           ],
                         ),
-                        child: Stack(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    activity.icon,
-                                    style: const TextStyle(fontSize: 40),
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    activity.title,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    activity.description,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.access_time,
-                                        size: 14,
-                                        color: AppColors.textSecondary,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                activity.icon,
+                                style: const TextStyle(fontSize: 32),
+                              ),
+                              const SizedBox(height: 4),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      activity.title,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.textPrimary,
+                                        height: 1.2,
                                       ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '${activity.estimatedDuration ~/ 60} min',
-                                        style: TextStyle(
-                                          fontSize: 11,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      activity.description,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: AppColors.textSecondary,
+                                        height: 1.2,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.access_time,
+                                          size: 12,
                                           color: AppColors.textSecondary,
                                         ),
-                                      ),
-                                      const Spacer(),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: _getDifficultyColor(activity.difficultyLevel),
-                                          borderRadius: BorderRadius.circular(4),
-                                        ),
-                                        child: Text(
-                                          _getDifficultyText(activity.difficultyLevel),
-                                          style: const TextStyle(
-                                            fontSize: 10,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w600,
+                                        const SizedBox(width: 3),
+                                        Flexible(
+                                          child: Text(
+                                            '${activity.estimatedDuration ~/ 60} min',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              color: AppColors.textSecondary,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (activity.isPremium)
-                              Positioned(
-                                top: 8,
-                                right: 8,
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.warning,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.star,
-                                    size: 16,
-                                    color: Colors.white,
-                                  ),
+                                        const SizedBox(width: 6),
+                                        Flexible(
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 4,
+                                              vertical: 1,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: _getDifficultyColor(activity.difficultyLevel),
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              _getDifficultyText(activity.difficultyLevel),
+                                              style: const TextStyle(
+                                                fontSize: 9,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     );

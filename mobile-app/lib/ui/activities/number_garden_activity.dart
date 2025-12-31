@@ -4,54 +4,42 @@ import '../../data/models/activity_model.dart';
 import '../../core/constants/colors.dart';
 import 'base_activity.dart';
 
-class AnimalSafariActivity extends BaseActivity {
-  const AnimalSafariActivity({
+class NumberGardenActivity extends BaseActivity {
+  const NumberGardenActivity({
     super.key,
     required super.activity,
     required super.onComplete,
   });
 
   @override
-  State<AnimalSafariActivity> createState() => _AnimalSafariActivityState();
+  State<NumberGardenActivity> createState() => _NumberGardenActivityState();
 }
 
-class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity> {
-  final List<AnimalCard> _animals = [
-    AnimalCard(name: 'Dog', emoji: '🐶', sound: 'Woof!'),
-    AnimalCard(name: 'Cat', emoji: '🐱', sound: 'Meow!'),
-    AnimalCard(name: 'Cow', emoji: '🐮', sound: 'Moo!'),
-    AnimalCard(name: 'Lion', emoji: '🦁', sound: 'Roar!'),
-    AnimalCard(name: 'Elephant', emoji: '🐘', sound: 'Trumpet!'),
-    AnimalCard(name: 'Monkey', emoji: '🐵', sound: 'Ooh-ooh!'),
-    AnimalCard(name: 'Pig', emoji: '🐷', sound: 'Oink!'),
-    AnimalCard(name: 'Sheep', emoji: '🐑', sound: 'Baa!'),
-  ];
-
-  late AnimalCard _currentAnimal;
-  late List<String> _options;
+class _NumberGardenActivityState extends BaseActivityState<NumberGardenActivity> {
+  late int _targetNumber;
+  late List<int> _options;
+  late String _flowerEmoji;
 
   @override
   void initializeActivity() {
-    totalQuestions = 5;
+    totalQuestions = 8;
     _generateQuestion();
   }
 
   void _generateQuestion() {
     final random = Random();
-    _currentAnimal = _animals[random.nextInt(_animals.length)];
-
-    // Generate options
-    final wrongAnimals = _animals.where((a) => a != _currentAnimal).toList()
-      ..shuffle();
+    _targetNumber = random.nextInt(10) + 1;
+    _flowerEmoji = ['🌻', '🌹', '🌷', '🌺', '🌸'][random.nextInt(5)];
+    
     _options = [
-      _currentAnimal.name,
-      wrongAnimals[0].name,
-      wrongAnimals[1].name,
+      _targetNumber,
+      (_targetNumber - 1).clamp(1, 10),
+      (_targetNumber + 1).clamp(1, 10),
     ]..shuffle();
   }
 
-  void _handleAnswer(String selectedName) {
-    if (selectedName == _currentAnimal.name) {
+  void _handleAnswer(int selected) {
+    if (selected == _targetNumber) {
       onCorrectAnswer();
     } else {
       onIncorrectAnswer();
@@ -63,7 +51,7 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.activity.title),
-        backgroundColor: AppColors.primary,
+        backgroundColor: Colors.purple.shade400,
         foregroundColor: Colors.white,
         actions: [
           Center(
@@ -71,10 +59,7 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 '${currentQuestion + 1}/$totalQuestions',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -85,29 +70,22 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.green.shade100, Colors.blue.shade100],
+            colors: [Colors.green.shade200, Colors.yellow.shade100],
           ),
         ),
         child: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(20.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(height: 20),
-                  // Instructions
                   const Text(
-                    'Which animal makes this sound?',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'Count the flowers!',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
-
-                  // Animal sound
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
@@ -121,36 +99,29 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
                         ),
                       ],
                     ),
-                    child: Column(
-                      children: [
-                        Text(
-                          _currentAnimal.emoji,
-                          style: const TextStyle(fontSize: 64),
+                    child: Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      alignment: WrapAlignment.center,
+                      children: List.generate(
+                        _targetNumber,
+                        (index) => Text(
+                          _flowerEmoji,
+                          style: const TextStyle(fontSize: 48),
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          '"${_currentAnimal.sound}"',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 32),
-
-                  // Answer options
-                  ..._options.map((name) => Padding(
+                  ..._options.map((number) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: () => _handleAnswer(name),
+                            onPressed: () => _handleAnswer(number),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
-                              foregroundColor: AppColors.primary,
+                              foregroundColor: Colors.purple.shade400,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -158,11 +129,8 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
                               elevation: 4,
                             ),
                             child: Text(
-                              name,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              number.toString(),
+                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -176,16 +144,4 @@ class _AnimalSafariActivityState extends BaseActivityState<AnimalSafariActivity>
       ),
     );
   }
-}
-
-class AnimalCard {
-  final String name;
-  final String emoji;
-  final String sound;
-
-  AnimalCard({
-    required this.name,
-    required this.emoji,
-    required this.sound,
-  });
 }

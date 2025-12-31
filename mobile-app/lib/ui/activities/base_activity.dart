@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../data/models/activity_model.dart';
+import '../../providers/reward_provider.dart';
+import '../../providers/progress_provider.dart';
 
 /// Base class for all learning activities
 abstract class BaseActivity extends StatefulWidget {
@@ -200,7 +203,7 @@ class _FeedbackOverlayState extends State<FeedbackOverlay>
 }
 
 /// Activity result screen
-class ActivityResultScreen extends StatelessWidget {
+class ActivityResultScreen extends StatefulWidget {
   final ActivityModel activity;
   final int score;
   final int correctAnswers;
@@ -219,9 +222,55 @@ class ActivityResultScreen extends StatelessWidget {
   });
 
   @override
+  State<ActivityResultScreen> createState() => _ActivityResultScreenState();
+}
+
+class _ActivityResultScreenState extends State<ActivityResultScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Award points and update challenges
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _awardPointsAndUpdateChallenges();
+    });
+  }
+
+  void _awardPointsAndUpdateChallenges() {
+    final rewardProvider = context.read<RewardProvider>();
+    final progressProvider = context.read<ProgressProvider>();
+    
+    final percentage = (widget.correctAnswers / widget.totalQuestions * 100).round();
+    
+    // Award points based on performance
+    int pointsEarned = widget.score;
+    if (percentage == 100) {
+      pointsEarned += 20; // Perfect bonus
+    } else if (percentage >= 80) {
+      pointsEarned += 10; // Good performance bonus
+    }
+    
+    rewardProvider.awardPoints(pointsEarned, 'Completed ${widget.activity.title}');
+    rewardProvider.updateStreak();
+    rewardProvider.updateLevel();
+    
+    // Update challenges
+    rewardProvider.updateChallengeProgress('daily_complete_3', 1); // Activity completion
+    if (percentage >= 80) {
+      rewardProvider.updateChallengeProgress('daily_score', percentage); // High score
+    }
+    
+    // Update progress
+    progressProvider.recordActivityCompletion(
+      widget.activity.id,
+      widget.correctAnswers,
+      widget.totalQuestions,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final percentage = (correctAnswers / totalQuestions * 100).round();
-    final isPerfect = correctAnswers == totalQuestions;
+    final percentage = (widget.correctAnswers / widget.totalQuestions * 100).round();
+    final isPerfect = widget.correctAnswers == widget.totalQuestions;
     final isGood = percentage >= 70;
 
     return Scaffold(
@@ -279,7 +328,7 @@ class ActivityResultScreen extends StatelessWidget {
                         children: [
                           // Activity name
                           Text(
-                            activity.title,
+                            widget.activity.title,
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w600,
@@ -295,17 +344,17 @@ class ActivityResultScreen extends StatelessWidget {
                               _buildStat(
                                 icon: Icons.score,
                                 label: 'Score',
-                                value: score.toString(),
+                                value: widget.score.toString(),
                               ),
                               _buildStat(
                                 icon: Icons.check_circle,
                                 label: 'Correct',
-                                value: '$correctAnswers/$totalQuestions',
+                                value: '${widget.correctAnswers}/${widget.totalQuestions}',
                               ),
                               _buildStat(
                                 icon: Icons.timer,
                                 label: 'Time',
-                                value: _formatDuration(duration),
+                                value: _formatDuration(widget.duration),
                               ),
                             ],
                           ),
@@ -334,7 +383,7 @@ class ActivityResultScreen extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: onContinue,
+                      onPressed: widget.onContinue,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: isPerfect

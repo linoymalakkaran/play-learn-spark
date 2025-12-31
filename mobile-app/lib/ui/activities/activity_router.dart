@@ -22,6 +22,23 @@ import '../activities/nature_walk_activity.dart';
 import '../activities/community_helpers_activity.dart';
 import '../activities/body_parts_activity.dart';
 import '../activities/daily_routine_activity.dart';
+import '../activities/english_learning_activity.dart';
+import '../activities/arabic_learning_activity.dart';
+import '../activities/fruit_basket_activity.dart';
+import '../activities/vegetable_garden_activity.dart';
+import '../activities/transportation_activity.dart';
+import '../activities/family_tree_activity.dart';
+import '../activities/pet_parade_activity.dart';
+import '../activities/toy_box_activity.dart';
+import '../activities/malayalam_learning_activity.dart';
+import '../activities/number_garden_activity.dart';
+import '../activities/pizza_fractions_activity.dart';
+import '../activities/math_adventure_activity.dart';
+import '../activities/art_studio_activity.dart';
+import '../activities/science_lab_activity.dart';
+import '../activities/logic_puzzles_activity.dart';
+import '../activities/physical_fun_activity.dart';
+import '../activities/social_skills_activity.dart';
 
 class ActivityRouter {
   static Widget getActivityWidget(
@@ -128,6 +145,96 @@ class ActivityRouter {
         );
       case 'daily_routine':
         return DailyRoutineActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'fruit_basket':
+        return FruitBasketActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'vegetable_garden':
+        return VegetableGardenActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'transportation':
+        return TransportationActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'family_tree':
+        return FamilyTreeActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'pet_parade':
+        return PetParadeActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'toy_box':
+        return ToyBoxActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'english_learning':
+        return EnglishLearningActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'arabic_learning':
+        return ArabicLearningActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'malayalam_learning':
+        return MalayalamLearningActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'number_garden':
+        return NumberGardenActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'pizza_fractions':
+        return PizzaFractionsActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'math_adventure':
+        return MathAdventureActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'art_studio':
+        return ArtStudioActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'science_lab':
+        return ScienceLabActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'weather_station':
+        return WeatherWatcherActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'logic_puzzles':
+        return LogicPuzzlesActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'physical_fun':
+        return PhysicalFunActivity(
+          activity: activity,
+          onComplete: () {},
+        );
+      case 'social_skills':
+        return SocialSkillsActivity(
           activity: activity,
           onComplete: () {},
         );

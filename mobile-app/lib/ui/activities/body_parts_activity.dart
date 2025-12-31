@@ -78,7 +78,7 @@ class _BodyPartsActivityState extends BaseActivityState<BodyPartsActivity> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.pink.shade100, Colors.rose.shade100],
+            colors: [Colors.pink.shade100, Colors.red.shade100],
           ),
         ),
         child: SafeArea(

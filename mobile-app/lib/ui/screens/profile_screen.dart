@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/student_provider.dart';
 import '../../core/constants/colors.dart';
 import 'student_setup_screen.dart';
@@ -132,6 +134,62 @@ class ProfileTab extends StatelessWidget {
                   subtitle: 'App version and info',
                   onTap: () {},
                 ),
+                
+                // Debug option for web
+                if (kIsWeb)
+                  _buildProfileOption(
+                    icon: Icons.bug_report,
+                    title: 'Clear Storage (Debug)',
+                    subtitle: 'Reset app data',
+                    onTap: () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Clear Storage?'),
+                          content: const Text(
+                            'This will clear all data and restart the app with fresh activities. '
+                            'All students and progress will be lost.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.red,
+                              ),
+                              child: const Text('Clear'),
+                            ),
+                          ],
+                        ),
+                      );
+                      
+                      if (confirm == true && context.mounted) {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.clear();
+                        
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Storage cleared! Reloading app...'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                          
+                          // Reload the page
+                          Future.delayed(const Duration(seconds: 1), () {
+                            // Force reload by navigating to splash
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              '/', 
+                              (route) => false,
+                            );
+                          });
+                        }
+                      }
+                    },
+                  ),
                 
                 const SizedBox(height: 24),
                 

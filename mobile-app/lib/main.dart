@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'providers/student_provider.dart';
 import 'providers/activity_provider.dart';
 import 'providers/progress_provider.dart';
+import 'providers/reward_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'ui/screens/home_screen.dart';
 import 'ui/screens/onboarding_screen.dart';
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => StudentProvider()),
         ChangeNotifierProvider(create: (_) => ActivityProvider()),
         ChangeNotifierProvider(create: (_) => ProgressProvider()),
+        ChangeNotifierProvider(create: (_) => RewardProvider()),
       ],
       child: MaterialApp(
         title: 'Play & Learn Spark',
@@ -63,7 +65,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _initialize();
+    // Use addPostFrameCallback to ensure initialization happens after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initialize();
+    });
   }
 
   Future<void> _initialize() async {

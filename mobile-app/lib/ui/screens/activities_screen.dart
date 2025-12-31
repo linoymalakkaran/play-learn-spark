@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/activity_provider.dart';
 import '../../core/constants/colors.dart';
+import '../activities/activity_router.dart';
 
 class ActivitiesTab extends StatefulWidget {
   const ActivitiesTab({super.key});
@@ -71,9 +72,13 @@ class _ActivitiesTabState extends State<ActivitiesTab> {
                     final activity = activities[index];
                     return GestureDetector(
                       onTap: () {
-                        // Navigate to activity detail
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Starting ${activity.title}...')),
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => ActivityRouter.getActivityWidget(
+                              context,
+                              activity,
+                            ),
+                          ),
                         );
                       },
                       child: Container(

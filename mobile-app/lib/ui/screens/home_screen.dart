@@ -7,6 +7,8 @@ import '../../core/constants/colors.dart';
 import 'activities_screen.dart';
 import 'progress_screen.dart';
 import 'profile_screen.dart';
+import 'enhanced_dashboard_screen.dart';
+import 'badges_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -233,6 +235,47 @@ class DashboardTab extends StatelessWidget {
             
             const SizedBox(height: 24),
             
+            // Quick Access Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: _buildQuickActionButton(
+                    context,
+                    'Detailed Progress',
+                    Icons.analytics,
+                    Colors.blue,
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const EnhancedDashboardScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildQuickActionButton(
+                    context,
+                    'My Badges',
+                    Icons.emoji_events,
+                    Colors.amber,
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const BadgesScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 24),
+            
             // Continue Learning
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -363,6 +406,51 @@ class DashboardTab extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActionButton(
+    BuildContext context,
+    String label,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [color, color.withValues(alpha: 0.7)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: Colors.white, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
